@@ -1,0 +1,410 @@
+[
+  {
+    "subtype": "thread_broadcast",
+    "user": "U09AHUQ30BX",
+    "thread_ts": "1759447987.625479",
+    "root": {
+      "user": "U09J14MAYUX",
+      "type": "message",
+      "ts": "1759447987.625479",
+      "bot_id": "B09JL4NNUN8",
+      "app_id": "A09J144DSBH",
+      "text": "what is good? `asdf` <https://test.com|crystal>",
+      "team": "T09AHUQ2QCD",
+      "bot_profile": {
+        "id": "B09JL4NNUN8",
+        "app_id": "A09J144DSBH",
+        "user_id": "U09J14MAYUX",
+        "name": "TestBot",
+        "icons": {
+          "image_36": "https://a.slack-edge.com/80588/img/plugins/app/bot_36.png",
+          "image_48": "https://a.slack-edge.com/80588/img/plugins/app/bot_48.png",
+          "image_72": "https://a.slack-edge.com/80588/img/plugins/app/service_72.png"
+        },
+        "deleted": false,
+        "updated": 1759444158,
+        "team_id": "T09AHUQ2QCD"
+      },
+      "thread_ts": "1759447987.625479",
+      "reply_count": 3,
+      "reply_users_count": 1,
+      "latest_reply": "1759521328.000909",
+      "reply_users": ["U09AHUQ30BX"],
+      "is_locked": false,
+      "subscribed": false,
+      "blocks": [
+        {
+          "type": "rich_text",
+          "block_id": "Y7atO",
+          "elements": [
+            {
+              "type": "rich_text_section",
+              "elements": [
+                { "type": "text", "text": "what is good? " },
+                { "type": "text", "text": "asdf", "style": { "code": true } },
+                { "type": "text", "text": " " },
+                { "type": "link", "url": "https://test.com", "text": "crystal" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "type": "message",
+    "ts": "1759521328.000909",
+    "client_msg_id": "510f1560-4026-4d7f-83bf-92c503b9e445",
+    "text": "What about you????? Test message",
+    "blocks": [
+      {
+        "type": "rich_text",
+        "block_id": "tFBEo",
+        "elements": [
+          {
+            "type": "rich_text_section",
+            "elements": [
+              { "type": "text", "text": "What about you????? Test message" }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "text": "what about these images\n<http://test.com|url> <!here> hahahaha",
+    "files": [
+      {
+        "id": "F09JSDSQHM2",
+        "created": 1759521089,
+        "timestamp": 1759521089,
+        "name": "freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095.png",
+        "title": "freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095.png",
+        "mimetype": "image/png",
+        "filetype": "png",
+        "pretty_type": "PNG",
+        "user": "U09AHUQ30BX",
+        "user_team": "T09AHUQ2QCD",
+        "editable": false,
+        "size": 894935,
+        "mode": "hosted",
+        "is_external": false,
+        "external_type": "",
+        "is_public": true,
+        "public_url_shared": false,
+        "display_as_bot": false,
+        "username": "",
+        "url_private": "https://files.slack.com/files-pri/T09AHUQ2QCD-F09JSDSQHM2/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095.png",
+        "url_private_download": "https://files.slack.com/files-pri/T09AHUQ2QCD-F09JSDSQHM2/download/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095.png",
+        "media_display_type": "unknown",
+        "thumb_64": "https://files.slack.com/files-tmb/T09AHUQ2QCD-F09JSDSQHM2-5a688ac7b3/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_64.png",
+        "thumb_80": "https://files.slack.com/files-tmb/T09AHUQ2QCD-F09JSDSQHM2-5a688ac7b3/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_80.png",
+        "thumb_360": "https://files.slack.com/files-tmb/T09AHUQ2QCD-F09JSDSQHM2-5a688ac7b3/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_360.png",
+        "thumb_360_w": 360,
+        "thumb_360_h": 360,
+        "thumb_480": "https://files.slack.com/files-tmb/T09AHUQ2QCD-F09JSDSQHM2-5a688ac7b3/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_480.png",
+        "thumb_480_w": 480,
+        "thumb_480_h": 480,
+        "thumb_160": "https://files.slack.com/files-tmb/T09AHUQ2QCD-F09JSDSQHM2-5a688ac7b3/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_160.png",
+        "thumb_720": "https://files.slack.com/files-tmb/T09AHUQ2QCD-F09JSDSQHM2-5a688ac7b3/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_720.png",
+        "thumb_720_w": 720,
+        "thumb_720_h": 720,
+        "thumb_800": "https://files.slack.com/files-tmb/T09AHUQ2QCD-F09JSDSQHM2-5a688ac7b3/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_800.png",
+        "thumb_800_w": 800,
+        "thumb_800_h": 800,
+        "thumb_960": "https://files.slack.com/files-tmb/T09AHUQ2QCD-F09JSDSQHM2-5a688ac7b3/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_960.png",
+        "thumb_960_w": 960,
+        "thumb_960_h": 960,
+        "thumb_1024": "https://files.slack.com/files-tmb/T09AHUQ2QCD-F09JSDSQHM2-5a688ac7b3/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_1024.png",
+        "thumb_1024_w": 1024,
+        "thumb_1024_h": 1024,
+        "original_w": 1024,
+        "original_h": 1024,
+        "thumb_tiny": "AwAwADDTprusa7mOBTqhn+aMjHFNK4m7Eu4UbgBknAHrUVsCIVVgQQMcnNJcozxMqAkn0IFFhXJkYOoZTkGlqKL5EA7VLQ0NO4jdKjPJxT3+7TWANCExiCVZBuIYHuox6+9LiYznG1Yx68k1FJvYMh+6fQ4NSxq4QLnCjp3IFNoSHtwacvSox0GetPTpSY1uEg3IQOtV4n5Ofyq0RkYNRmCMnOCD7GmmDVyKZgCCppGmXKrkYYc1IbZD3b86RbSIHPzHjHJp3QrMeBmpKQKFGAMYpallJH//2Q==",
+        "permalink": "https://my-office-team-hq.slack.com/files/U09J14MAYUX/F09JSDSQHM2/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095.png",
+        "permalink_public": "https://slack-files.com/T09AHUQ2QCD-F09JSDSQHM2-631d3d9209",
+        "is_starred": false,
+        "skipped_shares": true,
+        "has_rich_preview": false,
+        "file_access": "visible"
+      },
+      {
+        "id": "F09K1QB9A2V",
+        "created": 1759521096,
+        "timestamp": 1759521096,
+        "name": "freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095 - Copy.png",
+        "title": "freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095 - Copy.png",
+        "mimetype": "image/png",
+        "filetype": "png",
+        "pretty_type": "PNG",
+        "user": "U09AHUQ30BX",
+        "user_team": "T09AHUQ2QCD",
+        "editable": false,
+        "size": 894935,
+        "mode": "hosted",
+        "is_external": false,
+        "external_type": "",
+        "is_public": true,
+        "public_url_shared": false,
+        "display_as_bot": false,
+        "username": "",
+        "url_private": "https://files.slack.com/files-pri/T09AHUQ2QCD-F09K1QB9A2V/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_-_copy.png",
+        "url_private_download": "https://files.slack.com/files-pri/T09AHUQ2QCD-F09K1QB9A2V/download/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_-_copy.png",
+        "media_display_type": "unknown",
+        "thumb_64": "https://files.slack.com/files-tmb/T09AHUQ2QCD-F09K1QB9A2V-9b3b46b00c/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_-_copy_64.png",
+        "thumb_80": "https://files.slack.com/files-tmb/T09AHUQ2QCD-F09K1QB9A2V-9b3b46b00c/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_-_copy_80.png",
+        "thumb_360": "https://files.slack.com/files-tmb/T09AHUQ2QCD-F09K1QB9A2V-9b3b46b00c/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_-_copy_360.png",
+        "thumb_360_w": 360,
+        "thumb_360_h": 360,
+        "thumb_480": "https://files.slack.com/files-tmb/T09AHUQ2QCD-F09K1QB9A2V-9b3b46b00c/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_-_copy_480.png",
+        "thumb_480_w": 480,
+        "thumb_480_h": 480,
+        "thumb_160": "https://files.slack.com/files-tmb/T09AHUQ2QCD-F09K1QB9A2V-9b3b46b00c/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_-_copy_160.png",
+        "thumb_720": "https://files.slack.com/files-tmb/T09AHUQ2QCD-F09K1QB9A2V-9b3b46b00c/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_-_copy_720.png",
+        "thumb_720_w": 720,
+        "thumb_720_h": 720,
+        "thumb_800": "https://files.slack.com/files-tmb/T09AHUQ2QCD-F09K1QB9A2V-9b3b46b00c/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_-_copy_800.png",
+        "thumb_800_w": 800,
+        "thumb_800_h": 800,
+        "thumb_960": "https://files.slack.com/files-tmb/T09AHUQ2QCD-F09K1QB9A2V-9b3b46b00c/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_-_copy_960.png",
+        "thumb_960_w": 960,
+        "thumb_960_h": 960,
+        "thumb_1024": "https://files.slack.com/files-tmb/T09AHUQ2QCD-F09K1QB9A2V-9b3b46b00c/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_-_copy_1024.png",
+        "thumb_1024_w": 1024,
+        "thumb_1024_h": 1024,
+        "original_w": 1024,
+        "original_h": 1024,
+        "thumb_tiny": "AwAwADDTprusa7mOBTqhn+aMjHFNK4m7Eu4UbgBknAHrUVsCIVVgQQMcnNJcozxMqAkn0IFFhXJkYOoZTkGlqKL5EA7VLQ0NO4jdKjPJxT3+7TWANCExiCVZBuIYHuox6+9LiYznG1Yx68k1FJvYMh+6fQ4NSxq4QLnCjp3IFNoSHtwacvSox0GetPTpSY1uEg3IQOtV4n5Ofyq0RkYNRmCMnOCD7GmmDVyKZgCCppGmXKrkYYc1IbZD3b86RbSIHPzHjHJp3QrMeBmpKQKFGAMYpallJH//2Q==",
+        "permalink": "https://my-office-team-hq.slack.com/files/U09J14MAYUX/F09K1QB9A2V/freepik__a-snow-fox-avatar-designed-as-a-corporate-logo-cle__65095_-_copy.png",
+        "permalink_public": "https://slack-files.com/T09AHUQ2QCD-F09K1QB9A2V-24ce8439cc",
+        "is_starred": false,
+        "skipped_shares": true,
+        "has_rich_preview": false,
+        "file_access": "visible"
+      }
+    ],
+    "upload": false,
+    "user": "U09AHUQ30BX",
+    "blocks": [
+      {
+        "type": "rich_text",
+        "block_id": "l8BfM",
+        "elements": [
+          {
+            "type": "rich_text_section",
+            "elements": [
+              { "type": "text", "text": "what about these images\n" },
+              { "type": "link", "url": "http://test.com", "text": "url" },
+              { "type": "text", "text": " " },
+              { "type": "broadcast", "range": "here" },
+              { "type": "text", "text": " hahahaha" }
+            ]
+          }
+        ]
+      }
+    ],
+    "type": "message",
+    "ts": "1759521131.903969",
+    "client_msg_id": "a7c385c5-4f75-4e1e-88e7-a16dfccd1e5d"
+  },
+  {
+    "user": "U09AHUQ30BX",
+    "type": "message",
+    "ts": "1759520968.554009",
+    "client_msg_id": "54cca2b3-1615-4f3f-9b02-127b5a3a35f0",
+    "text": "How are you",
+    "team": "T09AHUQ2QCD",
+    "blocks": [
+      {
+        "type": "rich_text",
+        "block_id": "OvDWb",
+        "elements": [
+          {
+            "type": "rich_text_section",
+            "elements": [{ "type": "text", "text": "How are you" }]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "user": "U09AHUQ30BX",
+    "type": "message",
+    "ts": "1759520965.510859",
+    "client_msg_id": "5da79451-63bc-4502-bb5d-b814497a13ac",
+    "text": "Hi",
+    "team": "T09AHUQ2QCD",
+    "blocks": [
+      {
+        "type": "rich_text",
+        "block_id": "bnCY8",
+        "elements": [
+          {
+            "type": "rich_text_section",
+            "elements": [{ "type": "text", "text": "Hi" }]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "text": "cool",
+    "files": [
+      {
+        "id": "F09J1CQP815",
+        "created": 1759448803,
+        "timestamp": 1759448803,
+        "name": "hosts",
+        "title": "hosts",
+        "mimetype": "text/plain",
+        "filetype": "text",
+        "pretty_type": "Plain Text",
+        "user": "U09AHUQ30BX",
+        "user_team": "T09AHUQ2QCD",
+        "editable": true,
+        "size": 847,
+        "mode": "snippet",
+        "is_external": false,
+        "external_type": "",
+        "is_public": true,
+        "public_url_shared": false,
+        "display_as_bot": false,
+        "username": "",
+        "url_private": "https://files.slack.com/files-pri/T09AHUQ2QCD-F09J1CQP815/hosts",
+        "url_private_download": "https://files.slack.com/files-pri/T09AHUQ2QCD-F09J1CQP815/download/hosts",
+        "permalink": "https://my-office-team-hq.slack.com/files/U09J14MAYUX/F09J1CQP815/hosts",
+        "permalink_public": "https://slack-files.com/T09AHUQ2QCD-F09J1CQP815-e80952ce17",
+        "edit_link": "https://my-office-team-hq.slack.com/files/U09J14MAYUX/F09J1CQP815/hosts/edit",
+        "preview": "# Copyright (c) 1993-2009 Microsoft Corp.\r\n#\r\n# This is a sample HOSTS file used by Microsoft TCP/IP for Windows.\r\n#\r\n# This file contains the mappings of IP addresses to host names. Each\r",
+        "preview_highlight": "<div class=\"CodeMirror cm-s-default CodeMirrorServer\">\n<div class=\"CodeMirror-code\">\n<div><pre># Copyright (c) 1993-2009 Microsoft Corp.</pre></div>\n<div><pre>#</pre></div>\n<div><pre># This is a sample HOSTS file used by Microsoft TCP/IP for Windows.</pre></div>\n<div><pre>#</pre></div>\n<div><pre># This file contains the mappings of IP addresses to host names. Each</pre></div>\n<div><pre></pre></div>\n</div>\n</div>\n",
+        "lines": 22,
+        "lines_more": 17,
+        "preview_is_truncated": false,
+        "is_starred": false,
+        "skipped_shares": true,
+        "has_rich_preview": false,
+        "file_access": "visible"
+      }
+    ],
+    "upload": false,
+    "user": "U09AHUQ30BX",
+    "display_as_bot": false,
+    "blocks": [
+      {
+        "type": "rich_text",
+        "block_id": "46P+d",
+        "elements": [
+          {
+            "type": "rich_text_section",
+            "elements": [{ "type": "text", "text": "cool" }]
+          }
+        ]
+      }
+    ],
+    "type": "message",
+    "ts": "1759448810.547379",
+    "client_msg_id": "c8e18748-30e1-42d9-85eb-029190b50579"
+  },
+  {
+    "user": "U09J14MAYUX",
+    "type": "message",
+    "ts": "1759447987.625479",
+    "bot_id": "B09JL4NNUN8",
+    "app_id": "A09J144DSBH",
+    "text": "what is good? `asdf` <https://test.com|crystal>",
+    "team": "T09AHUQ2QCD",
+    "bot_profile": {
+      "id": "B09JL4NNUN8",
+      "deleted": false,
+      "name": "TestBot",
+      "updated": 1759444158,
+      "app_id": "A09J144DSBH",
+      "user_id": "U09J14MAYUX",
+      "icons": {
+        "image_36": "https://a.slack-edge.com/80588/img/plugins/app/bot_36.png",
+        "image_48": "https://a.slack-edge.com/80588/img/plugins/app/bot_48.png",
+        "image_72": "https://a.slack-edge.com/80588/img/plugins/app/service_72.png"
+      },
+      "team_id": "T09AHUQ2QCD"
+    },
+    "thread_ts": "1759447987.625479",
+    "reply_count": 3,
+    "reply_users_count": 1,
+    "latest_reply": "1759521328.000909",
+    "reply_users": ["U09AHUQ30BX"],
+    "is_locked": false,
+    "subscribed": false,
+    "blocks": [
+      {
+        "type": "rich_text",
+        "block_id": "NmQ0",
+        "elements": [
+          {
+            "type": "rich_text_section",
+            "elements": [
+              { "type": "text", "text": "what is good? " },
+              { "type": "text", "text": "asdf", "style": { "code": true } },
+              { "type": "text", "text": " " },
+              { "type": "link", "url": "https://test.com", "text": "crystal" }
+            ]
+          }
+        ]
+      }
+    ],
+    "reactions": [
+      { "name": "white_check_mark", "users": ["U09AHUQ30BX"], "count": 1 },
+      { "name": "eyes", "users": ["U09AHUQ30BX"], "count": 1 }
+    ]
+  },
+  {
+    "subtype": "channel_join",
+    "user": "U09J14MAYUX",
+    "text": "<@U09J14MAYUX> has joined the channel",
+    "inviter": "U09AHUQ30BX",
+    "type": "message",
+    "ts": "1759445730.560009"
+  },
+  {
+    "user": "U09AHUQ30BX",
+    "type": "message",
+    "ts": "1759445691.665589",
+    "client_msg_id": "b40b446b-fa5a-47ce-90c9-de4fa22482b7",
+    "text": "```This is very good```\n<@U09J14MAYUX> is good\nwhat is good? `asdf`  <https://test.com|crystal>",
+    "team": "T09AHUQ2QCD",
+    "blocks": [
+      {
+        "type": "rich_text",
+        "block_id": "jzRBY",
+        "elements": [
+          {
+            "type": "rich_text_preformatted",
+            "elements": [{ "type": "text", "text": "This is very good" }],
+            "border": 0
+          },
+          {
+            "type": "rich_text_section",
+            "elements": [
+              { "type": "user", "user_id": "U09J14MAYUX" },
+              { "type": "text", "text": " is good\nwhat is good? " },
+              { "type": "text", "text": "asdf", "style": { "code": true } },
+              { "type": "text", "text": "  " },
+              { "type": "link", "url": "https://test.com", "text": "crystal" }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "subtype": "channel_join",
+    "user": "U09BC038AE4",
+    "text": "<@U09BC038AE4> has joined the channel",
+    "type": "message",
+    "ts": "1755266379.931299"
+  },
+  {
+    "subtype": "channel_join",
+    "user": "U09AHUQ30BX",
+    "text": "<@U09AHUQ30BX> has joined the channel",
+    "type": "message",
+    "ts": "1755266246.845439"
+  }
+]
