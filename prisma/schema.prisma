@@ -1,0 +1,192 @@
+generator client {
+  provider             = "prisma-client-py"
+  recursive_type_depth = "5"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Message {
+  id              String     @id @unique
+  clientMsgId     String?    @unique
+  channelId       String
+  userId          String
+  text            String?
+  timestamp       DateTime
+  type            String     @default("message")
+  subtype         String?
+  isEdited        Boolean    @default(false)
+  editedAt        String?
+  editedBy        String?
+  threadTs        String?
+  replyCount      Int        @default(0)
+  replyUsersCount Int        @default(0)
+  isLocked        Boolean    @default(false)
+  subscribed      Boolean    @default(false)
+  botId           String?
+  appId           String?
+  team            String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  files           File[]
+  parentMessage   Message?   @relation("ThreadMessages", fields: [threadTs], references: [id])
+  threadMessages  Message[]  @relation("ThreadMessages")
+  user            User       @relation(fields: [userId], references: [id])
+  reactions       Reaction[]
+
+  @@index([channelId])
+  @@index([userId])
+  @@index([threadTs])
+}
+
+model User {
+  id                     String     @id
+  name                   String?
+  email                  String?
+  realName               String?
+  displayName            String?
+  realNameNormalized     String?
+  displayNameNormalized  String?
+  firstName              String?
+  lastName               String?
+  title                  String?
+  phone                  String?
+  skype                  String?
+  color                  String?
+  avatarHash             String?
+  isBot                  Boolean    @default(false)
+  isDeleted              Boolean    @default(false)
+  isAppUser              Boolean    @default(false)
+  isEmailConfirmed       Boolean    @default(false)
+  isAdmin                Boolean    @default(false)
+  isOwner                Boolean    @default(false)
+  isPrimaryOwner         Boolean    @default(false)
+  isRestricted           Boolean    @default(false)
+  isUltraRestricted      Boolean    @default(false)
+  isCustomImage          Boolean    @default(false)
+  alwaysActive           Boolean    @default(false)
+  whoCanShareContactCard String?
+  teamId                 String?
+  timezone               String?
+  timezoneLabel          String?
+  timezoneOffset         Int?
+  updated                Int?
+  image24                String?
+  image32                String?
+  image48                String?
+  image72                String?
+  image192               String?
+  image512               String?
+  image1024              String?
+  imageOriginal          String?
+  statusText             String?
+  statusTextCanonical    String?
+  statusEmoji            String?
+  statusExpiration       Int?
+  botId                  String?
+  apiAppId               String?
+  createdAt              DateTime   @default(now())
+  updatedAt              DateTime   @default(now()) @updatedAt
+  Message                Message[]
+  Reaction               Reaction[]
+
+  @@index([teamId])
+  @@index([isBot])
+  @@index([isDeleted])
+}
+
+model Reaction {
+  id        Int      @id @default(autoincrement())
+  name      String
+  count     Int      @default(1)
+  userId    String
+  messageId String
+  createdAt DateTime @default(now())
+  message   Message  @relation(fields: [messageId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([messageId, userId, name])
+  @@index([messageId])
+  @@index([userId])
+}
+
+model File {
+  id                 Int      @id @default(autoincrement())
+  slackFileId        String   @unique
+  name               String
+  title              String?
+  mimetype           String?
+  filetype           String?
+  prettyType         String?
+  size               Int?
+  mode               String?
+  isExternal         Boolean  @default(false)
+  externalType       String?
+  isPublic           Boolean  @default(false)
+  publicUrlShared    Boolean  @default(false)
+  displayAsBot       Boolean  @default(false)
+  username           String?
+  urlPrivate         String?
+  urlPrivateDownload String?
+  permalink          String?
+  permalinkPublic    String?
+  editLink           String?
+  preview            String?
+  previewHighlight   String?
+  lines              Int?
+  linesMore          Int?
+  previewIsTruncated Boolean  @default(false)
+  isStarred          Boolean  @default(false)
+  skippedShares      Boolean  @default(false)
+  hasRichPreview     Boolean  @default(false)
+  fileAccess         String?
+  thumb64            String?
+  thumb80            String?
+  thumb360           String?
+  thumb360W          Int?
+  thumb360H          Int?
+  thumb480           String?
+  thumb480W          Int?
+  thumb480H          Int?
+  thumb160           String?
+  thumb720           String?
+  thumb720W          Int?
+  thumb720H          Int?
+  thumb800           String?
+  thumb800W          Int?
+  thumb800H          Int?
+  thumb960           String?
+  thumb960W          Int?
+  thumb960H          Int?
+  thumb1024          String?
+  thumb1024W         Int?
+  thumb1024H         Int?
+  thumbTiny          String?
+  originalW          Int?
+  originalH          Int?
+  messageId          String
+  userId             String
+  userTeam           String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  message            Message  @relation(fields: [messageId], references: [id])
+
+  @@index([messageId])
+  @@index([userId])
+}
+
+model Channel {
+  id         String   @id
+  name       String
+  isPrivate  Boolean  @default(false)
+  isArchived Boolean  @default(false)
+  isGeneral  Boolean  @default(false)
+  isMember   Boolean  @default(false)
+  topic      String?
+  purpose    String?
+  members    String[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
