@@ -31,6 +31,7 @@ model Message {
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
   files           File[]
+  channel         Channel    @relation(fields: [channelId], references: [id])
   parentMessage   Message?   @relation("ThreadMessages", fields: [threadTs], references: [id])
   threadMessages  Message[]  @relation("ThreadMessages")
   user            User       @relation(fields: [userId], references: [id])
@@ -72,7 +73,7 @@ model User {
   timezone               String?
   timezoneLabel          String?
   timezoneOffset         Int?
-  updated                Int?
+  updated                DateTime?
   image24                String?
   image32                String?
   image48                String?
@@ -89,6 +90,7 @@ model User {
   apiAppId               String?
   createdAt              DateTime   @default(now())
   updatedAt              DateTime   @default(now()) @updatedAt
+  createdChannels        Channel[]  @relation("ChannelCreator")
   Message                Message[]
   Reaction               Reaction[]
 
@@ -178,15 +180,41 @@ model File {
 }
 
 model Channel {
-  id         String   @id
-  name       String
-  isPrivate  Boolean  @default(false)
-  isArchived Boolean  @default(false)
-  isGeneral  Boolean  @default(false)
-  isMember   Boolean  @default(false)
-  topic      String?
-  purpose    String?
-  members    String[]
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id                      String    @id
+  name                    String
+  isPrivate               Boolean   @default(false)
+  isArchived              Boolean   @default(false)
+  isGeneral               Boolean   @default(false)
+  isMember                Boolean   @default(false)
+  topic                   String?
+  purpose                 String?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  contextTeamId           String?
+  created                 DateTime?
+  creator                 String?
+  isChannel               Boolean   @default(false)
+  isExtShared             Boolean   @default(false)
+  isGroup                 Boolean   @default(false)
+  isIm                    Boolean   @default(false)
+  isMpim                  Boolean   @default(false)
+  isOrgShared             Boolean   @default(false)
+  isPendingExtShared      Boolean   @default(false)
+  isShared                Boolean   @default(false)
+  lastRead                String?
+  nameNormalized          String?
+  parentConversation      String?
+  pendingConnectedTeamIds String[]
+  pendingShared           String[]
+  previousNames           String[]
+  sharedTeamIds           String[]
+  unlinked                Int       @default(0)
+  updated                 DateTime?
+  creatorUser             User?     @relation("ChannelCreator", fields: [creator], references: [id])
+  messages                Message[]
+
+  @@index([creator])
+  @@index([contextTeamId])
+  @@index([isPrivate])
+  @@index([isArchived])
 }

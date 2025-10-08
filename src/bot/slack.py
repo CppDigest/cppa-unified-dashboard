@@ -1,41 +1,15 @@
-import logging
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 from slack_sdk.socket_mode import SocketModeClient
 from slack_sdk.socket_mode.request import SocketModeRequest
 from slack_sdk.socket_mode.response import SocketModeResponse
 from config.settings import Settings
-from src.services import handle_event
+from src.services import handle_errors, logger
 
 import requests
 import os
-from functools import wraps
+
 from datetime import datetime
-
-logger = logging.getLogger(__name__)
-
-
-def handle_errors(defaultReturn=None, logPrefix=""):
-    """
-    Decorator to handle common error patterns in Slack API calls.
-
-    Args:
-        defaultReturn: Value to return on error
-        logPrefix: Prefix for log messages
-    """
-
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            try:
-                return func(*args, **kwargs)
-            except Exception as e:
-                logger.error(f"{logPrefix}Error in {func.__name__}: {e}")
-                return defaultReturn
-
-        return wrapper
-
-    return decorator
 
 
 class SlackBot:
@@ -91,9 +65,61 @@ class SlackBot:
         """Get files for a specific message."""
         return self._get_message_data(messageTs, "files")
 
+    @handle_errors(defaultReturn=[], logPrefix="Thread by Root ")
+    def get_thread_by_root_message(self, rootMessageTs: str):
+        """Get thread messages by root message timestamp."""
+        try:
+            response = self.webClient.conversations_replies(
+                channel=self.channelId, ts=rootMessageTs
+            )
+            return response.data.get("messages", [])
+        except Exception as e:
+            logger.error(f"Error getting thread by root message {rootMessageTs}: {e}")
+            return []
+
     def get_message(self, messageTs: str):
         """Get a specific message."""
         return self._get_message_data(messageTs, "message")
+
+    @handle_errors(defaultReturn=None, logPrefix="User Info ")
+    def get_user_info(self, userId: str):
+        """Get user information by user ID."""
+        try:
+            response = self.webClient.users_info(user=userId)
+            return response.data.get("user", {})
+        except Exception as e:
+            logger.error(f"Error getting user info for {userId}: {e}")
+            return None
+
+    @handle_errors(defaultReturn=[], logPrefix="All Users ")
+    def get_all_users(self):
+        """Get all users in the workspace."""
+        try:
+            response = self.webClient.users_list()
+            return response.data.get("members", [])
+        except Exception as e:
+            logger.error(f"Error getting all users: {e}")
+            return []
+
+    @handle_errors(defaultReturn=[], logPrefix="User Profile ")
+    def get_user_profile(self, userId: str):
+        """Get user profile information."""
+        try:
+            response = self.webClient.users_profile_get(user=userId)
+            return response.data.get("profile", {})
+        except Exception as e:
+            logger.error(f"Error getting user profile for {userId}: {e}")
+            return {}
+
+    @handle_errors(defaultReturn=[], logPrefix="User Lookup ")
+    def lookup_user_by_email(self, email: str):
+        """Look up user by email address."""
+        try:
+            response = self.webClient.users_lookupByEmail(email=email)
+            return response.data.get("user", {})
+        except Exception as e:
+            logger.error(f"Error looking up user by email {email}: {e}")
+            return None
 
     @handle_errors(defaultReturn=None, logPrefix="Get message date ")
     def get_message_date(self, messageTs: str, formatStr: str = "%Y-%m-%d %H:%M:%S"):
@@ -115,7 +141,27 @@ class SlackBot:
             )
 
             messages = response.data.get("messages", [])
-            allMessages.extend(messages)
+            for message in messages:
+                if message.get("subtype") == "thread_broadcast":
+                    continue
+                allMessages.append(message)
+                if message.get("thread_ts"):
+                    cursor = None
+                    while True:
+                        replies_response = self.webClient.conversations_replies(
+                            channel=self.channelId,
+                            ts=message["thread_ts"],
+                            cursor=cursor,
+                        )
+                        replies = replies_response.data.get("messages", [])
+                        allMessages.extend(replies)
+                        if not replies_response.data.get("has_more", False):
+                            break
+                        cursor = replies_response.data.get("response_metadata", {}).get(
+                            "next_cursor"
+                        )
+                        if not cursor:
+                            break
 
             if not response.data.get("has_more", False):
                 break
@@ -154,3 +200,9 @@ class SlackBot:
             f"File '{fileId}' {fileInfo['name']} ({fileInfo['size']} bytes) downloaded successfully to '{outputName}'."
         )
         return outputName
+
+    @handle_errors(defaultReturn=None, logPrefix="Channel Info ")
+    def get_channel_info(self):
+        """Get channel information."""
+        response = self.webClient.conversations_info(channel=self.channelId)
+        return response.data.get("channel", {})

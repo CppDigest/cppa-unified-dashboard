@@ -1,58 +1,33 @@
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# Python
+# Python bytecode
+*.pyc
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-ref/
 
 # Virtual environments
-venv/
-env/
-ENV/
 .venv/
+env/
+venv/
 
-# IDE
+# Editor/IDE files
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
 
-# OS
-.DS_Store
-Thumbs.db
+# Build artifacts
+build/
+dist/
+*.egg-info/
 
-# Logs
+# Logs and temporary files
 *.log
-logs/
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
-# Temporary files
 *.tmp
-*.temp
-.cache/
+*.swp
+
+# Environment variables
+.env
+/src/generated/prisma
+
+# Downloads
+downloads/
+
+# Reference files
+ref/
+prisma/migrations/
