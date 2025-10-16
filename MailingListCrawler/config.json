@@ -1,0 +1,23 @@
+{
+  "file_paths": {
+    "pull_file": "pull.json",
+    "lists_file": "boost_mailing_lists.json",
+    "cache_folder": "cache",
+    "log_file": "email_sync.log"
+  },
+  "api_settings": {
+    "endpoint": "http://192.168.1.8:8000/maillist/messages/new",
+    "bundle_threshold": 5
+  },
+  "timing": {
+    "request_delay": 0.5,
+    "batch_delay": 1.0,
+    "request_timeout": 30.0
+  },
+  "retry": {
+    "max_attempts": 5,
+    "initial_delay": 2.0,
+    "backoff_multiplier": 2.0
+  }
+}
+

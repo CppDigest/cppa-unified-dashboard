@@ -31,3 +31,6 @@ downloads/
 # Reference files
 ref/
 prisma/migrations/
+data/
+BoostDepth/boost/
+BoostDepth/dependencies/

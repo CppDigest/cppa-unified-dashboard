@@ -1,0 +1,40 @@
+{
+  "timestamp": "2025-09-30T13:33:31.987274",
+  "source_url": "https://lists.boost.org/archives/api/lists/",
+  "total_lists": 3,
+  "lists": [
+    {
+      "url": "http://lists.boost.org/archives/api/list/boost-announce@lists.boost.org/",
+      "name": "boost-announce@lists.boost.org",
+      "display_name": "Boost-announce",
+      "description": "Boost announce-only mailing list",
+      "subject_prefix": "[Boost-announce] ",
+      "archive_policy": "public",
+      "created_at": "2002-05-23T14:46:23.192182Z",
+      "threads": "http://lists.boost.org/archives/api/list/boost-announce@lists.boost.org/threads/",
+      "emails": "http://lists.boost.org/archives/api/list/boost-announce@lists.boost.org/emails/"
+    },
+    {
+      "url": "http://lists.boost.org/archives/api/list/boost-users@lists.boost.org/",
+      "name": "boost-users@lists.boost.org",
+      "display_name": "Boost-users",
+      "description": "Boost Users mailing list",
+      "subject_prefix": "[Boost-users] ",
+      "archive_policy": "public",
+      "created_at": "2002-05-23T14:44:45.662749Z",
+      "threads": "http://lists.boost.org/archives/api/list/boost-users@lists.boost.org/threads/",
+      "emails": "http://lists.boost.org/archives/api/list/boost-users@lists.boost.org/emails/"
+    },
+    {
+      "url": "http://lists.boost.org/archives/api/list/boost@lists.boost.org/",
+      "name": "boost@lists.boost.org",
+      "display_name": "Boost",
+      "description": "Boost developers' mailing list",
+      "subject_prefix": "[boost] ",
+      "archive_policy": "public",
+      "created_at": "2002-05-09T16:53:34.405682Z",
+      "threads": "http://lists.boost.org/archives/api/list/boost@lists.boost.org/threads/",
+      "emails": "http://lists.boost.org/archives/api/list/boost@lists.boost.org/emails/"
+    }
+  ]
+}
