@@ -74,7 +74,13 @@ For detailed Slack App configuration including:
 SLACK_BOT_TOKEN=xoxb-your-bot-token
 SLACK_APP_TOKEN=xapp-your-app-token
 DATABASE_URL=postgresql://slack_user:your_password@localhost:5432/slack_database
+
+# RAG Pipeline Configuration (Optional)
+RAG_API_ENDPOINT=https://your-rag-api-endpoint.com/api
+RAG_API_KEY=your-rag-api-key-here
 ```
+
+**RAG Pipeline:** The bot includes a `RAGClient` class for sending data to a RAG (Retrieval-Augmented Generation) pipeline. Configure `RAG_API_ENDPOINT` and `RAG_API_KEY` if you have a RAG service.
 
 ## 🚀 Usage
 

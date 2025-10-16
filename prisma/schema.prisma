@@ -29,6 +29,7 @@ model Message {
   botId           String?
   appId           String?
   team            String?
+  isEmbed         Boolean    @default(false)
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
   files           File[]
@@ -218,4 +219,12 @@ model Channel {
   @@index([contextTeamId])
   @@index([isPrivate])
   @@index([isArchived])
+}
+
+model Event {
+  id        Int      @id @default(autoincrement())
+  type      String
+  event     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -233,6 +233,7 @@ class DatabaseService:
                 "botId": messageData.get("bot_id"),
                 "appId": messageData.get("app_id"),
                 "team": messageData.get("team"),
+                "isEmbed": False,
             }
 
             existingMessage = await self.prisma.message.find_unique(
@@ -290,11 +291,33 @@ class DatabaseService:
             logger.error(f"Error getting message {messageId}: {e}")
             return None
 
+    async def get_messages_for_rag(
+        self, skip: int = 0, take: int = 100
+    ) -> List[Message]:
+        """Get messages for RAG with all relations."""
+        try:
+            return await self.prisma.message.find_many(
+                skip=skip,
+                take=take,
+                where={
+                    "isEmbed": False,
+                    "AND": [{"subtype": None}, {"subtype": "thread_broadcast"}],
+                },
+                include={
+                    "channel": True,
+                    "user": True,
+                },
+                order={"timestamp": "desc"},
+            )
+        except Exception as e:
+            logger.error(f"Error getting messages for RAG: {e}")
+            return []
+
     async def delete_message(self, messageId: str):
         """Delete a message."""
         try:
             await self.prisma.message.update(
-                where={"id": messageId}, data={"isDeleted": True}
+                where={"id": messageId}, data={"isDeleted": True, "isEmbed": True}
             )
         except Exception as e:
             logger.error(f"Error deleting message {messageId}: {e}")

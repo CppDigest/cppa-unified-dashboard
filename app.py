@@ -3,11 +3,10 @@ import json
 import asyncio
 import threading
 
-from src.bot import SlackBot
+from src.bot import SlackBot, eventApp, handler, RAGClient
 from src.database import DatabaseService
 from src.services import SlackDatabaseService, logger
 from config.settings import Settings
-from src.services.event_handler import eventApp, handler
 
 
 async def start_socket_mode():
@@ -22,157 +21,70 @@ async def start_socket_mode():
 async def main():
     """Main async function to handle database operations."""
 
-    # Start socket mode as a background task
-    loop = asyncio.new_event_loop()
-    threading.Thread(target=loop.run_forever).start()
-    asyncio.run_coroutine_threadsafe(start_socket_mode(), loop)
     token = Settings.SLACK_BOT_TOKEN
-    slackBot = SlackBot(token=token)
+    slack_bot = SlackBot(token=token)
 
     # Initialize database service
-    dbService = DatabaseService()
-    slackDbService = SlackDatabaseService(slackBot, dbService)
+    db_service = DatabaseService()
+    slack_db_service = SlackDatabaseService(slack_bot, db_service)
+    rag_client = RAGClient()
+
+    # Start RAG client
+    loop_rag = asyncio.new_event_loop()
+    threading.Thread(target=loop_rag.run_forever).start()
+    asyncio.run_coroutine_threadsafe(rag_client.rag_sending_task(), loop_rag)
+    # Start socket mode as a background task
+    loop_socket = asyncio.new_event_loop()
+    threading.Thread(target=loop_socket.run_forever).start()
+    asyncio.run_coroutine_threadsafe(start_socket_mode(), loop_socket)
 
     try:
-        await dbService.connect()
-        logger.info("Connected to PostgreSQL database")
 
         logger.info("Available commands:")
-        logger.info("  fetch <channelId> - Fetch all messages from a channel")
-        logger.info("  sync <channelId> - Sync all data to database")
         logger.info("  sync_all - Sync all data to database")
-        logger.info("  sync_users - Sync all users to database")
-        logger.info("  get_db <channelId> - Get messages from database")
-        logger.info("  search <query> - Search messages in database")
-        logger.info("  user_db <userId> - Get user messages from database")
-        logger.info("  thread_db <threadTs> - Get thread messages from database")
-        logger.info("  thread <threadTs> - Get all messages in a thread")
-        logger.info("  user <userId> - Get user information")
-        logger.info("  users - Get all users in workspace")
-        logger.info("  profile <userId> - Get user profile")
-        logger.info("  lookup <email> - Look up user by email")
+        logger.info("  rag_start - Start sending messages to RAG (100 per batch)")
+        logger.info("  rag_stop - Stop sending messages to RAG")
+        logger.info("  rag_progress - Check RAG sending progress")
         logger.info("  exit - Exit the program")
 
         while True:
-            userInput = input(">> ").strip()
-            if (
-                userInput.lower() == "exit"
-                or userInput.lower() == "q"
-                or userInput.lower() == "quit"
-            ):
-                break
-            elif userInput.startswith("fetch"):
-                _, channelId = userInput.split()
-                slackBot.set_channel_id(channelId)
-                res = slackBot.get_all_history()
-                with open("ref/all_messages.json", "w", encoding="utf-8") as f:
-                    json.dump(res, f)
-                logger.info(f"Saved {len(res)} messages to all_messages.json")
-            elif userInput == "sync_all":
-                await slackDbService.sync_all_users()
-                channels = slackBot.get_all_channels()
-                for channel in channels:
-                    result = await slackDbService.sync_all_data(channel.get("id"))
+            user_input = input(">> ").strip()
+            try:
 
-            elif userInput.startswith("sync "):
-                _, channelId = userInput.split()
-                await slackDbService.sync_all_users()
-                result = await slackDbService.sync_all_data(channelId)
-                logger.info(
-                    f"Synced {result['users']} users and {result['messages']} messages to database"
-                )
-            elif userInput == "sync_users":
-                count = await slackDbService.sync_user_data()
-                logger.info(f"Synced {count} users to database")
-            elif userInput.startswith("get_db "):
-                _, channelId = userInput.split()
-                res = await slackDbService.get_channel_messages_from_db(channelId)
-                with open("ref/db_messages.json", "w", encoding="utf-8") as f:
-                    json.dump(res, f)
-                logger.info(f"Retrieved {len(res)} messages from database")
-            elif userInput.startswith("search "):
-                _, query = userInput.split()
-                res = await slackDbService.search_messages_in_db(query)
-                with open("ref/search_results.json", "w", encoding="utf-8") as f:
-                    json.dump(res, f)
-                logger.info(f"Found {len(res)} messages matching '{query}'")
-            elif userInput.startswith("user_db "):
-                _, userId = userInput.split()
-                res = await slackDbService.get_user_messages_from_db(userId)
-                with open("ref/user_messages_db.json", "w", encoding="utf-8") as f:
-                    json.dump(res, f)
-                logger.info(f"Retrieved {len(res)} messages from user {userId}")
-            elif userInput.startswith("thread_db "):
-                _, threadTs = userInput.split()
-                res = await slackDbService.get_thread_messages_from_db(threadTs)
-                with open("ref/thread_messages_db.json", "w", encoding="utf-8") as f:
-                    json.dump(res, f)
-                logger.info(f"Retrieved {len(res)} thread messages from database")
-            elif userInput.startswith("thread"):
-                _, threadTs = userInput.split()
-                res = slackBot.get_thread_by_root_message(threadTs)
-                with open("ref/thread_messages.json", "w", encoding="utf-8") as f:
-                    json.dump(res, f)
-                logger.info(f"Saved {len(res)} messages to thread_messages.json")
-                logger.info(f"Found {len(res)} messages in thread {threadTs}")
-                for i, msg in enumerate(res):
+                if (
+                    user_input.lower() == "exit"
+                    or user_input.lower() == "q"
+                    or user_input.lower() == "quit"
+                ):
+                    break
+
+                elif user_input == "sync_all":
+                    await slack_db_service.sync_all_users()
+                    await slack_db_service.sync_all_data()
+
+                elif user_input == "rag_start":
+                    rag_client.start_sending()
                     logger.info(
-                        f"  {i+1}. {msg.get('text', 'No text')} (by {msg.get('user', 'Unknown')})"
+                        "Started batch sending in background. Use 'rag_stop' to stop."
                     )
-            elif userInput == "users":
-                res = slackBot.get_all_users()
-                with open("ref/all_users.json", "w", encoding="utf-8") as f:
-                    json.dump(res, f)
-                logger.info(f"Saved {len(res)} users to all_users.json")
-            elif userInput.startswith("user"):
-                _, userId = userInput.split()
-                res = slackBot.get_user_info(userId)
-                with open("ref/user_info.json", "w", encoding="utf-8") as f:
-                    json.dump(res, f)
-                logger.info(f"Saved user info to user_info.json")
-                if res:
+                elif user_input == "rag_stop":
+                    rag_client.stop_sending()
+                    logger.info("Stopped batch sending")
+                elif user_input == "rag_progress":
+                    progress = rag_client.get_progress()
                     logger.info(
-                        f"User: {res.get('real_name', 'Unknown')} ({res.get('name', 'Unknown')})"
-                    )
-                    logger.info(
-                        f"Email: {res.get('profile', {}).get('email', 'Not available')}"
-                    )
-                    logger.info(
-                        f"Status: {res.get('profile', {}).get('status_text', 'No status')}"
-                    )
-                    logger.info(f"Is Bot: {res.get('is_bot', False)}")
-                    logger.info(f"Deleted: {res.get('deleted', False)}")
-                else:
-                    logger.warning("User not found")
-            elif userInput.startswith("profile"):
-                _, userId = userInput.split()
-                res = slackBot.get_user_profile(userId)
-                with open("ref/user_profile.json", "w", encoding="utf-8") as f:
-                    json.dump(res, f)
-                logger.info(f"Saved user profile to user_profile.json")
-                if res:
-                    logger.info(f"Profile: {res}")
-                else:
-                    logger.warning("Profile not found")
-            elif userInput.startswith("lookup"):
-                _, email = userInput.split()
-                res = slackBot.lookup_user_by_email(email)
-                with open("ref/user_lookup.json", "w", encoding="utf-8") as f:
-                    json.dump(res, f)
-                logger.info(f"Saved user lookup to user_lookup.json")
-                if res:
-                    logger.info(
-                        f"Found user: {res.get('real_name', 'Unknown')} ({res.get('name', 'Unknown')})"
+                        f"Progress: RAG is {progress.get('status', 'stopped')} at {progress.get('last_sent_index', 0)} messages"
                     )
                 else:
-                    logger.warning("User not found")
-            else:
-                logger.warning("Invalid command")
+                    logger.warning("Invalid command")
+            except Exception as e:
+                logger.error(f"Error in main: {e}")
+
     except Exception as e:
         logger.error(f"Error in main: {e}")
     finally:
-        # if dbService:
-        #     await dbService.disconnect()
+        if db_service:
+            await db_service.disconnect()
         logger.info("Disconnected from database")
 
 
