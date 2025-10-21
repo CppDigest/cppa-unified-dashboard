@@ -303,7 +303,7 @@ class MergeOptimizer:
     
     def get_best_module_merges(self, top_n: int = 10) -> List[Tuple[Tuple[str, ...], Dict[str, int]]]:
         """
-        Get the best module merge candidates with minimal damage.
+        Get the best module merge candidates sorted by edge reduction.
         
         Args:
             top_n: Number of top candidates to return
@@ -314,9 +314,10 @@ class MergeOptimizer:
         if not self.module_merge_damages:
             self.calculate_all_module_damages()
         
+        # Sort by edge reduction (higher reduction = better)
         sorted_merges = sorted(
             self.module_merge_damages.items(),
-            key=lambda x: x[1]["total_damage"]
+            key=lambda x: -self._calculate_edge_metrics(x[0])['edge_reduction']
         )
         seen_modules = set()
         final_merges = []
@@ -361,7 +362,7 @@ class MergeOptimizer:
         impact = self._calculate_overall_impact(best_merges)
         
         print("=" * 80)
-        print(f"TOP {top_n} MODULE MERGE RECOMMENDATIONS (Minimal Damage)")
+        print(f"TOP {top_n} MODULE MERGE RECOMMENDATIONS (Sorted by Edge Reduction)")
         print(f"Merge count: {self.merge_count} modules per combination")
         print("=" * 80)
         print()
@@ -378,8 +379,8 @@ class MergeOptimizer:
             
             # Simplified console output
             print(f"Rank {i}: {' + '.join(modules)}")
-            print(f"  Edges: {metrics['original_edges']} → {metrics['merged_edges']} (saved {metrics['edge_reduction']}, {(metrics['edge_reduction'] / metrics['original_edges'] * 100):.1f}%)")
-            print(f"  Shared: Primary={damage['shared_primary']}, Reverse={damage['shared_reverse']}")
+            print(f"  Edges: {metrics['original_edges']} -> {metrics['merged_edges']} (saved {metrics['edge_reduction']}, {(metrics['edge_reduction'] / metrics['original_edges'] * 100):.1f}%)")
+            print(f"  Shared: Primary={damage['shared_primary']}, Reverse={damage['shared_reverse']} | Damage={damage['total_damage']:.2f}")
             print()
     
     def export_module_merge_to_markdown(self, output_file: str = "module_merge_recommendations.md", top_n: int = 10):
@@ -395,10 +396,10 @@ class MergeOptimizer:
         
         # Generate markdown content
         md_content = []
-        md_content.append(f"# Module Merge Recommendations\n")
-        md_content.append(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        md_content.append(f"# Module Merge Recommendations\n\n")
         md_content.append(f"**Merge Count:** {self.merge_count} modules per combination\n")
-        md_content.append(f"**Top Recommendations:** {top_n}\n\n")
+        md_content.append(f"**Top Recommendations:** {top_n}\n")
+        md_content.append(f"**Sorting:** By Edge Reduction (highest first)\n\n")
         
         md_content.append("## Overall Impact\n")
         md_content.append("| Metric | Value |\n")
@@ -430,26 +431,13 @@ class MergeOptimizer:
                 count = self.module_relation_count.get(mod, {})
                 md_content.append(f"**{mod}:**\n")
                 md_content.append(f"- Edges from this module: {len(self.module_relation.get(mod, {}))}\n")
-                md_content.append(f"- Primary Relations: Level 1 = {count.get('Primary_level_1', 0)}, Total = {count.get('Primary_total', 0)}\n")
-                md_content.append(f"- Reverse Relations: Level 1 = {count.get('Reverse_level_1', 0)}, Total = {count.get('Reverse_total', 0)}\n\n")
-            
-            md_content.append("### Merge Metrics\n\n")
-            md_content.append("| Metric | Value |\n")
-            md_content.append("|--------|-------|\n")
-            md_content.append(f"| Shared Primary dependencies | {damage['shared_primary']} |\n")
-            md_content.append(f"| Shared Reverse dependencies | {damage['shared_reverse']} |\n")
-            md_content.append(f"| Unique Primary dependencies | {damage['unique_primary']} |\n")
-            md_content.append(f"| Unique Reverse dependencies | {damage['unique_reverse']} |\n")
-            md_content.append(f"| Redundancy saved (Primary) | {damage['redundant_primary']} |\n")
-            md_content.append(f"| Redundancy saved (Reverse) | {damage['redundant_reverse']} |\n")
-            md_content.append(f"| **Total Merge Damage** | **{damage['total_damage']:.2f}** |\n\n")
+                md_content.append(f"- Dependents Relations: Primary = {count.get('Primary_level_1', 0)}, All = {count.get('Primary_total', 0)}\n")
+                md_content.append(f"- Dependencies Relations: Primary = {count.get('Reverse_level_1', 0)}, All = {count.get('Reverse_total', 0)}\n\n")
             
             md_content.append("### Summary\n\n")
             md_content.append("After merge, the combined module would have:\n")
             md_content.append(f"- **{metrics['merged_edges']}** total outgoing edges (reduced from {metrics['original_edges']})\n")
-            md_content.append(f"- **{damage['unique_primary']}** unique Primary dependencies\n")
-            md_content.append(f"- **{damage['unique_reverse']}** unique Reverse dependencies\n")
-            md_content.append(f"- Redundancy saved: {damage['redundant_primary']} Primary, {damage['redundant_reverse']} Reverse\n")
+            md_content.append(f"- Redundancy saved: {damage['redundant_primary']} Dependents, {damage['redundant_reverse']} Dependencies\n")
             md_content.append(f"- Edges saved: **{metrics['edge_reduction']}** ({(metrics['edge_reduction'] / metrics['original_edges'] * 100):.2f}%)\n\n")
             md_content.append("---\n\n")
         
@@ -586,7 +574,7 @@ def main():
     parser.add_argument(
         "--output",
         type=str,
-        default="module_merge_recommendations.md",
+        default="module_merge_recommendations_3.md",
         help="Output markdown file path (default: module_merge_recommendations.md)"
     )
     

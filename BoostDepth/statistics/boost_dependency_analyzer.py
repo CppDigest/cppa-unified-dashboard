@@ -567,8 +567,8 @@ def generate_statistics_report(analyzer: BoostDependencyAnalyzer, output_file: s
     md_content.append("|--------|-------|\n")
     md_content.append(f"| Total modules | {total_modules} |\n")
     md_content.append(f"| Total module relations | {total_module_relations} |\n")
-    md_content.append(f"| Primary only (1) | {module_primary} |\n")
-    md_content.append(f"| Reverse only (-1) | {module_reverse} |\n")
+    md_content.append(f"| Primary Dependents | {module_primary} |\n")
+    md_content.append(f"| Primary Dependencies | {module_reverse} |\n")
     md_content.append(f"| Both operations (0) | {module_both} |\n\n")
     
     md_content.append("### Header Relations\n\n")
@@ -576,23 +576,23 @@ def generate_statistics_report(analyzer: BoostDependencyAnalyzer, output_file: s
     md_content.append("|--------|-------|\n")
     md_content.append(f"| Total headers | {total_headers} |\n")
     md_content.append(f"| Total header relations | {total_header_relations} |\n")
-    md_content.append(f"| Reverse only (1) | {header_primary} |\n")
-    md_content.append(f"| Primary only (-1) | {header_reverse} |\n")
+    md_content.append(f"| Primary Dependencies | {header_primary} |\n")
+    md_content.append(f"| Reverse Dependents | {header_reverse} |\n")
     md_content.append(f"| Both operations (0) | {header_both} |\n\n")
     
     # Top modules by Primary relations
-    md_content.append("## Top Modules by Primary Dependencies (Total)\n\n")
+    md_content.append("## Top Modules by All Dependents\n\n")
     sorted_modules = sorted(module_counts.items(), key=lambda x: x[1]["Primary_total"], reverse=True)
-    md_content.append("| Rank | Module | Primary (Level 1) | Primary (Total) | Reverse (Level 1) | Reverse (Total) |\n")
+    md_content.append("| Rank | Module | Primary Dependents | All Dependents | Primary Dependencies | All Dependencies |\n")
     md_content.append("|------|--------|-------------------|-----------------|-------------------|------------------|\n")
     for i, (mod, counts) in enumerate(sorted_modules[:20], 1):
         md_content.append(f"| {i} | {mod} | {counts['Primary_level_1']} | {counts['Primary_total']} | {counts['Reverse_level_1']} | {counts['Reverse_total']} |\n")
     md_content.append("\n")
     
     # Top modules by Primary relations
-    md_content.append("## Top Modules by Primary Dependencies (Level 1)\n\n")
+    md_content.append("## Top Modules by Primary Dependents \n\n")
     sorted_modules = sorted(module_counts.items(), key=lambda x: x[1]["Primary_level_1"], reverse=True)
-    md_content.append("| Rank | Module | Primary (Level 1) | Primary (Total) | Reverse (Level 1) | Reverse (Total) |\n")
+    md_content.append("| Rank | Module | Primary Dependents | All Dependents | Primary Dependencies | All Dependencies |\n")
     md_content.append("|------|--------|-------------------|-----------------|-------------------|------------------|\n")
     for i, (mod, counts) in enumerate(sorted_modules[:20], 1):
         md_content.append(f"| {i} | {mod} | {counts['Primary_level_1']} | {counts['Primary_total']} | {counts['Reverse_level_1']} | {counts['Reverse_total']} |\n")
@@ -600,16 +600,16 @@ def generate_statistics_report(analyzer: BoostDependencyAnalyzer, output_file: s
     
     
     # Top modules by Reverse relations
-    md_content.append("## Top Modules by Reverse Dependencies (Total)\n\n")
+    md_content.append("## Top Modules by All Dependencies\n\n")
     sorted_modules = sorted(module_counts.items(), key=lambda x: x[1]["Reverse_total"], reverse=True)
-    md_content.append("| Rank | Module | Primary (Level 1) | Primary (Total) | Reverse (Level 1) | Reverse (Total) |\n")
+    md_content.append("| Rank | Module | Primary Dependents | All Dependents | Primary Dependencies | All Dependencies |\n")
     md_content.append("|------|--------|-------------------|-----------------|-------------------|------------------|\n")
     for i, (mod, counts) in enumerate(sorted_modules[:20], 1):
         md_content.append(f"| {i} | {mod} | {counts['Primary_level_1']} | {counts['Primary_total']} | {counts['Reverse_level_1']} | {counts['Reverse_total']} |\n")
     md_content.append("\n")
     
     # Top modules by Reverse relations
-    md_content.append("## Top Modules by Reverse Dependencies (Level 1)\n\n")
+    md_content.append("## Top Modules by Primary Dependencies\n\n")
     sorted_modules = sorted(module_counts.items(), key=lambda x: x[1]["Reverse_level_1"], reverse=True)
     md_content.append("| Rank | Module | Primary (Level 1) | Primary (Total) | Reverse (Level 1) | Reverse (Total) |\n")
     md_content.append("|------|--------|-------------------|-----------------|-------------------|------------------|\n")
@@ -619,18 +619,18 @@ def generate_statistics_report(analyzer: BoostDependencyAnalyzer, output_file: s
     
     
     # Top headers by Primary relations
-    md_content.append("## Top Headers by Primary Dependencies\n\n")
+    md_content.append("## Top Headers by All Dependents\n\n")
     sorted_headers = sorted(header_counts.items(), key=lambda x: x[1]["Primary_total"], reverse=True)
-    md_content.append("| Rank | Header | Primary (Level 1) | Primary (Total) | Reverse (Level 1) | Reverse (Total) |\n")
+    md_content.append("| Rank | Header | Primary Dependents | All Dependents | Primary Dependencies | All Dependencies |\n")
     md_content.append("|------|--------|-------------------|-----------------|-------------------|------------------|\n")
     for i, (hdr, counts) in enumerate(sorted_headers[:20], 1):
         md_content.append(f"| {i} | {hdr} | {counts['Primary_level_1']} | {counts['Primary_total']} | {counts['Reverse_level_1']} | {counts['Reverse_total']} |\n")
     md_content.append("\n")
     
     # Top headers by Reverse relations
-    md_content.append("## Top Headers by Reverse Dependencies\n\n")
+    md_content.append("## Top Headers by All Dependencies\n\n")
     sorted_headers = sorted(header_counts.items(), key=lambda x: x[1]["Reverse_total"], reverse=True)
-    md_content.append("| Rank | Header | Primary (Level 1) | Primary (Total) | Reverse (Level 1) | Reverse (Total) |\n")
+    md_content.append("| Rank | Header | Primary Dependents | All Dependents | Primary Dependencies | All Dependencies |\n")
     md_content.append("|------|--------|-------------------|-----------------|-------------------|------------------|\n")
     for i, (hdr, counts) in enumerate(sorted_headers[:20], 1):
         md_content.append(f"| {i} | {hdr} | {counts['Primary_level_1']} | {counts['Primary_total']} | {counts['Reverse_level_1']} | {counts['Reverse_total']} |\n")
@@ -646,14 +646,14 @@ def generate_statistics_report(analyzer: BoostDependencyAnalyzer, output_file: s
         primary_dist[p_count] = primary_dist.get(p_count, 0) + 1
         reverse_dist[r_count] = reverse_dist.get(r_count, 0) + 1
     
-    md_content.append("### Primary Dependencies Distribution\n\n")
-    md_content.append("| Dependencies | Number of Modules |\n")
+    md_content.append("### Primary Dependents Distribution\n\n")
+    md_content.append("| Dependents | Number of Modules |\n")
     md_content.append("|--------------|-------------------|\n")
     for count in sorted(primary_dist.keys(), reverse=True)[:15]:
         md_content.append(f"| {count} | {primary_dist[count]} |\n")
     md_content.append("\n")
     
-    md_content.append("### Reverse Dependencies Distribution\n\n")
+    md_content.append("### Primary Dependencies Distribution\n\n")
     md_content.append("| Dependencies | Number of Modules |\n")
     md_content.append("|--------------|-------------------|\n")
     for count in sorted(reverse_dist.keys(), reverse=True)[:15]:
