@@ -611,7 +611,7 @@ def generate_statistics_report(analyzer: BoostDependencyAnalyzer, output_file: s
     # Top modules by Reverse relations
     md_content.append("## Top Modules by Primary Dependencies\n\n")
     sorted_modules = sorted(module_counts.items(), key=lambda x: x[1]["Reverse_level_1"], reverse=True)
-    md_content.append("| Rank | Module | Primary (Level 1) | Primary (Total) | Reverse (Level 1) | Reverse (Total) |\n")
+    md_content.append("| Rank | Module | Primary Dependents | All Dependents | Primary Dependencies | All Dependencies |\n")
     md_content.append("|------|--------|-------------------|-----------------|-------------------|------------------|\n")
     for i, (mod, counts) in enumerate(sorted_modules[:20], 1):
         md_content.append(f"| {i} | {mod} | {counts['Primary_level_1']} | {counts['Primary_total']} | {counts['Reverse_level_1']} | {counts['Reverse_total']} |\n")
