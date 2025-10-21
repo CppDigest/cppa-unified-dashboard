@@ -1,6 +1,6 @@
 # Boost Dependency Analysis Report
 
-**Generated:** 2025-10-22 02:05:27
+**Generated:** 2025-10-22 02:18:11
 
 ## Overall Statistics
 
@@ -128,51 +128,51 @@
 
 | Rank | Header | Primary Dependencies | All Dependencies |Primary Dependents | All Dependents | 
 |------|--------|-------------------|-----------------|-------------------|------------------|
-| 1 | boost/config.hpp | 2145 | 4690 | 0 | 0 |
-| 2 | boost/detail/workaround.hpp | 276 | 1775 | 0 | 0 |
-| 3 | boost/config/workaround.hpp | 99 | 1438 | 0 | 0 |
-| 4 | boost/assert.hpp | 792 | 1247 | 1 | 1 |
-| 5 | boost/static_assert.hpp | 327 | 1131 | 2 | 2 |
-| 6 | boost/preprocessor/cat.hpp | 324 | 1019 | 0 | 0 |
-| 7 | boost/cstdint.hpp | 165 | 903 | 0 | 0 |
-| 8 | boost/type_traits/is_same.hpp | 325 | 804 | 0 | 0 |
-| 9 | boost/mpl/if.hpp | 331 | 674 | 0 | 0 |
-| 10 | boost/mpl/bool.hpp | 422 | 614 | 0 | 0 |
-| 11 | boost/assert/source_location.hpp | 13 | 586 | 2 | 2 |
-| 12 | boost/core/enable_if.hpp | 127 | 554 | 1 | 1 |
-| 13 | boost/throw_exception.hpp | 329 | 553 | 3 | 4 |
-| 14 | boost/type_traits/integral_constant.hpp | 53 | 506 | 2 | 2 |
-| 15 | boost/preprocessor/repetition/enum_params.hpp | 172 | 489 | 0 | 0 |
-| 16 | boost/mpl/eval_if.hpp | 184 | 423 | 0 | 0 |
-| 17 | boost/type_traits/remove_reference.hpp | 166 | 373 | 2 | 2 |
-| 18 | boost/preprocessor/repetition/enum_trailing_params.hpp | 56 | 366 | 0 | 0 |
-| 19 | boost/mp11/utility.hpp | 54 | 338 | 0 | 0 |
-| 20 | boost/preprocessor/inc.hpp | 39 | 329 | 0 | 0 |
+| 1 | boost/config.hpp | 0 | 0 | 2145 | 4690 |
+| 2 | boost/detail/workaround.hpp | 0 | 0 | 276 | 1775 |
+| 3 | boost/config/workaround.hpp | 0 | 0 | 99 | 1438 |
+| 4 | boost/assert.hpp | 1 | 1 | 792 | 1247 |
+| 5 | boost/static_assert.hpp | 2 | 2 | 327 | 1131 |
+| 6 | boost/preprocessor/cat.hpp | 0 | 0 | 324 | 1019 |
+| 7 | boost/cstdint.hpp | 0 | 0 | 165 | 903 |
+| 8 | boost/type_traits/is_same.hpp | 0 | 0 | 325 | 804 |
+| 9 | boost/mpl/if.hpp | 0 | 0 | 331 | 674 |
+| 10 | boost/mpl/bool.hpp | 0 | 0 | 422 | 614 |
+| 11 | boost/assert/source_location.hpp | 2 | 2 | 13 | 586 |
+| 12 | boost/core/enable_if.hpp | 1 | 1 | 127 | 554 |
+| 13 | boost/throw_exception.hpp | 3 | 4 | 329 | 553 |
+| 14 | boost/type_traits/integral_constant.hpp | 2 | 2 | 53 | 506 |
+| 15 | boost/preprocessor/repetition/enum_params.hpp | 0 | 0 | 172 | 489 |
+| 16 | boost/mpl/eval_if.hpp | 0 | 0 | 184 | 423 |
+| 17 | boost/type_traits/remove_reference.hpp | 2 | 2 | 166 | 373 |
+| 18 | boost/preprocessor/repetition/enum_trailing_params.hpp | 0 | 0 | 56 | 366 |
+| 19 | boost/mp11/utility.hpp | 0 | 0 | 54 | 338 |
+| 20 | boost/preprocessor/inc.hpp | 0 | 0 | 39 | 329 |
 
 ## Top Headers by All Dependents
 
 | Rank | Header | Primary Dependencies | All Dependencies |Primary Dependents | All Dependents | 
 |------|--------|-------------------|-----------------|-------------------|------------------|
-| 1 | boost/graph/distributed/strong_components.hpp | 0 | 0 | 12 | 130 |
-| 2 | boost/graph/distributed/adjacency_list.hpp | 0 | 0 | 20 | 122 |
-| 3 | boost/graph/distributed/betweenness_centrality.hpp | 0 | 0 | 12 | 118 |
-| 4 | boost/graph/distributed/compressed_sparse_row_graph.hpp | 0 | 0 | 6 | 113 |
-| 5 | boost/log/expressions/formatters/char_decorator.hpp | 0 | 0 | 20 | 113 |
-| 6 | boost/compute/detail/parameter_cache.hpp | 0 | 0 | 6 | 104 |
-| 7 | boost/log/expressions/formatters/max_size_decorator.hpp | 0 | 0 | 14 | 102 |
-| 8 | libs/graph/src/graphml.cpp | 0 | 0 | 5 | 97 |
-| 9 | boost/geometry/index/detail/rtree/node/variant_dynamic.hpp | 0 | 0 | 6 | 96 |
-| 10 | libs/log/src/setup/init_from_settings.cpp | 0 | 0 | 14 | 94 |
-| 11 | boost/graph/distributed/graphviz.hpp | 0 | 0 | 7 | 90 |
-| 12 | boost/log/expressions/formatters/if.hpp | 0 | 0 | 9 | 89 |
-| 13 | boost/graph/distributed/connected_components.hpp | 0 | 0 | 12 | 88 |
-| 14 | boost/log/detail/attr_output_terminal.hpp | 0 | 0 | 9 | 88 |
-| 15 | boost/log/expressions/formatters/named_scope.hpp | 0 | 0 | 12 | 86 |
-| 16 | boost/spirit/home/lex/argument_phoenix.hpp | 0 | 0 | 7 | 84 |
-| 17 | boost/log/utility/setup/settings.hpp | 0 | 0 | 9 | 82 |
-| 18 | boost/geometry/srs/projections/dpar.hpp | 0 | 0 | 6 | 82 |
-| 19 | boost/log/expressions/keyword.hpp | 0 | 0 | 8 | 81 |
-| 20 | boost/spirit/home/support/context.hpp | 0 | 0 | 11 | 81 |
+| 1 | boost/graph/distributed/strong_components.hpp | 12 | 130 | 0 | 0 |
+| 2 | boost/graph/distributed/adjacency_list.hpp | 20 | 122 | 0 | 0 |
+| 3 | boost/graph/distributed/betweenness_centrality.hpp | 12 | 118 | 0 | 0 |
+| 4 | boost/graph/distributed/compressed_sparse_row_graph.hpp | 6 | 113 | 0 | 0 |
+| 5 | boost/log/expressions/formatters/char_decorator.hpp | 20 | 113 | 0 | 0 |
+| 6 | boost/compute/detail/parameter_cache.hpp | 6 | 104 | 0 | 0 |
+| 7 | boost/log/expressions/formatters/max_size_decorator.hpp | 14 | 102 | 0 | 0 |
+| 8 | libs/graph/src/graphml.cpp | 5 | 97 | 0 | 0 |
+| 9 | boost/geometry/index/detail/rtree/node/variant_dynamic.hpp | 6 | 96 | 0 | 0 |
+| 10 | libs/log/src/setup/init_from_settings.cpp | 14 | 94 | 0 | 0 |
+| 11 | boost/graph/distributed/graphviz.hpp | 7 | 90 | 0 | 0 |
+| 12 | boost/log/expressions/formatters/if.hpp | 9 | 89 | 0 | 0 |
+| 13 | boost/graph/distributed/connected_components.hpp | 12 | 88 | 0 | 0 |
+| 14 | boost/log/detail/attr_output_terminal.hpp | 9 | 88 | 0 | 0 |
+| 15 | boost/log/expressions/formatters/named_scope.hpp | 12 | 86 | 0 | 0 |
+| 16 | boost/spirit/home/lex/argument_phoenix.hpp | 7 | 84 | 0 | 0 |
+| 17 | boost/log/utility/setup/settings.hpp | 9 | 82 | 0 | 0 |
+| 18 | boost/geometry/srs/projections/dpar.hpp | 6 | 82 | 0 | 0 |
+| 19 | boost/log/expressions/keyword.hpp | 8 | 81 | 0 | 0 |
+| 20 | boost/spirit/home/support/context.hpp | 11 | 81 | 0 | 0 |
 
 ## Module Dependency Distribution
 
