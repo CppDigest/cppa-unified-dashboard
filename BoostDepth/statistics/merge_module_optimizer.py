@@ -311,16 +311,16 @@ class MergeModuleOptimizer:
             merge_count = len(modules)
             if merge_count not in count_per_merge_count:
                 count_per_merge_count[merge_count] = 0
-            elif count_per_merge_count[merge_count] >= count_limit:
+            elif count_per_merge_count[merge_count] >= top_n:
                 continue
             
-            if any(module in seen_modules for module in modules):
-                continue
+            # if any(module in seen_modules for module in modules):
+            #     continue
             seen_modules.update(modules)
             final_merges.append(group)
             count_per_merge_count[merge_count] += 1
-            if len(final_merges) >= top_n:
-                break
+            # if len(final_merges) >= top_n:
+                # break
         return final_merges
     
     def print_module_merge_recommendations(self, top_n: int = 10):
