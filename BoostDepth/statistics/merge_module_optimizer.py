@@ -1,73 +1,66 @@
 """
-Merge Optimizer for Boost Modules and Headers
+Merge Module Optimizer for Boost Modules
 
-This module provides a class to find optimal merge plans for modules and headers
+This module provides a class to find optimal merge plans for modules
 by calculating the damage of merging each pair.
 """
 
 import argparse
 from typing import Dict, List, Tuple
 from pathlib import Path
-from datetime import datetime
 
 
-class MergeOptimizer:
+class MergeModuleOptimizer:
     """
-    Finds optimal merge plans for modules and headers by minimizing merge damage.
+    Finds optimal merge plans for modules by minimizing merge damage.
     
     Damage is calculated as the sum of primary_damage and reverse_damage.
-    For a pair of items:
-    - reverse_damage = reverse_count[item1] + reverse_count[item2] - shared_reverse_count
-    - primary_damage = primary_count[item1] + primary_count[item2] - shared_primary_count
+    For a pair of modules:
+    - reverse_damage = reverse_count[module1] + reverse_count[module2] - shared_reverse_count
+    - primary_damage = primary_count[module1] + primary_count[module2] - shared_primary_count
     """
     
     def __init__(self, 
                  module_relation: Dict[str, Dict[str, int]] = None,
-                 header_relation: Dict[str, Dict[str, int]] = None,
                  module_relation_count: Dict[str, Dict[str, int]] = None,
-                 header_relation_count: Dict[str, Dict[str, int]] = None,
                  merge_count: int = 3):
         """
-        Initialize the MergeOptimizer.
+        Initialize the MergeModuleOptimizer.
         
         Args:
             module_relation: Module-to-module relations from BoostDependencyAnalyzer
-            header_relation: Header-to-header relations from BoostDependencyAnalyzer
             module_relation_count: Relation counts for modules
-            header_relation_count: Relation counts for headers
+            merge_count: Number of modules to merge together (default: 3)
         """
         self.module_relation = module_relation or {}
-        self.header_relation = header_relation or {}
         self.module_relation_count = module_relation_count or {}
-        self.header_relation_count = header_relation_count or {}
         
-        # Store calculated damages
+        # Store calculated damages (now includes merge_count in key)
         self.module_merge_damages: Dict[Tuple[str, ...], Dict[str, int]] = {}
-        self.header_merge_damages: Dict[Tuple[str, ...], Dict[str, int]] = {}
         self.merge_count = merge_count
         self.selected_nodes: List[str] = []
         self.candidate_modules: List[str] = []
-        self.candidate_headers: List[str] = []
+        self.current_merge_count: int = merge_count
     
     def _count_shared_relations(self, 
                                 relation_dict: Dict[str, Dict[str, int]], 
-                                item1: str, 
-                                item2: str, 
+                                module1: str, 
+                                module2: str, 
                                 target_value: int) -> int:
         """
-        Count shared relations between two items for a specific relation value.
+        Count shared relations between two modules for a specific relation value.
         
         Args:
-            relation_dict: The relation dictionary (module_relation or header_relation)
-            item1: First item name
-            item2: Second item name
+            relation_dict: The relation dictionary (module_relation)
+            module1: First module name
+            module2: Second module name
             target_value: The relation value to count (1 for Primary, -1 for Reverse)
             
         Returns:
             Count of shared relations with the target value
         """
-        relations1 = {name for name, val in relation_dict.get(item1, {}).items() if val == target_value}
-        relations2 = {name for name, val in relation_dict.get(item2, {}).items() if val == target_value}
+        relations1 = {name for name, val in relation_dict.get(module1, {}).items() if val == target_value}
+        relations2 = {name for name, val in relation_dict.get(module2, {}).items() if val == target_value}
         return len(relations1 & relations2)
     
     def _calculate_edge_metrics(self, modules: Tuple[str, ...]) -> Dict[str, int]:
@@ -103,7 +96,7 @@ class MergeOptimizer:
         
         return {
             'original_edges': original_edges,
-            'internal_edges': internal_edges / 2,
+            'internal_edges': int(internal_edges / 2),
             'merged_edges': merged_edges,
             'edge_reduction': edge_reduction
         }
@@ -134,27 +127,17 @@ class MergeOptimizer:
             'modules_merged': len(merged_modules)
         }
     
-    def calculate_merge_damage_for_nodes(self, note_type: str, nodes: List[str]) -> Dict[str, int]:
+    def calculate_merge_damage_for_modules(self, modules: List[str]) -> Dict[str, int]:
         """
-        Calculate the damage of merging multiple nodes together.
+        Calculate the damage of merging multiple modules together.
         
         Args:
-            note_type: "module" or "header"
-            nodes: List of node names to merge
+            modules: List of module names to merge
             
         Returns:
             Dictionary with damage metrics
         """
-        if note_type == "module":
-            relation_dict = self.module_relation
-            relation_count = self.module_relation_count
-        elif note_type == "header":
-            relation_dict = self.header_relation
-            relation_count = self.header_relation_count
-        else:
-            return {}
-        
-        if len(nodes) == 0:
+        if len(modules) == 0:
             return {
                 "primary_damage": 0,
                 "reverse_damage": 0,
@@ -163,27 +146,27 @@ class MergeOptimizer:
                 "shared_reverse": 0
             }
         
-        # Count total relations for each note_type (with redundancy)
+        # Count total relations for each module (with redundancy)
         total_primary_count = 0
         total_reverse_count = 0
         
-        # Track relations and how many nodes have them
-        primary_relations = {}  # {target: count of nodes that have this relation}
+        # Track relations and how many modules have them
+        primary_relations = {}  # {target: count of modules that have this relation}
         reverse_relations = {}
         
-        for node in nodes:
-            count = relation_count.get(node, {})
+        for module in modules:
+            count = self.module_relation_count.get(module, {})
             total_primary_count += count.get("Primary_level_1", 0)
             total_reverse_count += count.get("Reverse_level_1", 0)
             
-            # Track which nodes have which relations
-            for target, rel_value in relation_dict.get(node, {}).items():
+            # Track which modules have which relations
+            for target, rel_value in self.module_relation.get(module, {}).items():
                 if rel_value == 1:  # Primary relation
                     primary_relations[target] = primary_relations.get(target, 0) + 1
                 elif rel_value == -1:  # Reverse relation
                     reverse_relations[target] = reverse_relations.get(target, 0) + 1
         
-        # Count shared relations (relations that appear in 2+ nodes)
+        # Count shared relations (relations that appear in 2+ modules)
         shared_primary = sum(1 for count in primary_relations.values() if count >= 2)
         shared_reverse = sum(1 for count in reverse_relations.values() if count >= 2)
         
@@ -191,9 +174,8 @@ class MergeOptimizer:
         unique_primary = len(primary_relations)
         unique_reverse = len(reverse_relations)
         
-        # Calculate unshared (redundant) count
-        # unshared = total_count (with redundancy) - shared_count
-        # This represents how many redundant relations exist
+        # Calculate redundant count
+        # redundant = total_count (with redundancy) - unique_count
         redundant_primary = total_primary_count - unique_primary
         redundant_reverse = total_reverse_count - unique_reverse
         
@@ -223,45 +205,39 @@ class MergeOptimizer:
             "redundant_reverse": redundant_reverse
         }
         
-        
-    def calculate_merge_damage(self, note_type: str, depth: int = 1, last_index: int = -1):
+    def calculate_merge_damage(self, depth: int = 1, last_index: int = -1):
         """
-        Recursively calculate merge damages for all combinations of nodes.
+        Recursively calculate merge damages for all combinations of modules.
         
         Args:
-            type: "module" or "header"
             depth: Current recursion depth
             last_index: Last index used to avoid duplicates
         """
-        nodes = []
-        if note_type == "module":
-            nodes = self.candidate_modules
-        elif note_type == "header":
-            nodes = self.candidate_headers
+        modules = self.candidate_modules
         
-        for i in range(last_index + 1, len(nodes)):
-            node = nodes[i]
-            self.selected_nodes.append(node)
+        for i in range(last_index + 1, len(modules)):
+            module = modules[i]
+            self.selected_nodes.append(module)
             
-            if depth < self.merge_count:
-                # Continue recursion to select more nodes
-                self.calculate_merge_damage(note_type, depth + 1, i)
+            if depth < self.current_merge_count:
+                # Continue recursion to select more modules
+                self.calculate_merge_damage(depth + 1, i)
             else:
                 # Calculate damage for this combination
-                damage = self.calculate_merge_damage_for_nodes(note_type, self.selected_nodes)
-                # Store with tuple of all selected nodes as key
-                node_tuple = tuple(sorted(self.selected_nodes))
-                
-                if note_type == "module":
-                    self.module_merge_damages[node_tuple] = damage
-                elif note_type == "header":
-                    self.header_merge_damages[node_tuple] = damage
+                damage = self.calculate_merge_damage_for_modules(self.selected_nodes)
+                # Store with tuple of all selected modules as key
+                module_tuple = tuple(sorted(self.selected_nodes))
+                self.module_merge_damages[module_tuple] = damage
             
             self.selected_nodes.pop()
     
-    def calculate_all_module_damages(self) -> Dict[Tuple[str, ...], Dict[str, int]]:
+    def calculate_all_module_damages(self, merge_count_range: Tuple[int, int] = None, candidate_count: int = 30) -> Dict[Tuple[str, ...], Dict[str, int]]:
         """
-        Calculate merge damages for all combinations of modules.
+        Calculate merge damages for all combinations of modules across multiple merge counts.
+        
+        Args:
+            merge_count_range: Tuple of (min_merge_count, max_merge_count). 
+                             If None, uses self.merge_count only.
         
         Returns:
             Dictionary mapping module tuples to their damage metrics
@@ -270,36 +246,38 @@ class MergeOptimizer:
         self.candidate_modules = []
         self.selected_nodes = []
         
-        # Select candidate modules (those with reverse dependencies)
+        # Select top 20 modules by Reverse_level_1 count (most dependents)
+        modules_with_reverse = []
         for module in self.module_relation.keys():
-            if self.module_relation_count[module]["Reverse_level_1"] > 0:
-                self.candidate_modules.append(module)
+            reverse_count = self.module_relation_count[module]["Reverse_level_1"]
+            if reverse_count > 0:
+                modules_with_reverse.append((module, reverse_count))
         
-        print(f"Found {len(self.candidate_modules)} candidate modules for merging")
-        self.calculate_merge_damage(note_type="module", depth=1, last_index=-1)
+        # Sort by reverse count (descending) and take top 20
+        modules_with_reverse.sort(key=lambda x: x[1], reverse=True)
+        self.candidate_modules = [module for module, _ in modules_with_reverse[:candidate_count]]
+        
+        print(f"Selected top {candidate_count} candidate modules for merging (by Reverse_level_1 count)")
+        print(f"Top candidates: {', '.join(self.candidate_modules[:5])}...")
+        
+        # Calculate damages for each merge count in range
+        if merge_count_range:
+            min_count, max_count = merge_count_range
+            print(f"\nCalculating merge strategies for merge counts {min_count} to {max_count}...")
+            
+            for count in range(min_count, max_count + 1):
+                self.current_merge_count = count
+                self.selected_nodes = []
+                print(f"  Processing merge count {count}...")
+                self.calculate_merge_damage(depth=1, last_index=-1)
+            
+            print(f"\nTotal strategies found: {len(self.module_merge_damages)}")
+        else:
+            # Single merge count (backward compatibility)
+            self.current_merge_count = self.merge_count
+            self.calculate_merge_damage(depth=1, last_index=-1)
         
         return self.module_merge_damages
-    
-    def calculate_all_header_damages(self) -> Dict[Tuple[str, ...], Dict[str, int]]:
-        """
-        Calculate merge damages for all combinations of headers.
-        
-        Returns:
-            Dictionary mapping header tuples to their damage metrics
-        """
-        self.header_merge_damages = {}
-        self.candidate_headers = []
-        self.selected_nodes = []
-        
-        # Select candidate headers (those with reverse dependencies)
-        for header in self.header_relation.keys():
-            if self.header_relation_count[header]["Reverse_level_1"] > 0:
-                self.candidate_headers.append(header)
-        
-        print(f"Found {len(self.candidate_headers)} candidate headers for merging")
-        self.calculate_merge_damage(note_type="header", depth=1, last_index=-1)
-        
-        return self.header_merge_damages
     
     def get_best_module_merges(self, top_n: int = 10) -> List[Tuple[Tuple[str, ...], Dict[str, int]]]:
         """
@@ -315,41 +293,35 @@ class MergeOptimizer:
             self.calculate_all_module_damages()
         
         # Sort by edge reduction (higher reduction = better)
+        # sorted_merges = sorted(
+        #     self.module_merge_damages.items(),
+        #     key=lambda x: -self._calculate_edge_metrics(x[0])['edge_reduction']
+        # )
         sorted_merges = sorted(
             self.module_merge_damages.items(),
-            key=lambda x: -self._calculate_edge_metrics(x[0])['edge_reduction']
+            key=lambda x: -x[1]['total_damage']
         )
         seen_modules = set()
         final_merges = []
+        count_limit = int(top_n / 4) + 1
+        count_per_merge_count = {}
+        
         for group in sorted_merges:
             modules = group[0]
+            merge_count = len(modules)
+            if merge_count not in count_per_merge_count:
+                count_per_merge_count[merge_count] = 0
+            elif count_per_merge_count[merge_count] >= count_limit:
+                continue
+            
             if any(module in seen_modules for module in modules):
                 continue
             seen_modules.update(modules)
             final_merges.append(group)
+            count_per_merge_count[merge_count] += 1
             if len(final_merges) >= top_n:
                 break
         return final_merges
-    
-    def get_best_header_merges(self, top_n: int = 10) -> List[Tuple[Tuple[str, ...], Dict[str, int]]]:
-        """
-        Get the best header merge candidates with minimal damage.
-        
-        Args:
-            top_n: Number of top candidates to return
-            
-        Returns:
-            List of tuples: ((header1, header2, ...), damage_dict)
-        """
-        if not self.header_merge_damages:
-            self.calculate_all_header_damages()
-        
-        sorted_merges = sorted(
-            self.header_merge_damages.items(),
-            key=lambda x: x[1]["total_damage"]
-        )
-        
-        return sorted_merges[:top_n]
     
     def print_module_merge_recommendations(self, top_n: int = 10):
         """
@@ -363,23 +335,23 @@ class MergeOptimizer:
         
         print("=" * 80)
         print(f"TOP {top_n} MODULE MERGE RECOMMENDATIONS (Sorted by Edge Reduction)")
-        print(f"Merge count: {self.merge_count} modules per combination")
         print("=" * 80)
         print()
-        print(f"Overall Impact:")
+        print("Overall Impact:")
         print(f"  Original total edges: {impact['original_edges']}")
         print(f"  Reduced total edges:  {impact['reduced_edges']}")
-        print(f"  Edge reduction:       {impact['edge_reduction']} ({(impact['edge_reduction'] / impact['original_edges'] * 100):.2f}%)")
+        print(f"  Edge reduction:       {impact['edge_reduction']}")
         print(f"  Modules merged:       {impact['modules_merged']} modules")
         print("=" * 80)
         print()
         
         for i, (modules, damage) in enumerate(best_merges, 1):
             metrics = self._calculate_edge_metrics(modules)
+            merge_count = len(modules)
             
             # Simplified console output
-            print(f"Rank {i}: {' + '.join(modules)}")
-            print(f"  Edges: {metrics['original_edges']} -> {metrics['merged_edges']} (saved {metrics['edge_reduction']}, {(metrics['edge_reduction'] / metrics['original_edges'] * 100):.1f}%)")
+            print(f"Rank {i}: {' + '.join(modules)} (merge count: {merge_count})")
+            print(f"  Edges: {metrics['original_edges']} -> {metrics['merged_edges']} (saved {metrics['edge_reduction']})")
             print(f"  Shared: Primary={damage['shared_primary']}, Reverse={damage['shared_reverse']} | Damage={damage['total_damage']:.2f}")
             print()
     
@@ -396,24 +368,26 @@ class MergeOptimizer:
         
         # Generate markdown content
         md_content = []
-        md_content.append(f"# Module Merge Recommendations\n\n")
-        md_content.append(f"**Merge Count:** {self.merge_count} modules per combination\n")
+        md_content.append("# Module Merge Recommendations\n\n")
         md_content.append(f"**Top Recommendations:** {top_n}\n")
-        md_content.append(f"**Sorting:** By Edge Reduction (highest first)\n\n")
+        md_content.append("**Sorting:** By Edge Reduction (highest first)\n")
+        md_content.append("**Strategy:** Best merges across all merge counts (2-5 modules)\n\n")
         
         md_content.append("## Overall Impact\n")
         md_content.append("| Metric | Value |\n")
         md_content.append("|--------|-------|\n")
         md_content.append(f"| Original total edges | {impact['original_edges']} |\n")
         md_content.append(f"| Reduced total edges | {impact['reduced_edges']} |\n")
-        md_content.append(f"| Edge reduction | {impact['edge_reduction']} ({(impact['edge_reduction'] / impact['original_edges'] * 100):.2f}%) |\n")
+        md_content.append(f"| Edge reduction | {impact['edge_reduction']} |\n")
         md_content.append(f"| Modules merged | {impact['modules_merged']} |\n\n")
         
         md_content.append("---\n\n")
         
         # Add each recommendation
         for i, (modules, damage) in enumerate(best_merges, 1):
+            merge_count = len(modules)
             md_content.append(f"## Rank {i}: {' + '.join(modules)}\n\n")
+            md_content.append(f"**Merge Count:** {merge_count} modules\n\n")
             
             # Calculate edge metrics using helper function
             metrics = self._calculate_edge_metrics(modules)
@@ -424,7 +398,7 @@ class MergeOptimizer:
             md_content.append(f"| Original edges (sum) | {metrics['original_edges']} |\n")
             md_content.append(f"| Internal edges (removed) | {metrics['internal_edges']} |\n")
             md_content.append(f"| Merged edges (unique) | {metrics['merged_edges']} |\n")
-            md_content.append(f"| Edge reduction | {metrics['edge_reduction']} ({(metrics['edge_reduction'] / metrics['original_edges'] * 100):.2f}%) |\n\n")
+            md_content.append(f"| Edge reduction | {metrics['edge_reduction']} |\n\n")
             
             md_content.append("### Individual Module Details\n\n")
             for mod in modules:
@@ -438,7 +412,7 @@ class MergeOptimizer:
             md_content.append("After merge, the combined module would have:\n")
             md_content.append(f"- **{metrics['merged_edges']}** total outgoing edges (reduced from {metrics['original_edges']})\n")
             md_content.append(f"- Redundancy saved: {damage['redundant_primary']} Dependents, {damage['redundant_reverse']} Dependencies\n")
-            md_content.append(f"- Edges saved: **{metrics['edge_reduction']}** ({(metrics['edge_reduction'] / metrics['original_edges'] * 100):.2f}%)\n\n")
+            md_content.append(f"- Edges saved: **{metrics['edge_reduction']}**\n\n")
             md_content.append("---\n\n")
         
         # Write to file
@@ -448,89 +422,19 @@ class MergeOptimizer:
         
         return str(output_path.absolute())
     
-    def print_header_merge_recommendations(self, top_n: int = 10):
-        """
-        Print the best header merge recommendations with detailed metrics.
-        
-        Args:
-            top_n: Number of recommendations to print
-        """
-        best_merges = self.get_best_header_merges(top_n)
-        
-        print("=" * 80)
-        print(f"TOP {top_n} HEADER MERGE RECOMMENDATIONS (Minimal Damage)")
-        print(f"Merge count: {self.merge_count} headers per combination")
-        print("=" * 80)
-        print()
-        
-        for i, (headers, damage) in enumerate(best_merges, 1):
-            print(f"{'='*80}")
-            print(f"Rank {i}:")
-            for j, hdr in enumerate(headers, 1):
-                print(f"  Header {j}: {hdr}")
-            print(f"{'='*80}")
-            
-            # Individual header details
-            for hdr in headers:
-                count = self.header_relation_count.get(hdr, {})
-                short_name = hdr.split('/')[-1] if '/' in hdr else hdr
-                print(f"\n  {short_name}:")
-                print(f"    Primary Relations:")
-                print(f"      - Level 1 (direct):     {count.get('Primary_level_1', 0)}")
-                print(f"      - Total (with indirect): {count.get('Primary_total', 0)}")
-                print(f"    Reverse Relations:")
-                print(f"      - Level 1 (direct):     {count.get('Reverse_level_1', 0)}")
-                print(f"      - Total (with indirect): {count.get('Reverse_total', 0)}")
-            
-            # Shared relations
-            print(f"\n  Shared Relations:")
-            print(f"    - Primary (overlapping dependencies):  {damage['shared_primary']}")
-            print(f"    - Reverse (overlapping dependents):    {damage['shared_reverse']}")
-            print(f"    - Unique Primary dependencies:         {damage['unique_primary']}")
-            print(f"    - Unique Reverse dependencies:         {damage['unique_reverse']}")
-            print(f"    - Unshared Primary:                    {damage['unshared_primary']}")
-            print(f"    - Unshared Reverse:                    {damage['unshared_reverse']}")
-            print(f"    - Redundant Primary:                   {damage['redundant_primary']}")
-            print(f"    - Redundant Reverse:                   {damage['redundant_reverse']}")
-            
-            # Merge impact
-            print(f"\n  Merge Impact:")
-            print(f"    - Primary Damage:  {damage['primary_damage']:.2f}")
-            print(f"      Formula: unshared_primary / (shared_primary + 1)")
-            print(f"      = {damage['unshared_primary']} / ({damage['shared_primary']} + 1)")
-            print(f"    - Reverse Damage:  {damage['reverse_damage']:.2f}")
-            print(f"      Formula: unshared_reverse / (shared_reverse + 1)")
-            print(f"      = {damage['unshared_reverse']} / ({damage['shared_reverse']} + 1)")
-            print(f"    - Total Damage:    {damage['total_damage']:.2f}")
-            
-            # Summary
-            print(f"\n  Summary:")
-            print(f"    After merge, the combined header would have:")
-            print(f"    - {damage['unique_primary']} unique Primary dependencies")
-            print(f"    - {damage['unique_reverse']} unique Reverse dependencies")
-            print(f"    - Redundancy saved: {damage['redundant_primary']} Primary, {damage['redundant_reverse']} Reverse")
-            print()
-    
-    def get_merge_statistics(self, skip_headers: bool = True) -> Dict[str, int]:
+    def get_merge_statistics(self) -> Dict[str, int]:
         """
         Get statistics about calculated merges.
         
-        Args:
-            skip_headers: Whether to skip header merge analysis
-            
         Returns:
             Dictionary with statistics
         """
         if not self.module_merge_damages:
             self.calculate_all_module_damages()
-        if not skip_headers and not self.header_merge_damages:
-            self.calculate_all_header_damages()
         
         return {
             "total_module_combinations": len(self.module_merge_damages),
-            "total_header_combinations": len(self.header_merge_damages) if not skip_headers else 0,
             "modules_analyzed": len(self.module_relation),
-            "headers_analyzed": len(self.header_relation) if not skip_headers else 0,
         }
 
 
@@ -540,12 +444,13 @@ def main():
     
     Arguments:
         --csv: Path to the CSV file (optional, defaults to parent directory)
-        --merge-count: Number of modules/headers to merge together (default: 3)
+        --min-merge: Minimum merge count (default: 2)
+        --max-merge: Maximum merge count (default: 5)
         --top-n: Number of top recommendations to display (default: 10)
-        --skip-headers: Skip header merge analysis (faster execution)
+        --output: Output markdown file path
     """
     parser = argparse.ArgumentParser(
-        description="Find optimal merge candidates for Boost modules and headers"
+        description="Find optimal merge candidates for Boost modules across multiple merge counts"
     )
     parser.add_argument(
         "--csv",
@@ -554,10 +459,16 @@ def main():
         help="Path to boost_modules_dependencies.csv (default: parent directory)"
     )
     parser.add_argument(
-        "--merge-count",
+        "--min-merge",
         type=int,
-        default=4,
-        help="Number of modules/headers to merge together (default: 3)"
+        default=2,
+        help="Minimum number of modules to merge together (default: 2)"
+    )
+    parser.add_argument(
+        "--max-merge",
+        type=int,
+        default=5,
+        help="Maximum number of modules to merge together (default: 5)"
     )
     parser.add_argument(
         "--top-n",
@@ -566,16 +477,16 @@ def main():
         help="Number of top recommendations to display (default: 10)"
     )
     parser.add_argument(
-        "--skip-headers",
-        default=True,
-        action="store_true",
-        help="Skip header merge analysis (faster execution)"
-    )
-    parser.add_argument(
         "--output",
         type=str,
         default="module_merge_recommendations.md",
         help="Output markdown file path (default: module_merge_recommendations.md)"
+    )
+    parser.add_argument(
+        "--candidate-count",
+        type=int,
+        default=40,
+        help="Number of candidate modules to consider for merging (default: 30)"
     )
     
     args = parser.parse_args()
@@ -591,46 +502,38 @@ def main():
     # Get relation counts
     print("Calculating relation counts...")
     module_counts = analyzer.count_negative_relations_by_module()
-    header_counts = analyzer.count_negative_relations_by_header()
     print("Relation counts calculated!\n")
     
     # Create merge optimizer
-    print(f"Creating merge optimizer (merge count: {args.merge_count})...\n")
-    optimizer = MergeOptimizer(
+    print(f"Creating merge optimizer (merge count range: {args.min_merge}-{args.max_merge})...\n")
+    optimizer = MergeModuleOptimizer(
         module_relation=analyzer.module_relation,
-        header_relation=analyzer.header_relation,
         module_relation_count=module_counts,
-        header_relation_count=header_counts,
-        merge_count=args.merge_count
+        merge_count=args.min_merge  # Default, but will be overridden by range
     )
     
+    # Calculate damages across all merge counts
+    print("Calculating module merge damages across all merge counts...")
+    optimizer.calculate_all_module_damages(merge_count_range=(args.min_merge, args.max_merge), candidate_count=args.candidate_count)
+    
     # Print statistics
-    stats = optimizer.get_merge_statistics(args.skip_headers)
-    print("=" * 80)
+    stats = optimizer.get_merge_statistics()
+    print("\n" + "=" * 80)
     print("ANALYSIS STATISTICS")
     print("=" * 80)
     print(f"  Modules analyzed: {stats['modules_analyzed']}")
-    print(f"  Headers analyzed: {stats['headers_analyzed']}")
-    print(f"  Total module combinations to evaluate: {stats['total_module_combinations']}")
-    print(f"  Total header combinations to evaluate: {stats['total_header_combinations']}")
+    print(f"  Merge count range: {args.min_merge} to {args.max_merge}")
+    print(f"  Total merge strategies evaluated: {stats['total_module_combinations']}")
     print("=" * 80)
     print()
     
-    # Calculate and print module merge recommendations
-    print("Calculating module merge damages...")
+    # Print recommendations
     optimizer.print_module_merge_recommendations(args.top_n)
     
     # Export to markdown
-    print(f"\nExporting results to markdown file...")
-    output_path = optimizer.export_module_merge_to_markdown(f"{args.merge_count}_{args.output}", args.top_n)
-    print(f"✓ Results saved to: {output_path}\n")
-    
-    # Calculate and print header merge recommendations
-    if not args.skip_headers:
-        print("\nCalculating header merge damages (this may take a while)...")
-        optimizer.print_header_merge_recommendations(args.top_n)
-    else:
-        print("Skipping header merge analysis (--skip-headers flag set)")
+    print("\nExporting results to markdown file...")
+    output_path = optimizer.export_module_merge_to_markdown(f"multi_{args.output}", args.top_n)
+    print(f"Results saved to: {output_path}\n")
 
 
 # Example usage
