@@ -49,6 +49,12 @@ All features extract information from mailing list archives using RAG queries an
 
 ### 1~3. Discussion Summaries (Temporal)
 
+**Proposed Problem**:
+
+> 1. Summary of discussions for the last 7 days.
+> 2. Summary of discussions since last release, or for a version on a selected version.
+> 3. Latest: Summary of discussions in previous release - may be redundant.
+
 **Purpose**: Provide current and historical view of library discussions
 
 **Three Views**:
@@ -96,6 +102,10 @@ extract participants and status, highlight critical issues. Output as JSON.
 
 ### 4. Architectural Decisions
 
+**Proposed Problem**:
+
+> Summary of significant architectural decisions made, implemented, and justifications for those changes, since the library was created or some other timeframe.
+
 **Purpose**: Document design decisions and rationale
 
 **Step 1 - RAG Retrieval**:
@@ -138,6 +148,10 @@ Processing:
 
 ### 5. Deprecations and Removals
 
+**Proposed Problem**:
+
+> Latest: Deprecations and removals that were agreed upon since last release.
+
 **Purpose**: Track breaking changes to help users plan upgrades
 
 **Step 1 - RAG Retrieval**:
@@ -168,6 +182,10 @@ Group by deprecated feature. For each: extract what/why/replacement/timeline/mig
 ---
 
 ### 6. Future Roadmap
+
+**Proposed Problem**:
+
+> Latest: Future road map discussions/decisions.
 
 **Purpose**: Surface planned features and strategic direction
 
@@ -202,6 +220,10 @@ Identify contributor opportunities. Output roadmap grouped by status.
 
 ### 7. Maintainer History
 
+**Proposed Problem**:
+
+> Maintainer change history/updates since library creation and/or some other timeframe.
+
 **Purpose**: Document leadership transitions
 
 **Step 1 - RAG Retrieval**:
@@ -234,6 +256,10 @@ with library creation, all changes, current maintainer(s), succession planning.
 ---
 
 ### 8. Security Issues
+
+**Proposed Problem**:
+
+> Summary of security related discussions that resulted in changes (timeframe?) - may be a useful justification for upgrading.
 
 **Purpose**: Transparent security history for risk assessment
 
@@ -268,6 +294,10 @@ Calculate days to fix. Link sources. FLAG if not yet patched.
 ---
 
 ### 9. Migration Guides
+
+**Proposed Problem**:
+
+> Library specific upgrade migration processes/walkthroughs? Generated info may be too vague/hallucinated, we should probably loop library developers into this before publication?
 
 **Purpose**: Practical version-to-version upgrade guides
 
@@ -304,6 +334,10 @@ Mark inferred info with ⚠️. Link every source. Output with confidence scores
 
 ### 10. Review Process Links
 
+**Proposed Problem**:
+
+> Provide links to related threads of the review process.
+
 **Purpose**: Connect to formal library review discussions
 
 **Step 1 - RAG Retrieval**:
@@ -335,6 +369,10 @@ strengths/concerns/reviewer count. Extract participation stats. Output categoriz
 
 ### Source Linking (Cross-Cutting)
 
+**Proposed Problem**:
+
+> Add links to relevant threads/messages for above items.
+
 **Purpose**: Ensure transparency and verifiability
 
 **Implementation**: Applied to ALL features above
@@ -351,6 +389,13 @@ strengths/concerns/reviewer count. Extract participation stats. Output categoriz
 ---
 
 ## Organization Features (Standard Website Content)
+
+**Proposed Problem**:
+
+> 1. Boost history, leadership changes.
+> 2. Upcoming events.
+> 3. Ongoing Funding discussions.
+> 4. Index of libraries, mark accepted or...
 
 **Note**: These are standard website pages using official C++ Alliance data. No AI/RAG needed.
 
