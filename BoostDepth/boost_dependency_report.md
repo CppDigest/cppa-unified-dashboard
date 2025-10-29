@@ -1,6 +1,6 @@
 # Boost Dependency Analysis Report
 
-**Generated:** 2025-10-22 02:18:11
+**Generated:** 2025-10-24 14:48:32
 
 ## Overall Statistics
 
@@ -128,51 +128,51 @@
 
 | Rank | Header | Primary Dependencies | All Dependencies |Primary Dependents | All Dependents | 
 |------|--------|-------------------|-----------------|-------------------|------------------|
-| 1 | boost/config.hpp | 0 | 0 | 2145 | 4690 |
-| 2 | boost/detail/workaround.hpp | 0 | 0 | 276 | 1775 |
-| 3 | boost/config/workaround.hpp | 0 | 0 | 99 | 1438 |
-| 4 | boost/assert.hpp | 1 | 1 | 792 | 1247 |
-| 5 | boost/static_assert.hpp | 2 | 2 | 327 | 1131 |
-| 6 | boost/preprocessor/cat.hpp | 0 | 0 | 324 | 1019 |
-| 7 | boost/cstdint.hpp | 0 | 0 | 165 | 903 |
-| 8 | boost/type_traits/is_same.hpp | 0 | 0 | 325 | 804 |
-| 9 | boost/mpl/if.hpp | 0 | 0 | 331 | 674 |
-| 10 | boost/mpl/bool.hpp | 0 | 0 | 422 | 614 |
-| 11 | boost/assert/source_location.hpp | 2 | 2 | 13 | 586 |
-| 12 | boost/core/enable_if.hpp | 1 | 1 | 127 | 554 |
-| 13 | boost/throw_exception.hpp | 3 | 4 | 329 | 553 |
-| 14 | boost/type_traits/integral_constant.hpp | 2 | 2 | 53 | 506 |
-| 15 | boost/preprocessor/repetition/enum_params.hpp | 0 | 0 | 172 | 489 |
-| 16 | boost/mpl/eval_if.hpp | 0 | 0 | 184 | 423 |
-| 17 | boost/type_traits/remove_reference.hpp | 2 | 2 | 166 | 373 |
-| 18 | boost/preprocessor/repetition/enum_trailing_params.hpp | 0 | 0 | 56 | 366 |
-| 19 | boost/mp11/utility.hpp | 0 | 0 | 54 | 338 |
-| 20 | boost/preprocessor/inc.hpp | 0 | 0 | 39 | 329 |
+| 1 | boost/geometry.hpp | 1 | 2445 | 0 | 0 |
+| 2 | boost/geometry/geometry.hpp | 92 | 2444 | 1 | 1 |
+| 3 | boost/geometry/algorithms/buffer.hpp | 2 | 2225 | 1 | 2 |
+| 4 | boost/geometry/algorithms/detail/buffer/implementation.hpp | 15 | 2224 | 1 | 3 |
+| 5 | boost/geometry/algorithms/detail/buffer/buffer_inserter.hpp | 25 | 2217 | 1 | 4 |
+| 6 | boost/geometry/algorithms/detail/buffer/buffered_piece_collection.hpp | 39 | 2208 | 1 | 5 |
+| 7 | boost/geometry/algorithms/closest_points.hpp | 2 | 2204 | 1 | 2 |
+| 8 | boost/geometry/algorithms/detail/closest_points/implementation.hpp | 9 | 2202 | 1 | 3 |
+| 9 | boost/geometry/algorithms/detail/buffer/piece_border.hpp | 13 | 2200 | 1 | 6 |
+| 10 | boost/geometry/algorithms/detail/buffer/turn_in_piece_visitor.hpp | 9 | 2189 | 1 | 6 |
+| 11 | boost/geometry/index/detail/algorithms/minmaxdist.hpp | 6 | 2189 | 0 | 0 |
+| 12 | boost/geometry/algorithms/comparable_distance.hpp | 2 | 2186 | 4 | 9 |
+| 13 | boost/geometry/algorithms/distance.hpp | 2 | 2185 | 2 | 3 |
+| 14 | boost/geometry/algorithms/detail/comparable_distance/implementation.hpp | 1 | 2185 | 1 | 10 |
+| 15 | boost/geometry/algorithms/is_valid.hpp | 2 | 2184 | 1 | 2 |
+| 16 | boost/geometry/algorithms/detail/distance/implementation.hpp | 14 | 2184 | 3 | 14 |
+| 17 | boost/geometry/algorithms/detail/is_valid/implementation.hpp | 10 | 2180 | 1 | 3 |
+| 18 | boost/geometry/algorithms/is_simple.hpp | 2 | 2168 | 1 | 2 |
+| 19 | boost/geometry/algorithms/detail/is_simple/implementation.hpp | 7 | 2166 | 1 | 3 |
+| 20 | boost/geometry/algorithms/detail/is_valid/multipolygon.hpp | 22 | 2163 | 1 | 4 |
 
 ## Top Headers by All Dependents
 
 | Rank | Header | Primary Dependencies | All Dependencies |Primary Dependents | All Dependents | 
 |------|--------|-------------------|-----------------|-------------------|------------------|
-| 1 | boost/graph/distributed/strong_components.hpp | 12 | 130 | 0 | 0 |
-| 2 | boost/graph/distributed/adjacency_list.hpp | 20 | 122 | 0 | 0 |
-| 3 | boost/graph/distributed/betweenness_centrality.hpp | 12 | 118 | 0 | 0 |
-| 4 | boost/graph/distributed/compressed_sparse_row_graph.hpp | 6 | 113 | 0 | 0 |
-| 5 | boost/log/expressions/formatters/char_decorator.hpp | 20 | 113 | 0 | 0 |
-| 6 | boost/compute/detail/parameter_cache.hpp | 6 | 104 | 0 | 0 |
-| 7 | boost/log/expressions/formatters/max_size_decorator.hpp | 14 | 102 | 0 | 0 |
-| 8 | libs/graph/src/graphml.cpp | 5 | 97 | 0 | 0 |
-| 9 | boost/geometry/index/detail/rtree/node/variant_dynamic.hpp | 6 | 96 | 0 | 0 |
-| 10 | libs/log/src/setup/init_from_settings.cpp | 14 | 94 | 0 | 0 |
-| 11 | boost/graph/distributed/graphviz.hpp | 7 | 90 | 0 | 0 |
-| 12 | boost/log/expressions/formatters/if.hpp | 9 | 89 | 0 | 0 |
-| 13 | boost/graph/distributed/connected_components.hpp | 12 | 88 | 0 | 0 |
-| 14 | boost/log/detail/attr_output_terminal.hpp | 9 | 88 | 0 | 0 |
-| 15 | boost/log/expressions/formatters/named_scope.hpp | 12 | 86 | 0 | 0 |
-| 16 | boost/spirit/home/lex/argument_phoenix.hpp | 7 | 84 | 0 | 0 |
-| 17 | boost/log/utility/setup/settings.hpp | 9 | 82 | 0 | 0 |
-| 18 | boost/geometry/srs/projections/dpar.hpp | 6 | 82 | 0 | 0 |
-| 19 | boost/log/expressions/keyword.hpp | 8 | 81 | 0 | 0 |
-| 20 | boost/spirit/home/support/context.hpp | 11 | 81 | 0 | 0 |
+| 1 | boost/config/helper_macros.hpp | 0 | 0 | 3 | 10687 |
+| 2 | boost/config/detail/cxx_composite.hpp | 0 | 0 | 1 | 10662 |
+| 3 | boost/config/detail/suffix.hpp | 2 | 2 | 1 | 10661 |
+| 4 | boost/config.hpp | 1 | 3 | 1722 | 10660 |
+| 5 | boost/config/workaround.hpp | 1 | 4 | 90 | 9170 |
+| 6 | boost/detail/workaround.hpp | 1 | 5 | 245 | 8207 |
+| 7 | boost/type_traits/integral_constant.hpp | 2 | 6 | 108 | 6761 |
+| 8 | boost/static_assert.hpp | 2 | 6 | 315 | 6319 |
+| 9 | boost/type_traits/is_same.hpp | 1 | 7 | 332 | 6105 |
+| 10 | boost/mpl/aux_/config/workaround.hpp | 1 | 6 | 63 | 6077 |
+| 11 | boost/mpl/aux_/config/msvc.hpp | 1 | 4 | 31 | 6042 |
+| 12 | boost/mpl/aux_/config/gcc.hpp | 0 | 0 | 11 | 6033 |
+| 13 | boost/version.hpp | 0 | 0 | 36 | 5988 |
+| 14 | boost/mpl/aux_/config/intel.hpp | 1 | 4 | 2 | 5883 |
+| 15 | boost/mpl/aux_/config/adl.hpp | 4 | 10 | 1 | 5881 |
+| 16 | boost/mpl/aux_/adl_barrier.hpp | 3 | 11 | 11 | 5880 |
+| 17 | boost/mpl/aux_/config/nttp.hpp | 2 | 8 | 2 | 5811 |
+| 18 | boost/mpl/aux_/nttp_decl.hpp | 1 | 9 | 18 | 5810 |
+| 19 | boost/cstdint.hpp | 1 | 4 | 139 | 5739 |
+| 20 | boost/type_traits/remove_reference.hpp | 2 | 6 | 179 | 5710 |
 
 ## Module Dependency Distribution
 
