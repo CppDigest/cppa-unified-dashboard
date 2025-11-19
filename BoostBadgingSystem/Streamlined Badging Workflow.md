@@ -89,13 +89,13 @@ sequenceDiagram
      - Admin signs mint or batch mint transaction (supplying recipient wallet if available, token IDs, and metadata URI).  
      - Frontend sends the signed transaction to the token contract.  
      - Token contract (with built-in vault functionality) validates call and mints tokens:
-       - **If wallet provided**: Routes tokens directly to user wallets.
-       - **If no wallet provided**: Stores tokens in the contract's internal storage (vault functionality).
+       - If wallet provided: Routes tokens directly to user wallets.
+       - If no wallet provided: Stores tokens in the contract's internal storage (vault functionality).
      - Token contract emits confirmation event with transaction signatures to the database.
      - Post-confirmation hook triggers notification payload to mailing service (indicating whether badge was sent to wallet or stored in contract).
      - Mailing service sends email to user:
-       - **Direct wallet recipients** – badge details and blockchain links.
-       - **Contract-stored recipients** – claim instructions, emphasizing security posture.
+       - Direct wallet recipients – badge details and blockchain links.
+       - Contract-stored recipients – claim instructions, emphasizing security posture.
    - **Database-only badges**  
      - Application marks the issuance as "database-only" and stores the badge entirely in the database (no wallet required).  
      - Database generates database-only badge notification and triggers mailing service.
@@ -112,19 +112,233 @@ sequenceDiagram
    - Frontend sends the claim selection (URI, token ID, wallet) to the claim service.
    - Claim service updates the database with claim intent details (URI, token ID, wallet, timestamp).
    - Claim service sends claim request payload (URI, token ID, wallet) to admin webhook.
-   - Admin receives webhook notification and logs into the admin frontend.
+   - Admin receives webhook notification.
    - Admin initiates transfer via frontend with admin wallet. Frontend requests transaction signing (from contract to wallet).
    - Admin signs transfer transaction.
    - Frontend sends the signed transfer transaction to the token contract.
    - Token contract delivers the claimed badge to the user wallet.
    - System records claim completion in the database (transaction signature, wallet, timestamp).
-   - Mailing service sends claim confirmation email to the claimant.
-   - **Database-only badges skip this section entirely** – users already "own" the badge in the portal and can view/download without wallet submission or admin transfer.
+   - Mailing service sends claim confirmation email to the user.
+   - Database-only badges skip this section entirely – users already "own" the badge in the portal and can view/download without wallet submission or admin transfer.
+
+---
+
+## Database Schema
+
+```mermaid
+erDiagram
+    users {
+        UUID id PK
+        VARCHAR email UK
+        VARCHAR wallet_address
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    badge_categories {
+        UUID id PK
+        VARCHAR name
+        TEXT description
+        TIMESTAMP created_at
+    }
+
+    badges {
+        UUID id PK
+        UUID category_id FK
+        VARCHAR name
+        TEXT description
+        BYTEA image
+        INTEGER badge_type
+        INTEGER contract_token_id
+        TEXT metadata_uri
+        TIMESTAMP created_at
+    }
+
+    badge_issuances {
+        UUID id PK
+        UUID badge_id FK
+        UUID user_id FK
+        UUID issued_by FK
+        TEXT metadata_uri
+        INTEGER status
+        VARCHAR wallet_address
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    badge_notifications {
+        UUID id PK
+        UUID issuance_id FK
+        BOOLEAN is_read
+        TIMESTAMP appeared_at
+    }
+
+    claim_intents {
+        UUID id PK
+        UUID issuance_id FK
+        INTEGER status
+        VARCHAR wallet_address
+        TIMESTAMP submitted_at
+        TIMESTAMP admin_response_at
+    }
+
+    badge_logs {
+        UUID id PK
+        INTEGER action_type
+        VARCHAR entity_type
+        UUID badge_id FK
+        UUID category_id FK
+        UUID issuance_id FK
+        UUID user_id FK
+        UUID claim_id FK
+        UUID performed_by FK
+        VARCHAR blockchain_tx_signature
+        VARCHAR wallet_address
+        TEXT old_value
+        TEXT new_value
+        INTEGER status
+        TEXT error_message
+        TIMESTAMP created_at
+    }
+
+    email_logs {
+        UUID id PK
+        UUID issuance_id FK
+        INTEGER notification_type
+        VARCHAR mail_provider_id
+        VARCHAR status
+        JSONB metadata
+        TIMESTAMP created_at
+    }
+
+    %% Relationships
+    badge_categories ||--o{ badges : "has"
+    badges ||--o{ badge_issuances : "issued_as"
+    users ||--o{ badge_issuances : "receives"
+    users ||--o{ badge_issuances : "issues"
+    badge_issuances ||--o{ badge_notifications : "triggers"
+    badge_issuances ||--o{ claim_intents : "claimed_via"
+    badge_issuances ||--o{ email_logs : "notified_via"
+    users ||--o{ badge_logs : "performed_by"
+    badges ||--o{ badge_logs : "logged"
+    badge_categories ||--o{ badge_logs : "logged"
+    badge_issuances ||--o{ badge_logs : "logged"
+    users ||--o{ badge_logs : "logged"
+    claim_intents ||--o{ badge_logs : "logged"
+```
+
+---
 
 5. **Auditing & Reporting**  
    - Database maintains full lifecycle history (metadata hash, issuance, claim selections, completion).
-   - Dashboard surfaces mint/claim status, IPFS hashes, and notification delivery logs.  
-   - Scheduled jobs reconcile on-chain state with database records.
+   - Dashboard surfaces mint/claim status, IPFS hashes, and notification delivery logs.
+
+---
+
+## Appendix
+
+The following appendix provides illustrative sample data for every column in the database schema. These examples demonstrate the expected data types, formats, and values for each table in the system, serving as a reference for implementation and testing.
+
+---
+
+## Appendix A: Database Schema Sample Data
+
+Illustrative values for every column in the schema.
+
+### `users`
+| Column | Sample |
+| --- | --- |
+| `id` | `8f7c7d9b-1c0d-49f1-a29c-03d0c4c2c111` |
+| `email` | `alice@example.com` |
+| `wallet_address` | `0x32ffw32....3f2` |
+| `created_at` | `2025-02-01T10:12:55Z` |
+| `updated_at` | `2025-02-10T08:00:00Z` |
+
+
+### `badge_categories`
+| Column | Sample |
+| --- | --- |
+| `id` | `2fcb0271-6316-4c45-9375-8fca4c98840c` |
+| `name` | `Contribution Badges` |
+| `description` | `GitHub activity milestones` |
+| `created_at` | `2025-02-01T09:00:00Z` |
+
+### `badges`
+| Column | Sample |
+| --- | --- |
+| `id` | `0b1222b9-fd3f-4c4c-8e20-04a0670a74c2` |
+| `category_id` | `2fcb0271-6316-4c45-9375-8fca4c98840c` |
+| `name` | `SolDev Mentor` |
+| `description` | `Mentored five Solana-focused Boost contributors` |
+| `image` | `image data (this field may be blob, so the image data can be saved in database.)` |
+| `badge_type` | `1 (database-only:0, blockchain:1)` |
+| `contract_token_id` | `0 (database-only:null, blockchain:token_id)` |
+| `metadata_uri` | `ipfs://Qm...abc/23fwefsdcwcf.json` |
+| `created_at` | `2025-02-03T12:05:10Z` |
+
+### `badge_issuances`
+| Column | Sample |
+| --- | --- |
+| `id` | `3bf34c2a-3bb0-47cb-9336-6a9c8f4ecb5a` |
+| `badge_id` | `0b1222b9-fd3f-4c4c-8e20-04a0670a74c2` |
+| `user_id` | `8f7c7d9b-1c0d-49f1-a29c-03d0c4c2c111` |
+| `metadata_uri` | `ipfs://Qm...abc/sw323edwswef42.json (this value is for only this issuance and updated from IPFS after issuance)` |
+| `status` | `0 (pending:0, issued:1, claimed:2 (If the badge is based on database-only, then can have only 0 or 2 because of 'issued' means 'claimed'.)` |
+| `wallet_address` | `0x32ffw32....3f2` |
+| `issued_by` | `4783355a-4095-4fe8-a601-7d61d272af24` |
+| `created_at` | `2025-02-05T16:20:00Z` |
+| `updated_at` | `2025-02-05T16:20:00Z` |
+
+
+### `badge_notifications`
+| Column | Sample |
+| --- | --- |
+| `id` | `a8bcb904-6de7-4c49-96f9-9b0c165f08f1` |
+| `issuance_id` | `3bf34c2a-3bb0-47cb-9336-6a9c8f4ecb5a` |
+| `is_read` | `false` |
+| `appeared_at` | `2025-02-05T16:25:00Z` |
+
+### `claim_intents`
+| Column | Sample |
+| --- | --- |
+| `id` | `6d42dc09-1a7f-4cd5-8f24-71e2fc7df7c8` |
+| `issuance_id` | `3bf34c2a-3bb0-47cb-9336-6a9c8f4ecb5a` |
+| `status` | `0(pending:0, transfered:1)` |
+| `wallet_address` | `0x32ffw32....3f2` |
+| `submitted_at` | `2025-02-06T09:30:00Z` |
+| `admin_response_at` | `null` |
+
+### `badge_logs`
+| Column | Sample |
+| --- | --- |
+| `id` | `3232ff1-f23f-32f23-23f2f-23f23f23f23` |
+| `action_type` | `0 (badge_created:0, badge_category_created:1, badge_issued:2, badge_claimed:3, wallet_updated:4, badge_issued:5, badge_claimed:6)` |
+| `entity_type` | `issuance (badge, badge_category, issuance, user, claim_intent)` |
+| `badge_id` | `0b1222b9-fd3f-4c4c-8e20-04a0670a74c2 (nullable, for badge-related operations)` |
+| `category_id` | `2fcb0271-6316-4c45-9375-8fca4c98840c (nullable, for category-related operations)` |
+| `issuance_id` | `3bf34c2a-3bb0-47cb-9336-6a9c8f4ecb5a (nullable, for issuance-related operations)` |
+| `user_id` | `8f7c7d9b-1c0d-49f1-a29c-03d0c4c2c111 (nullable, for user-related operations)` |
+| `claim_id` | `6d42dc09-1a7f-4cd5-8f24-71e2fc7df7c8 (nullable, for claim-related operations)` |
+| `performed_by` | `4783355a-4095-4fe8-a601-7d61d272af24 (admin/user who performed the action)` |
+| `blockchain_tx_signature` | `5HgZQ...sd8 (nullable, only for blockchain operations)` |
+| `wallet_address` | `0xef23rg23f...f23f (nullable, for wallet-related operations)` |
+| `old_value` | `null (or previous value for updates, e.g., old wallet address)` |
+| `new_value` | `null (or new value for updates, e.g., new wallet address)` |
+| `status` | `0 (success:0, failed:1, pending:2)` |
+| `error_message` | `null (or error details if status is failed)` |
+| `created_at` | `2025-02-05T16:21:00Z` |
+
+
+### `email_logs`
+| Column | Sample |
+| --- | --- |
+| `id` | `ddf95ffa-3236-4413-be0a-09964fa7150d` |
+| `issuance_id` | `3bf34c2a-3bb0-47cb-9336-6a9c8f4ecb5a` |
+| `notification_type` | `0 (badging is issued and claimed(means that is sent to your wallet in case of blockchain-based badging, in other case only issued) : 0, only issued (in case of only blockchain-based badging) : 1`) |
+| `mail_provider_id` | `mailman-msg-49811` |
+| `status` | `sent` |
+| `metadata` | `{"template":"contract-claim","attempt":1}` |
+| `created_at` | `2025-02-05T16:26:00Z` |
 
 ---
 
