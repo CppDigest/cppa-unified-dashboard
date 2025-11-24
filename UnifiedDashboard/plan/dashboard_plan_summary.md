@@ -1,23 +1,14 @@
 # Boost Unified Dashboard Plan Summary
 
-## Quick Overview
+## Why Chart.js
 
-Boost Unified Dashboard is a real-time admin dashboard displaying metrics across Boost website, GitHub, WG21 papers, Slack, and mailing lists using Chart.js with AJAX polling for updates.
+Chart.js is easy to implement and provides a straightforward API for creating various chart types with minimal configuration.
 
-## Why We Use Chart.js
+Existing Django admin chart packages are difficult to customize to match our specific requirements. They offer limited flexibility in chart types, layouts, and styling options, making it hard to integrate custom business logic and data aggregation needs.
 
-We chose to build a custom dashboard solution using Chart.js instead of using existing Django admin chart packages for the following reasons:
+Django SQL chart packages require manual SQL queries which is not maintainable. Writing raw SQL for each chart increases complexity and reduces code reusability. It becomes difficult to maintain and update as requirements change, and lacks the flexibility of Django ORM for complex data relationships.
 
-- Easy to Implement  
-  Chart.js is easy to implement and provides a straightforward API for creating various chart types with minimal configuration.
-
-- Customization Limitations  
-  Existing Django admin chart packages are difficult to customize to match our specific requirements. They offer limited flexibility in chart types, layouts, and styling options, making it hard to integrate custom business logic and data aggregation needs.
-
-- SQL-Based Chart Packages  
-  Django SQL chart packages require manual SQL queries which is not maintainable. Writing raw SQL for each chart increases complexity and reduces code reusability. It becomes difficult to maintain and update as requirements change, and lacks the flexibility of Django ORM for complex data relationships.
-
-## Dashboard Sections
+## Sections
 
 1. Time Period Filters
 
@@ -51,7 +42,7 @@ We chose to build a custom dashboard solution using Chart.js instead of using ex
 
    Track mailing list engagement with popular topics, and top contributors. Displayed as bar chart for messages by date (time series), tables for top 3 topics and top commentors.
 
-## Technical Implementation
+## Implementation
 
 1. Real-Time Updates
 
@@ -65,13 +56,38 @@ We chose to build a custom dashboard solution using Chart.js instead of using ex
 
    Build efficient Django views with optimized database queries using PostgreSQL. Implement caching layer to reduce database load and improve response times. Use Celery tasks for asynchronous data collection from external sources (GitHub, Slack, mailing lists, etc.) to keep the dashboard data up-to-date without blocking the main application. Dashboard data is updated daily using Celery tasks that collect data from external sources. Pre-aggregated data in combined tables provides better performance than real-time queries. Combining related tables improves query performance and reduces database load during dashboard rendering.
 
-## Implementation Timeline (3 weeks)
+## Test
 
-- Week 1: Foundation & Backend  
-  Model design and creation, database migrations, basic dashboard structure, data aggregation queries, API/views for dashboard data, and caching implementation.
+1. Unit Tests
 
-- Week 2: Frontend & Real-Time  
-  Chart.js integration, dashboard layout, visualizations, AJAX polling mechanism, and cache management.
+   Write unit tests for each database query function that retrieves data for dashboard sections to verify correct data retrieval and filtering.
 
-- Week 3: Testing & Polish  
-  Performance optimization, testing, bug fixes, and documentation.
+   - Test time period filter calculations for Today, One Week, One Month, Three Months, One Year, and From Last Release date ranges.
+   - Test Total Activities Overview queries for aggregating commit numbers, GitHub issues/PRs, mailing list messages, Slack messages, WG21 papers, and website accounts over time.
+   - Test Account Numbers queries for retrieving total registered accounts per platform (GitHub, Slack, mailing list, website) with trend calculations.
+   - Test GitHub Commits queries for commit counts by date, top 5 committers aggregation, and top 5 libraries aggregation.
+   - Test GitHub Issues & PRs queries for created vs solved issues, created vs merged PRs, and comments/reviews aggregation over time.
+   - Test WG21 Papers queries for topic distribution aggregation and top 3 topics retrieval.
+   - Test Slack queries for message counts by date, top 3 topics/channels aggregation, and top 5 message senders aggregation.
+   - Test Mailing List queries for message counts by date, top 3 topics aggregation, and top commentors aggregation.
+   - Test edge cases including empty datasets, invalid date ranges, missing external data sources, and null value handling.
+
+2. Integration Tests
+
+   Test complete data flow from database queries through view processing to JSON response generation for all AJAX endpoints.
+
+3. Q/A Testing
+
+   Perform quality assurance testing for frontend including Chart.js rendering, responsive design, interactive features, and cross-browser compatibility.
+
+4. Performance Tests
+
+   Measure dashboard load times and query performance with different data volumes to ensure response times meet requirements.
+
+5. End-to-End Tests
+
+   Test complete user workflows including dashboard access, time period selection, data viewing, and real-time updates.
+
+## Timeline (3 weeks)
+
+![Boost Unified Dashboard](dashboard.png)
