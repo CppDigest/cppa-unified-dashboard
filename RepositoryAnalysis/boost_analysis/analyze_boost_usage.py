@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import os
 import sqlite3
 import re
 from datetime import datetime, timezone
@@ -12,6 +13,11 @@ DATA_DIR = BASE_DIR / "data"
 STATS_CSV = BASE_DIR / "boost_usage_statistics.csv"
 REPORT_MD = BASE_DIR / "boost_analysis" / "Booost_Usage_Report.md"
 DB_PATH = Path(__file__).resolve().parent / "boost_usage.db"
+
+# Path to Boost source code (can be set via BOOST_SOURCE_PATH environment variable)
+# Should point to the directory containing the boost/ folder (e.g., /path/to/boost_1_89_0/boost)
+BOOST_SOURCE_PATH_STR = os.getenv("BOOST_SOURCE_PATH", "D:/boost_1_89_0/boost")
+BOOST_SOURCE_PATH = Path(BOOST_SOURCE_PATH_STR) if BOOST_SOURCE_PATH_STR else None
 
 BOOST_INCLUDE_RE = re.compile(r'#include\s*[<"]\s*(boost/[^>"]+)[>"]')
 
@@ -58,12 +64,6 @@ def extract_boost_includes(content: str) -> List[str]:
             continue
         headers.append(header)
     return headers
-
-
-def derive_library_name(header: str) -> str:
-    tail = header[len("boost/") :]
-    segment = tail.split("/", 1)[0]
-    return segment.split(".", 1)[0].lower()
 
 
 def extract_version_from_path(path: str) -> Optional[str]:
@@ -145,21 +145,6 @@ def collect_usage_data():
                     if should_exclude_usage(file_path, contains_vendored):
                         excluded_count += 1
                         continue
-                    
-                    # Track header metadata
-                    library_name = derive_library_name(header)
-                    h_meta = header_meta.setdefault(
-                        header,
-                        {
-                            "library_name": library_name,
-                            "max_commit": last_commit,
-                        },
-                    )
-                    if last_commit is not None:
-                        h_prev = h_meta.get("max_commit")
-                        if h_prev is None or last_commit > h_prev:
-                            h_meta["max_commit"] = last_commit
-                    
                     # Store usage record (without boost_version - it's in repository table)
                     usage_records.append({
                         "repo_name": repo,
@@ -181,39 +166,45 @@ def collect_usage_data():
 
 
 def build_database(data):
-    """Build the database with updated schema."""
+    """
+    Build the boost_usage table by referencing existing boost_library and boost_header tables.
+    
+    This function does NOT modify boost_library or boost_header tables. It only:
+    1. Creates repository and boost_usage tables if they don't exist
+    2. Inserts repository records
+    3. Inserts boost_usage records by matching headers via full_header_name
+    """
     usage_records = data["usage_records"]
     repo_info = data["repo_info"]
-    header_meta = data["header_meta"]
-
-    if DB_PATH.exists():
-        DB_PATH.unlink()
 
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA foreign_keys = ON;")
+    
+    # Create tables if they don't exist (but don't populate boost_library/boost_header)
     conn.executescript(
         """
-        CREATE TABLE boost_library (
+        CREATE TABLE IF NOT EXISTS boost_library (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE
         );
 
-        CREATE TABLE boost_header (
+        CREATE TABLE IF NOT EXISTS boost_header (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             library_id INTEGER NOT NULL,
             header_name TEXT NOT NULL UNIQUE,
+            full_header_name TEXT,
             max_commit_ts TEXT,
             FOREIGN KEY (library_id) REFERENCES boost_library(id)
         );
 
-        CREATE TABLE repository (
+        CREATE TABLE IF NOT EXISTS repository (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             repo_name TEXT NOT NULL UNIQUE,
             affect_from_boost INTEGER NOT NULL,
             boost_version TEXT
         );
 
-        CREATE TABLE boost_usage (
+        CREATE TABLE IF NOT EXISTS boost_usage (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             repository_id INTEGER NOT NULL,
             file_path TEXT NOT NULL,
@@ -226,51 +217,67 @@ def build_database(data):
         """
     )
 
-    library_ids: Dict[str, int] = {}
-    header_ids: Dict[str, int] = {}
     repo_ids: Dict[str, int] = {}
+    header_id_cache: Dict[str, Optional[int]] = {}  # Cache for full_header_name -> header_id lookups
 
     with conn:
-        # Insert libraries and headers
-        for header_name, meta in sorted(header_meta.items()):
-            library = meta["library_name"]
-            if library not in library_ids:
-                cur = conn.execute(
-                    "INSERT INTO boost_library (name) VALUES (?)",
-                    (library,),
-                )
-                library_ids[library] = cur.lastrowid
-            cur = conn.execute(
-                "INSERT INTO boost_header (library_id, header_name, max_commit_ts) "
-                "VALUES (?, ?, ?)",
-                (
-                    library_ids[library],
-                    header_name,
-                    isoformat(meta.get("max_commit")),
-                ),
-            )
-            header_ids[header_name] = cur.lastrowid
+        # Check if boost_header table has data
+        header_count = conn.execute("SELECT COUNT(*) FROM boost_header").fetchone()[0]
+        if header_count == 0:
+            print("Warning: boost_header table is empty. Please run populate_boost_headers.py first.")
+            conn.close()
+            return 0
 
-        # Insert repositories
-        repo_rows = []
+        # Insert or get repositories
         for repo_name, info in sorted(repo_info.items()):
-            affect_from_boost = 1 if not info["contains_vendored_boost"] else 0
-            boost_version = info.get("boost_version")
-            repo_rows.append((repo_name, affect_from_boost, boost_version))
-        conn.executemany(
-            "INSERT INTO repository (repo_name, affect_from_boost, boost_version) VALUES (?, ?, ?)",
-            repo_rows,
-        )
-        for repo_name, row_id in conn.execute("SELECT repo_name, id FROM repository"):
-            repo_ids[repo_name] = row_id
+            # Check if repository already exists
+            existing = conn.execute(
+                "SELECT id FROM repository WHERE repo_name = ?",
+                (repo_name,),
+            ).fetchone()
+            
+            if existing:
+                repo_ids[repo_name] = existing[0]
+            else:
+                affect_from_boost = 1 if not info["contains_vendored_boost"] else 0
+                boost_version = info.get("boost_version")
+                cur = conn.execute(
+                    "INSERT INTO repository (repo_name, affect_from_boost, boost_version) VALUES (?, ?, ?)",
+                    (repo_name, affect_from_boost, boost_version),
+                )
+                repo_ids[repo_name] = cur.lastrowid
+
+        # Build header_id lookup cache by full_header_name
+        for row in conn.execute("SELECT id, full_header_name FROM boost_header WHERE full_header_name IS NOT NULL"):
+            header_id, full_header_name = row
+            if full_header_name:
+                header_id_cache[full_header_name] = header_id
+        
+        # Also cache by header_name for cases where full_header_name is NULL or same as header_name
+        for row in conn.execute("SELECT id, header_name, full_header_name FROM boost_header"):
+            header_id, header_name, full_header_name = row
+            # If full_header_name is NULL or same as header_name, use header_name as key
+            if not full_header_name or full_header_name == header_name:
+                if header_name not in header_id_cache:
+                    header_id_cache[header_name] = header_id
 
         # Insert usage records
         usage_rows = []
+        unmatched_headers = set()
+        
         for record in usage_records:
             repo_id = repo_ids.get(record["repo_name"])
-            header_id = header_ids.get(record["header"])
-            if repo_id is None or header_id is None:
+            if repo_id is None:
                 continue
+            
+            # Look up header_id by full_header_name (the real_header from derive_library_name)
+            header = record["header"]
+            header_id = header_id_cache.get(header)
+            
+            if header_id is None:
+                unmatched_headers.add(header)
+                continue
+            
             usage_rows.append(
                 (
                     repo_id,
@@ -280,6 +287,14 @@ def build_database(data):
                     None,  # excepted_ts - placeholder for future use
                 )
             )
+        
+        if unmatched_headers:
+            print(f"Warning: {len(unmatched_headers)} unique headers not found in boost_header table:")
+            for h in sorted(unmatched_headers)[:10]:  # Show first 10
+                print(f"  - {h}")
+            if len(unmatched_headers) > 10:
+                print(f"  ... and {len(unmatched_headers) - 10} more")
+        
         conn.executemany(
             "INSERT INTO boost_usage (repository_id, file_path, header_id, last_commit_ts, excepted_ts) "
             "VALUES (?, ?, ?, ?, ?)",
@@ -287,7 +302,7 @@ def build_database(data):
         )
 
     conn.close()
-    print(f"SQLite database created at {DB_PATH.relative_to(BASE_DIR)}")
+    print(f"Inserted {len(usage_rows):,} usage records into database.")
     return len(usage_rows)
 
 
@@ -544,12 +559,12 @@ def appendics() -> list(str):
     ]
     
 def main():
-    # print("Step 1: Collecting data from data directory...")
-    # data = collect_usage_data()
+    print("Step 1: Collecting data from data directory...")
+    data = collect_usage_data()
     
-    # print("\nStep 2: Building database...")
-    # usage_count = build_database(data)
-    # print(f"Inserted {usage_count:,} usage records into database.")
+    print("\nStep 2: Building database...")
+    usage_count = build_database(data)
+    print(f"Inserted {usage_count:,} usage records into database.")
     
     print("\nStep 3: Generating statistics...")
     stats = generate_statistics()

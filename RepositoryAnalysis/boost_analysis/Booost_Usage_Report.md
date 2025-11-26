@@ -1,82 +1,82 @@
 # Boost Usage Analysis Report
 
-Generated: 2025-11-26 17:21:43 UTC
+Generated: 2025-11-26 21:58:43 UTC
 
 ## Overview
 
 - **Total Repositories**: 37,693
 - **Repositories Using System Boost**: 34,158
-- **Repositories Using Boost**: 37,024
-- **Total Boost Libraries**: 308
-- **Total Boost Headers**: 15,305
-- **Total Usage Records**: 3,160,402
+- **Repositories Using Boost**: 36,244
+- **Total Boost Libraries**: 150
+- **Total Boost Headers**: 15,172
+- **Total Usage Records**: 3,002,447
 
 **Note on Repository Counts**: "Repositories Using Boost" counts distinct repositories that depend on external/system Boost. This may be less than "Total Repositories" because repositories with vendored Boost bundle their own copy of Boost rather than using external Boost, so their Boost includes are filtered out during processing.
 
 ## Top Boost Libraries by Repository Count
 
-| Library         | Repository Count | Usage Count |
-| --------------- | ---------------- | ----------- |
-| thread          | 14,682           | 146,936     |
-| algorithm       | 14,109           | 159,208     |
-| filesystem      | 13,362           | 165,360     |
-| shared_ptr      | 12,923           | 94,082      |
-| bind            | 12,609           | 79,067      |
-| lexical_cast    | 12,128           | 50,768      |
-| program_options | 11,469           | 45,198      |
-| asio            | 11,059           | 87,193      |
-| date_time       | 10,610           | 52,943      |
-| function        | 9,716            | 33,786      |
-| test            | 9,476            | 270,574     |
-| foreach         | 9,460            | 141,564     |
-| version         | 8,811            | 26,710      |
-| variant         | 8,138            | 26,127      |
-| tuple           | 7,758            | 37,262      |
-| type_traits     | 7,626            | 66,198      |
-| config          | 7,556            | 54,172      |
-| iostreams       | 7,481            | 39,905      |
-| array           | 7,438            | 16,188      |
-| assign          | 6,973            | 71,514      |
+| Library | Repository Count | Usage Count |
+|---------|------------------|-------------|
+| smart_ptr | 15,466 | 176,184 |
+| thread | 14,681 | 146,810 |
+| algorithm | 14,107 | 159,172 |
+| filesystem | 13,312 | 158,729 |
+| bind | 12,633 | 79,357 |
+| lexical_cast | 12,127 | 50,775 |
+| program_options | 11,469 | 45,196 |
+| config | 10,984 | 111,196 |
+| date_time | 10,610 | 52,899 |
+| asio | 10,515 | 79,489 |
+| function | 9,716 | 33,707 |
+| test | 9,475 | 267,893 |
+| foreach | 9,462 | 141,623 |
+| variant | 8,138 | 26,048 |
+| type_traits | 7,796 | 65,747 |
+| tuple | 7,755 | 37,249 |
+| iostreams | 7,481 | 39,899 |
+| array | 7,437 | 16,170 |
+| assign | 6,973 | 71,514 |
+| interprocess | 6,791 | 38,211 |
 
 ## Top Boost Headers by Repository Count
 
-| Header                                    | Repository Count | Usage Count |
-| ----------------------------------------- | ---------------- | ----------- |
-| boost/shared_ptr.hpp                      | 12,922           | 94,079      |
-| boost/bind.hpp                            | 12,518           | 75,975      |
-| boost/algorithm/string.hpp                | 12,482           | 52,930      |
-| boost/filesystem.hpp                      | 12,437           | 90,094      |
-| boost/lexical_cast.hpp                    | 12,123           | 50,582      |
-| boost/thread.hpp                          | 10,986           | 49,006      |
-| boost/asio.hpp                            | 9,891            | 27,879      |
-| boost/function.hpp                        | 9,701            | 31,242      |
-| boost/foreach.hpp                         | 9,460            | 141,563     |
-| boost/thread/mutex.hpp                    | 9,404            | 28,677      |
-| boost/test/unit_test.hpp                  | 8,962            | 231,622     |
-| boost/version.hpp                         | 8,811            | 26,710      |
-| boost/variant.hpp                         | 7,903            | 17,602      |
-| boost/tuple/tuple.hpp                     | 7,703            | 26,313      |
-| boost/date_time/posix_time/posix_time.hpp | 7,614            | 18,696      |
-| boost/array.hpp                           | 7,437            | 16,170      |
-| boost/filesystem/path.hpp                 | 7,314            | 19,900      |
-| boost/config.hpp                          | 7,277            | 45,177      |
-| boost/algorithm/string/predicate.hpp      | 7,212            | 27,745      |
-| boost/algorithm/string/replace.hpp        | 7,099            | 23,281      |
+| Header | Repository Count | Usage Count |
+|--------|------------------|-------------|
+| boost/shared_ptr.hpp | 12,922 | 94,079 |
+| boost/bind.hpp | 12,518 | 75,975 |
+| boost/algorithm/string.hpp | 12,482 | 52,930 |
+| boost/filesystem.hpp | 12,437 | 90,094 |
+| boost/lexical_cast.hpp | 12,123 | 50,582 |
+| boost/thread.hpp | 10,986 | 49,006 |
+| boost/asio.hpp | 9,891 | 27,879 |
+| boost/function.hpp | 9,701 | 31,242 |
+| boost/foreach.hpp | 9,460 | 141,563 |
+| boost/thread/mutex.hpp | 9,404 | 28,677 |
+| boost/test/unit_test.hpp | 8,962 | 231,622 |
+| boost/version.hpp | 8,811 | 26,710 |
+| boost/variant.hpp | 7,903 | 17,602 |
+| boost/tuple/tuple.hpp | 7,703 | 26,313 |
+| boost/date_time/posix_time/posix_time.hpp | 7,614 | 18,696 |
+| boost/array.hpp | 7,437 | 16,170 |
+| boost/filesystem/path.hpp | 7,314 | 19,900 |
+| boost/config.hpp | 7,277 | 45,177 |
+| boost/algorithm/string/predicate.hpp | 7,212 | 27,745 |
+| boost/algorithm/string/replace.hpp | 7,099 | 23,281 |
 
 ## Boost Version Distribution (Top 10)
 
 | Version | Usage Count |
-| ------- | ----------- |
-| 1.53.0  | 232         |
-| 1.55    | 229         |
-| 1.54    | 192         |
-| 1.54.0  | 153         |
-| 1.55.0  | 151         |
-| 1.40.0  | 125         |
-| 1.58.0  | 100         |
-| 1.48.0  | 97          |
-| 1.38    | 97          |
-| 1.57.0  | 88          |
+|---------|-------------|
+| 1.53.0 | 232 |
+| 1.55 | 229 |
+| 1.54 | 192 |
+| 1.54.0 | 153 |
+| 1.55.0 | 151 |
+| 1.40.0 | 125 |
+| 1.58.0 | 100 |
+| 1.48.0 | 97 |
+| 1.38 | 97 |
+| 1.57.0 | 88 |
 
 ## Data Processing Procedure
 
@@ -84,7 +84,7 @@ This report is generated from BigQuery exports containing Boost-related files fr
 
 ### 1. BigQuery Data Production
 
-Data is produced by executing `query.sql` in Google BigQuery against the `bigquery-public-data.github_repos` dataset. This query:
+**The most important step**: Data is produced by executing `query.sql` in Google BigQuery against the `bigquery-public-data.github_repos` dataset. This query:
 
 - Detects repositories containing Boost includes in C/C++ source files
 - Identifies repositories with vendored Boost (containing `boost/` folder)
