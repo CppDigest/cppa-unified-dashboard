@@ -1,6 +1,6 @@
 # BSL-1.0 Projects Analysis Report
 
-**Generated:** 2025-12-07 08:52:16  
+**Generated:** 2025-12-09 03:39:58  
 **Data file:** `bsl_projects.json`
 
 ---
@@ -104,8 +104,8 @@
 | Latest Created | 2025-12-07 |
 | Earliest Updated | 2009-04-08 |
 | Latest Updated | 2025-12-07 |
-| Updated in Last 6 Months | 8,739 |
-| Updated in Last Year | 13,568 |
+| Updated in Last 6 Months | 8,686 |
+| Updated in Last Year | 13,534 |
 | Most Active Year (by creation) | 2025 |
 
 ### Projects Created by Year (Top 10)
@@ -140,4 +140,4 @@
 
 ---
 
-*Report generated on 2025-12-07 08:52:16*
+*Report generated on 2025-12-09 03:39:59*
