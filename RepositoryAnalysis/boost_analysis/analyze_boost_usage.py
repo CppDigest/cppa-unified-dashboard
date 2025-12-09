@@ -701,7 +701,7 @@ def generate_statistics():
         parts = version.split('.')
         return tuple(int(p) if p.isdigit() else 0 for p in parts[:3])
     
-    filtered_items.sort(key=version_sort_key)
+    filtered_items.sort(key=version_sort_key, reverse=True)
     
     stats["version_distribution"] = filtered_items
     
@@ -1045,7 +1045,7 @@ def write_report(stats):
     if stats["version_distribution"]:
         report_lines.extend([
             "",
-            "## Boost Version Distribution (Top 10)",
+            "## Boost Version Distribution",
             "",
             "| Version | Usage Count |",
             "|---------|-------------|",
@@ -1064,7 +1064,6 @@ def write_report(stats):
             "",
         ])
         
-        # Group by version and show year breakdown
         # Filter out versions below 1.53.0
         min_version = "1.53.0"
         filtered_versions = [
@@ -1072,19 +1071,48 @@ def write_report(stats):
             if compare_versions(version, min_version) >= 0
         ]
         
-        for version in sorted(filtered_versions, reverse=True):
-            year_data = stats["repos_by_year_version_dict"][version]
-            if not year_data:
-                continue
-                
-            report_lines.extend([
-                f"### Boost Version {version}",
-                "",
-                "| Year | Repository Count |",
-                "|------|------------------|",
-            ])
-            for year, count in sorted(year_data, reverse=True):
-                report_lines.append(f"| {year} | {count:,} |")
+        if filtered_versions:
+            # Collect all unique years
+            all_years = set()
+            for version in filtered_versions:
+                year_data = stats["repos_by_year_version_dict"][version]
+                for year, _ in year_data:
+                    all_years.add(year)
+            
+            # Sort years descending (newest first)
+            sorted_years = sorted(all_years, reverse=True)
+            
+            # Sort versions descending (newest first)
+            def version_sort_key(v):
+                parts = v.split('.')
+                return tuple(int(p) if p.isdigit() else 0 for p in parts[:3])
+            
+            sorted_versions = sorted(filtered_versions, key=version_sort_key, reverse=True)
+            
+            # Build the pivot table
+            # Header row
+            header = "| Year |"
+            separator = "|------|"
+            for version in sorted_versions:
+                header += f" {version} |"
+                separator += "--------|"
+            report_lines.append(header)
+            report_lines.append(separator)
+            
+            # Data rows
+            for year in sorted_years:
+                row = f"| {year} |"
+                for version in sorted_versions:
+                    year_data = stats["repos_by_year_version_dict"][version]
+                    # Find count for this year
+                    count = 0
+                    for y, c in year_data:
+                        if y == year:
+                            count = c
+                            break
+                    row += f" {count:,} |" if count > 0 else " |"
+                report_lines.append(row)
+            
             report_lines.append("")
     
     report_lines.extend(appendics())
