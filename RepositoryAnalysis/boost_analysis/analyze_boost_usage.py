@@ -59,11 +59,11 @@ def iter_data_files() -> Iterable[Path]:
     """
     if not DATA_DIR.exists():
         raise FileNotFoundError(f"Missing data directory: {DATA_DIR}")
-    
+
     # Find both BigQuery exports and GitHub API results
     bq_files = sorted(DATA_DIR.rglob("bq-results-*"))
     github_files = sorted(DATA_DIR.rglob("github-api-results-*"))
-    
+
     # Combine and return all files
     all_files = sorted(set(bq_files) | set(github_files))
     return all_files
@@ -85,22 +85,22 @@ def extract_version_from_path(path: str) -> Optional[str]:
     """Extract Boost version from path if it contains patterns like /boost_1_57_0/ or /boost-1.57.0/."""
     if not path:
         return None
-    
+
     # Pattern 1: /boost_1_57_0/ or /boost_1_70_0/
     match = re.search(r'/boost[_-](\d+)[_-](\d+)[_-](\d+)', path)
     if match:
         return f"{match.group(1)}.{match.group(2)}.{match.group(3)}"
-    
+
     # Pattern 2: /boost-1.57.0/ or /boost-1.70.0/
     match = re.search(r'/boost[_-](\d+\.\d+\.\d+)', path)
     if match:
         return match.group(1)
-    
+
     # Pattern 3: /boost1.57.0/ or /boost1.70.0/
     match = re.search(r'/boost(\d+\.\d+\.\d+)', path)
     if match:
         return match.group(1)
-    
+
     return None
 
 
@@ -118,24 +118,24 @@ def load_boost_release_dates() -> List[tuple]:
     if not BOOST_RELEASE_DATE_CSV.exists():
         print(f"Warning: Boost release date file not found: {BOOST_RELEASE_DATE_CSV}")
         return []
-    
+
     releases = []
     with BOOST_RELEASE_DATE_CSV.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
         for row in reader:
             name = (row.get("name") or "").strip()
             release_date_str = (row.get("release_date") or "").strip()
-            
+
             if not name or not release_date_str:
                 continue
-            
+
             # Extract version from name (e.g., "boost-1.89.0" -> "1.89.0")
             match = re.search(r'boost-(\d+\.\d+(?:\.\d+)?)', name)
             if not match:
                 continue
-            
+
             version = match.group(1)
-            
+
             # Parse release date (format: "8/6/2025" or "4/3/2025")
             try:
                 # Try different date formats
@@ -148,14 +148,14 @@ def load_boost_release_dates() -> List[tuple]:
                 else:
                     # If all formats fail, skip this row
                     continue
-                
+
                 # Convert to timestamp
                 release_timestamp = int(release_date.replace(tzinfo=timezone.utc).timestamp())
                 releases.append((version, release_timestamp))
             except Exception as e:
                 print(f"Warning: Could not parse release date '{release_date_str}' for {name}: {e}")
                 continue
-    
+
     # Sort by release date descending (newest first)
     releases.sort(key=lambda x: x[1], reverse=True)
     return releases
@@ -168,16 +168,16 @@ def find_candidate_version(last_commit_ts: Optional[int], release_dates: List[tu
     """
     if last_commit_ts is None or not release_dates:
         return None
-    
+
     # Find the latest version released on or before the commit timestamp
     for version, release_ts in release_dates:
         if release_ts <= last_commit_ts:
             return version
-    
+
     # If commit is older than all releases, return the oldest version
     if release_dates:
         return release_dates[-1][0]
-    
+
     return None
 
 def normalize_version(version:str) -> str:
@@ -191,20 +191,20 @@ def normalize_version(version:str) -> str:
     """
     # Normalize version string (handle variations like "1.80.0" vs "1.80")
     version_normalized = version.strip()
-    
+
     # Normalize to have exactly 3 parts (major.minor.patch)
     # e.g., "1.80" -> "1.80.0", "1.80.0" -> "1.80.0"
     version_parts = version_normalized.split(".")
     if len(version_parts) == 2:
         version_normalized = f"{version_parts[0]}.{version_parts[1]}.0"
-    
+
     if len(version_parts) >= 2:
         if int(version_parts[1]) < 10:
             if len(version_parts) == 3:
                 version_normalized = f"{version_parts[0]}.{version_parts[1]}{version_parts[2]}.0"
             else:
                 version_normalized = f"{version_parts[0]}.{version_parts[1]}0.0"
-        
+
     elif len(version_parts) == 1:
         version_normalized = f"{version_parts[0]}.0.0"
     return version_normalized
@@ -212,7 +212,7 @@ def normalize_version(version:str) -> str:
 def compare_versions(version1: str, version2: str) -> int:
     """
     Compare two version strings.
-    
+
     Returns:
         -1 if version1 < version2
          0 if version1 == version2
@@ -222,11 +222,11 @@ def compare_versions(version1: str, version2: str) -> int:
         """Convert version string to tuple of integers for comparison."""
         if not v:
             return (0, 0, 0)
-        
+
         # Split by dot and extract numeric parts
         parts = v.split('.')
         result = []
-        
+
         for part in parts[:3]:  # Only take first 3 parts (major.minor.patch)
             # Extract numeric part (handle cases like "1.53" or "1.53.0")
             numeric_part = ''.join(c for c in part if c.isdigit())
@@ -234,13 +234,13 @@ def compare_versions(version1: str, version2: str) -> int:
                 result.append(int(numeric_part))
             else:
                 result.append(0)
-        
+
         # Pad with zeros to ensure same length (major.minor.patch)
         while len(result) < 3:
             result.append(0)
-        
+
         return tuple(result[:3])
-    
+
     try:
         v1_tuple = version_tuple(version1)
         v2_tuple = version_tuple(version2)
@@ -262,13 +262,13 @@ def get_release_year_for_version(version: str, release_dates: List[tuple]) -> Op
     """
     if not version or not release_dates:
         return None
-        
+
     # Find exact match first
     for ver, release_ts in release_dates:
         if ver == version:
             release_date = datetime.fromtimestamp(release_ts, tz=timezone.utc)
             return release_date.year
-    
+
     # Try matching without patch version (e.g., "1.80" should match "1.80.0")
     version_major_minor = ".".join(version.split(".")[:2])
     for ver, release_ts in release_dates:
@@ -276,24 +276,24 @@ def get_release_year_for_version(version: str, release_dates: List[tuple]) -> Op
         if ver_major_minor == version_major_minor:
             release_date = datetime.fromtimestamp(release_ts, tz=timezone.utc)
             return release_date.year
-    
+
     return None
 
 
 def load_csv_data_and_build_boost_usage():
     """
     Step 1: Load CSV data and construct boost_usage table.
-    
+
     This function:
     1. Reads CSV files and extracts Boost includes
     2. Creates temporary repository entries (minimal info)
     3. Inserts boost_usage records directly into the database
-    
+
     Returns: Statistics about the loading process
     """
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA foreign_keys = ON;")
-    
+
     # Create tables if they don't exist
     conn.executescript(
         """
@@ -333,27 +333,27 @@ def load_csv_data_and_build_boost_usage():
         );
         """
     )
-    
+
     # Check if boost_header table has data
     header_count = conn.execute("SELECT COUNT(*) FROM boost_header").fetchone()[0]
     if header_count == 0:
         print("Warning: boost_header table is empty. Please run populate_boost_headers.py first.")
         conn.close()
         return {"error": "boost_header table is empty"}
-    
+
     # Build header_id lookup cache
     header_id_cache: Dict[str, Optional[int]] = {}
     for row in conn.execute("SELECT id, full_header_name FROM boost_header WHERE full_header_name IS NOT NULL"):
         header_id, full_header_name = row
         if full_header_name:
             header_id_cache[full_header_name] = header_id
-    
+
     for row in conn.execute("SELECT id, header_name, full_header_name FROM boost_header"):
         header_id, header_name, full_header_name = row
         if not full_header_name or full_header_name == header_name:
             if header_name not in header_id_cache:
                 header_id_cache[header_name] = header_id
-    
+
     # Statistics
     total_rows = 0
     total_includes = 0
@@ -361,7 +361,7 @@ def load_csv_data_and_build_boost_usage():
     usage_rows = []
     unmatched_headers = set()
     repo_name_to_id: Dict[str, int] = {}  # Temporary mapping for CSV processing
-    
+
     # Load CSV data and build boost_usage records
     print("Step 1: Loading CSV data and constructing boost_usage table...")
     for csv_path in iter_data_files():
@@ -373,16 +373,16 @@ def load_csv_data_and_build_boost_usage():
                 repo_name = (row.get("repo_name") or "").strip()
                 if not repo_name:
                     continue
-                
+
                 file_path = (row.get("path") or "").strip()
                 contains_vendored = parse_boolean(row.get("contains_vendored_boost", ""))
                 boost_version = (row.get("boost_version") or "").strip() or None
                 last_commit = parse_timestamp(row.get("last_commit_ts", ""))
-                
+
                 # Extract version from path if CSV field is empty
                 if not boost_version:
                     boost_version = extract_version_from_path(file_path)
-                
+
                 # Get or create repository entry (minimal - will be updated later)
                 if repo_name not in repo_name_to_id:
                     # Check if repository already exists
@@ -390,7 +390,7 @@ def load_csv_data_and_build_boost_usage():
                         "SELECT id FROM repository WHERE repo_name = ?",
                         (repo_name,),
                     ).fetchone()
-                    
+
                     if existing:
                         repo_id = existing[0]
                     else:
@@ -404,29 +404,29 @@ def load_csv_data_and_build_boost_usage():
                     repo_name_to_id[repo_name] = repo_id
                 else:
                     repo_id = repo_name_to_id[repo_name]
-                
+
                 # Extract Boost includes
                 includes = extract_boost_includes(row.get("file_content", ""))
                 if not includes:
                     continue
-                
+
                 for header in includes:
                     total_includes += 1
-                    
+
                     # Check if we should exclude this usage
                     if should_exclude_usage(file_path, contains_vendored):
                         excluded_count += 1
                         continue
-                    
+
                     # Look up header_id
                     header_id = header_id_cache.get(header)
                     if header_id is None:
                         unmatched_headers.add(header)
                         continue
-                    
+
                     # Calculate affect_from_boost (1 if using system Boost, 0 if vendored)
                     affect_from_boost = 1 if not contains_vendored else 0
-                    
+
                     # Prepare usage record (now includes boost_version and affect_from_boost)
                     usage_rows.append((
                         repo_id,
@@ -437,7 +437,7 @@ def load_csv_data_and_build_boost_usage():
                         affect_from_boost,  # Store affect_from_boost in boost_usage table
                         None,  # excepted_ts
                     ))
-    
+
     # Insert all usage records
     if usage_rows:
         print(f"  Inserting {len(usage_rows):,} usage records...")
@@ -447,18 +447,18 @@ def load_csv_data_and_build_boost_usage():
             usage_rows,
         )
         conn.commit()
-    
+
     if unmatched_headers:
         print(f"  Warning: {len(unmatched_headers)} unique headers not found in boost_header table:")
         for h in sorted(unmatched_headers)[:10]:
             print(f"    - {h}")
         if len(unmatched_headers) > 10:
             print(f"    ... and {len(unmatched_headers) - 10} more")
-    
+
     conn.close()
-    
+
     conn.close()
-    
+
     stats = {
         "total_rows": total_rows,
         "total_includes": total_includes,
@@ -466,7 +466,7 @@ def load_csv_data_and_build_boost_usage():
         "usage_records_inserted": len(usage_rows),
         "unmatched_headers": len(unmatched_headers),
     }
-    
+
     print(f"  Completed: {stats['usage_records_inserted']:,} usage records inserted.")
     return stats
 
@@ -474,26 +474,26 @@ def load_csv_data_and_build_boost_usage():
 def load_boost_usage_from_table():
     """
     Step 2: Load boost_usage data from the database table.
-    
+
     Aggregates data from boost_usage to determine repository-level information:
     - Latest commit timestamp per repository
     - Boost versions (from boost_usage.boost_version field)
     - File paths (for fallback version extraction if needed)
     - Repository IDs
-    
+
     Returns: Dictionary with repository-level aggregated data
     """
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    
+
     print("Step 2: Loading boost_usage data from table...")
-    
+
     # Aggregate usage data per repository
     repo_data = {}
-    
+
     # Get all usage records with repository, file path, version, affect_from_boost, and commit info
     query = """
-        SELECT 
+        SELECT
             r.id as repo_id,
             r.repo_name,
             bu.file_path,
@@ -504,7 +504,7 @@ def load_boost_usage_from_table():
         JOIN repository r ON bu.repository_id = r.id
         WHERE bu.excepted_ts IS NULL
     """
-    
+
     for row in conn.execute(query):
         repo_id = row["repo_id"]
         repo_name = row["repo_name"]
@@ -521,7 +521,7 @@ def load_boost_usage_from_table():
             except (ValueError, AttributeError):
                 # If parsing fails, skip this record
                 continue
-            
+
         if repo_id not in repo_data:
             repo_data[repo_id] = {
                 "repo_name": repo_name,
@@ -530,16 +530,16 @@ def load_boost_usage_from_table():
                 "boost_versions": [],  # Collect all versions from usage records
                 "affect_from_boost_values": [],  # Collect all affect_from_boost values
             }
-        
+
         repo_data[repo_id]["file_paths"].append(file_path)
         if commit_ts:
             repo_data[repo_id]["commit_timestamps"].append(commit_ts)
         if boost_version:
             repo_data[repo_id]["boost_versions"].append(boost_version)
         repo_data[repo_id]["affect_from_boost_values"].append(affect_from_boost)
-    
+
     conn.close()
-    
+
     print(f"  Loaded data for {len(repo_data)} repositories")
     return repo_data
 
@@ -547,35 +547,35 @@ def load_boost_usage_from_table():
 def update_repository_table(repo_data):
     """
     Step 3: Update repository table based on boost_usage data.
-    
+
     This function uses ONLY data from the boost_usage table:
     1. Extracts Boost version from boost_usage.boost_version field (priority)
     2. Falls back to extracting version from file paths if not in boost_usage
     3. Calculates latest commit timestamp per repository
     4. Calculates candidate_version based on commit timestamps
     5. Updates repository table with this information
-    
+
     Args:
         repo_data: Dictionary from load_boost_usage_from_table()
     """
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA foreign_keys = ON;")
-    
+
     print("Step 3: Updating repository table...")
-    
+
     # Load Boost release dates for candidate version calculation
     print("  Loading Boost release dates...")
     release_dates = load_boost_release_dates()
     print(f"  Loaded {len(release_dates)} Boost release dates")
-    
+
     updates = []
-    
+
     for repo_id, data in repo_data.items():
         file_paths = data["file_paths"]
         commit_timestamps = data["commit_timestamps"]
         boost_versions = data.get("boost_versions", [])
         affect_from_boost_values = data.get("affect_from_boost_values", [])
-        
+
         # Priority 1: Get version from boost_usage.boost_version field
         boost_version = None
         if boost_versions:
@@ -583,7 +583,7 @@ def update_repository_table(repo_data):
             version_counts = Counter(boost_versions)
             if version_counts:
                 boost_version = version_counts.most_common(1)[0][0]
-        
+
         # Priority 2: Extract version from file paths if not found in boost_usage
         if not boost_version:
             for file_path in file_paths:
@@ -591,7 +591,7 @@ def update_repository_table(repo_data):
                 if version:
                     boost_version = version
                     break
-        
+
         # Determine affect_from_boost from boost_usage data
         # If any usage record has affect_from_boost=1, the repository is affected
         # (uses system Boost, not vendored)
@@ -601,7 +601,7 @@ def update_repository_table(repo_data):
             # This means at least some files use system Boost
             if any(val == 1 for val in affect_from_boost_values):
                 affect_from_boost = 1
-        
+
         # Find latest commit timestamp
         latest_commit_ts = None
         if commit_timestamps:
@@ -614,26 +614,26 @@ def update_repository_table(repo_data):
                     parsed_timestamps.append(int(dt.timestamp()))
                 except (ValueError, AttributeError):
                     continue
-            
+
             if parsed_timestamps:
                 latest_commit_ts = min(parsed_timestamps)
-        
+
         # Calculate candidate_version based on latest commit
         candidate_version = find_candidate_version(latest_commit_ts, release_dates)
-        
+
         updates.append({
             "repo_id": repo_id,
             "boost_version": boost_version,
             "candidate_version": candidate_version,
             "affect_from_boost": affect_from_boost,
         })
-    
+
     # Update repository table
     updated_count = 0
     with conn:
         for update in updates:
             conn.execute(
-                """UPDATE repository 
+                """UPDATE repository
                    SET boost_version = COALESCE(?, boost_version),
                        candidate_version = COALESCE(?, candidate_version),
                        affect_from_boost = ?
@@ -641,7 +641,7 @@ def update_repository_table(repo_data):
                 (update["boost_version"], update["candidate_version"], update["affect_from_boost"], update["repo_id"]),
             )
             updated_count += 1
-    
+
     conn.close()
     print(f"  Updated {updated_count} repository records")
     return updated_count
@@ -651,12 +651,12 @@ def generate_statistics():
     """Generate statistics from the database."""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    
+
     # Load release dates for version validation
     release_dates = load_boost_release_dates()
-    
+
     stats = {}
-    
+
     # Overall statistics
     stats["total_repositories"] = conn.execute("SELECT COUNT(*) FROM repository").fetchone()[0]
     stats["affected_repositories"] = conn.execute(
@@ -665,28 +665,28 @@ def generate_statistics():
     stats["total_headers"] = conn.execute("SELECT COUNT(*) FROM boost_header").fetchone()[0]
     stats["total_libraries"] = conn.execute("SELECT COUNT(*) FROM boost_library").fetchone()[0]
     stats["total_usage_records"] = conn.execute("SELECT COUNT(*) FROM boost_usage").fetchone()[0]
-    
+
     # Version statistics (from repository table)
     # Only use boost_version, not candidate_version
     # Get ALL versions (not just top 10) so dashboard can filter to 1.53.0-1.80.0 range
     version_stats = conn.execute(
         """
-        SELECT 
+        SELECT
             boost_version as version,
-            COUNT(*) as cnt 
-        FROM repository 
-        WHERE boost_version IS NOT NULL 
-            AND boost_version != '' 
-        GROUP BY boost_version 
+            COUNT(*) as cnt
+        FROM repository
+        WHERE boost_version IS NOT NULL
+            AND boost_version != ''
+        GROUP BY boost_version
         ORDER BY cnt DESC
         """
     ).fetchall()
     version_distribution = {}
     for row in version_stats:
         version_name = normalize_version(row["version"])
-        
+
         version_distribution[version_name] = version_distribution.get(version_name, 0) + row["cnt"]
-    
+
     # Sort by version number, starting from 1.50.0
     # Filter versions >= 1.50.0 and sort them numerically
     min_version = "1.50.0"
@@ -694,17 +694,17 @@ def generate_statistics():
         (version, count) for version, count in version_distribution.items()
         if compare_versions(version, min_version) >= 0
     ]
-    
+
     # Sort by version number (ascending) - convert version to tuple for proper numeric sorting
     def version_sort_key(item):
         version = item[0]
         parts = version.split('.')
         return tuple(int(p) if p.isdigit() else 0 for p in parts[:3])
-    
+
     filtered_items.sort(key=version_sort_key, reverse=True)
-    
+
     stats["version_distribution"] = filtered_items
-    
+
     # Version coverage statistics
     repos_with_version = conn.execute(
         "SELECT COUNT(*) FROM repository WHERE boost_version IS NOT NULL AND boost_version != ''"
@@ -712,16 +712,16 @@ def generate_statistics():
     stats["repos_with_version"] = repos_with_version
     stats["repos_without_version"] = stats["total_repositories"] - repos_with_version
     stats["version_coverage_percent"] = (
-        (repos_with_version / stats["total_repositories"] * 100) 
+        (repos_with_version / stats["total_repositories"] * 100)
         if stats["total_repositories"] > 0 else 0
     )
-    
+
     # Top libraries by repository count with time ranges
     top_libraries = conn.execute(
         """
-        SELECT 
-            bl.name, 
-            COUNT(bu.id) as usage_count, 
+        SELECT
+            bl.name,
+            COUNT(bu.id) as usage_count,
             COUNT(DISTINCT bu.repository_id) as repo_count,
             MIN(bu.last_commit_ts) as earliest_commit,
             MAX(bu.last_commit_ts) as latest_commit
@@ -731,7 +731,7 @@ def generate_statistics():
         WHERE bu.excepted_ts IS NULL
         GROUP BY bl.id, bl.name
         ORDER BY repo_count DESC
-        LIMIT 20
+        LIMIT 150
         """
     ).fetchall()
     stats["top_libraries"] = [
@@ -744,13 +744,13 @@ def generate_statistics():
         }
         for row in top_libraries
     ]
-    
+
     # Bottom libraries by repository count with time ranges
     bottom_libraries = conn.execute(
         """
-        SELECT 
-            bl.name, 
-            COUNT(bu.id) as usage_count, 
+        SELECT
+            bl.name,
+            COUNT(bu.id) as usage_count,
             COUNT(DISTINCT bu.repository_id) as repo_count,
             MIN(bu.last_commit_ts) as earliest_commit,
             MAX(bu.last_commit_ts) as latest_commit
@@ -774,7 +774,7 @@ def generate_statistics():
         }
         for row in bottom_libraries
     ]
-    
+
     # Top headers by repository count
     top_headers = conn.execute(
         """
@@ -790,22 +790,22 @@ def generate_statistics():
         {"header": row["header_name"], "usage_count": row["usage_count"], "repo_count": row["repo_count"]}
         for row in top_headers
     ]
-    
+
     # Repository counts by year (based on latest commit timestamp per repository)
     # Get latest commit per repository, then extract year
     repos_by_year_raw = conn.execute(
         """
-        SELECT 
+        SELECT
             bu.repository_id,
             MAX(bu.last_commit_ts) as latest_commit
         FROM boost_usage bu
-        WHERE bu.last_commit_ts IS NOT NULL 
+        WHERE bu.last_commit_ts IS NOT NULL
             AND bu.last_commit_ts != ''
             AND LENGTH(bu.last_commit_ts) >= 4
         GROUP BY bu.repository_id
         """
     ).fetchall()
-    
+
     # Extract year from timestamps and count
     year_counts = {}
     for row in repos_by_year_raw:
@@ -820,21 +820,21 @@ def generate_statistics():
                         year_counts[year] = year_counts.get(year, 0) + 1
             except (ValueError, TypeError):
                 continue
-    
+
     stats["repos_by_year"] = sorted(year_counts.items(), reverse=True)
-    
+
     # Repository counts by year AND version
     # Get latest commit per repository with version info, then extract year
     # Only use boost_version, not candidate_version
     repos_by_year_version_raw = conn.execute(
         """
-        SELECT 
+        SELECT
             bu.repository_id,
             MAX(bu.last_commit_ts) as latest_commit,
             r.boost_version as version
         FROM boost_usage bu
         JOIN repository r ON bu.repository_id = r.id
-        WHERE bu.last_commit_ts IS NOT NULL 
+        WHERE bu.last_commit_ts IS NOT NULL
             AND bu.last_commit_ts != ''
             AND LENGTH(bu.last_commit_ts) >= 4
             AND r.boost_version IS NOT NULL
@@ -842,17 +842,17 @@ def generate_statistics():
         GROUP BY bu.repository_id, r.boost_version
         """
     ).fetchall()
-    
+
     # Build nested dict: {version: {year: count}}
     version_year_counts = {}
     for row in repos_by_year_version_raw:
         commit_ts = row[1]
         version = row[2]
-        
+
         if not version or not commit_ts or len(commit_ts) < 4:
             continue
         version = normalize_version(version)
-        
+
         try:
             # Extract year from ISO format (YYYY-MM-DD...)
             year_str = commit_ts[:4]
@@ -861,18 +861,18 @@ def generate_statistics():
                 if 2014 <= year <= datetime.now().year:
                     # Get release year for this version
                     release_year = get_release_year_for_version(version, release_dates)
-                    
+
                     # Ensure year is at least as recent as release year
                     # If release_year is known, use the maximum of commit year and release year
                     if release_year is not None:
                         year = max(year, release_year)
-                    
+
                     if version not in version_year_counts:
                         version_year_counts[version] = {}
                     version_year_counts[version][year] = version_year_counts[version].get(year, 0) + 1
         except (ValueError, TypeError):
             continue
-    
+
     # Convert to list of dicts for easier JSON serialization
     # Format: [{"version": "1.89.0", "year": 2024, "count": 123}, ...]
     stats["repos_by_year_version"] = []
@@ -883,13 +883,13 @@ def generate_statistics():
                 "year": year,
                 "count": count
             })
-    
+
     # Also create a summary dict for easier access: {version: [(year, count), ...]}
     stats["repos_by_year_version_dict"] = {
         version: sorted(year_data.items())
         for version, year_data in version_year_counts.items()
     }
-    
+
     conn.close()
     return stats
 
@@ -904,13 +904,13 @@ def write_statistics_csv():
         "last_commit_time",
         "boost_version",
     ]
-    
+
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    
+
     rows = []
     query = """
-        SELECT 
+        SELECT
             bl.name as library_name,
             bh.header_name,
             COUNT(DISTINCT bu.repository_id) as repository_count,
@@ -924,12 +924,12 @@ def write_statistics_csv():
         GROUP BY bh.id, bh.header_name, bl.name
         ORDER BY bl.name, repository_count DESC
     """
-    
+
     for row in conn.execute(query):
         # Get most common version if multiple (using COALESCE result)
         versions = [v.strip() for v in (row["boost_versions"] or "").split(",") if v.strip()]
         most_common_version = max(set(versions), key=versions.count) if versions else ""
-        
+
         rows.append([
             row["library_name"],
             row["header_name"],
@@ -938,14 +938,14 @@ def write_statistics_csv():
             row["last_commit_time"] or "",
             most_common_version,
         ])
-    
+
     conn.close()
-    
+
     with STATS_CSV.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.writer(handle, delimiter=",")
         writer.writerow(headers)
         writer.writerows(rows)
-    
+
     print(f"Wrote {len(rows)} statistics rows to {STATS_CSV.relative_to(BASE_DIR)}")
 
 
@@ -965,7 +965,7 @@ def write_report(stats):
         "- Repository activity after 2022-11-27 is not included in this analysis",
         "- The \"latest commit\" dates shown in the statistics reflect the most recent commit in the dataset, not necessarily the current state of repositories",
         "",
-        
+
         "## Overview",
         "",
         f"- **Total Repositories**: {stats['total_repositories']:,}",
@@ -981,14 +981,14 @@ def write_report(stats):
         "| Library | Repository Count | Usage Count | Earliest Commit | Latest Commit |",
         "|---------|------------------|-------------|-----------------|---------------|",
     ]
-    
+
     for lib in stats["top_libraries"]:
         earliest = lib.get("earliest_commit", "") or "N/A"
         latest = lib.get("latest_commit", "") or "N/A"
         report_lines.append(
             f"| {lib['name']} | {lib['repo_count']:,} | {lib['usage_count']:,} | {earliest} | {latest} |"
         )
-    
+
     if stats.get("bottom_libraries"):
         report_lines.extend([
             "",
@@ -997,14 +997,14 @@ def write_report(stats):
             "| Library | Repository Count | Usage Count | Earliest Commit | Latest Commit |",
             "|---------|------------------|-------------|-----------------|---------------|",
         ])
-        
+
         for lib in stats["bottom_libraries"]:
             earliest = lib.get("earliest_commit", "") or "N/A"
             latest = lib.get("latest_commit", "") or "N/A"
             report_lines.append(
                 f"| {lib['name']} | {lib['repo_count']:,} | {lib['usage_count']:,} | {earliest} | {latest} |"
             )
-    
+
     report_lines.extend([
         "",
         "## Top Boost Headers by Repository Count",
@@ -1012,12 +1012,12 @@ def write_report(stats):
         "| Header | Repository Count | Usage Count |",
         "|--------|------------------|-------------|",
     ])
-    
+
     for header in stats["top_headers"]:
         report_lines.append(
             f"| {header['header']} | {header['repo_count']:,} | {header['usage_count']:,} |"
         )
-    
+
     if stats.get("repos_by_year"):
         report_lines.extend([
             "",
@@ -1030,7 +1030,7 @@ def write_report(stats):
         ])
         for year, count in stats["repos_by_year"]:
             report_lines.append(f"| {year} | {count:,} |")
-    
+
     report_lines.extend([
         "## Version Coverage Statistics",
         "",
@@ -1041,7 +1041,7 @@ def write_report(stats):
         "**Note**: Version detection relies on explicit version declarations in build files (CMake, Conan, vcpkg) or `boost/version.hpp` files. Repositories using system Boost installed via package managers may not have explicit version declarations.",
         "",
     ])
-    
+
     if stats["version_distribution"]:
         report_lines.extend([
             "",
@@ -1052,7 +1052,7 @@ def write_report(stats):
         ])
         for version, count in stats["version_distribution"]:
             report_lines.append(f"| {version} | {count:,} |")
-            
+
     if stats.get("repos_by_year_version_dict"):
         report_lines.extend([
             "",
@@ -1063,14 +1063,14 @@ def write_report(stats):
             "**Note**: This section only includes Boost versions for which version information was successfully detected in the repository data. Versions are shown starting from Boost 1.53.0 and later, as earlier versions may not have explicit version declarations in build files or may use different version detection methods. The absence of earlier versions in this table does not indicate they were not used, but rather that version information was not reliably detected for those repositories.",
             "",
         ])
-        
+
         # Filter out versions below 1.53.0
         min_version = "1.53.0"
         filtered_versions = [
             version for version in stats["repos_by_year_version_dict"].keys()
             if compare_versions(version, min_version) >= 0
         ]
-        
+
         if filtered_versions:
             # Collect all unique years
             all_years = set()
@@ -1078,17 +1078,17 @@ def write_report(stats):
                 year_data = stats["repos_by_year_version_dict"][version]
                 for year, _ in year_data:
                     all_years.add(year)
-            
+
             # Sort years descending (newest first)
             sorted_years = sorted(all_years, reverse=True)
-            
+
             # Sort versions descending (newest first)
             def version_sort_key(v):
                 parts = v.split('.')
                 return tuple(int(p) if p.isdigit() else 0 for p in parts[:3])
-            
+
             sorted_versions = sorted(filtered_versions, key=version_sort_key, reverse=True)
-            
+
             # Build the pivot table
             # Header row
             header = "| Year |"
@@ -1098,7 +1098,7 @@ def write_report(stats):
                 separator += "--------|"
             report_lines.append(header)
             report_lines.append(separator)
-            
+
             # Data rows
             for year in sorted_years:
                 row = f"| {year} |"
@@ -1112,11 +1112,11 @@ def write_report(stats):
                             break
                     row += f" {count:,} |" if count > 0 else " |"
                 report_lines.append(row)
-            
+
             report_lines.append("")
-    
+
     report_lines.extend(appendics())
-    
+
     REPORT_MD.write_text("\n".join(report_lines), encoding="utf-8")
     print(f"Report written to {REPORT_MD.relative_to(BASE_DIR)}")
 
@@ -1192,29 +1192,29 @@ def appendics() -> list(str):
         "- **`boost_usage`**: Individual usage records linking repositories to headers with file paths and commit timestamps",
         "",
     ]
-    
+
 def main():
     # Step 1: Load CSV data and construct boost_usage table
     # stats = load_csv_data_and_build_boost_usage()
     # if stats.get("error"):
     #     print("Cannot proceed without boost_header data. Exiting.")
     #     return
-    
+
     # Step 2: Load boost_usage data from table
     # repo_data = load_boost_usage_from_table()
-    
+
     # # Step 3: Update repository table based on boost_usage data
     # update_repository_table(repo_data)
-    
+
     print("\nStep 4: Generating statistics...")
     stats = generate_statistics()
-    
+
     print("\nStep 5: Writing statistics CSV...")
     write_statistics_csv()
-    
+
     print("\nStep 6: Writing summary report...")
     write_report(stats)
-    
+
     print("\nStep 7: Generating interactive visualization...")
     try:
         from generate_visualization import generate_html_dashboard
@@ -1222,7 +1222,7 @@ def main():
         print("Interactive dashboard generated successfully!")
     except ImportError:
         print("Warning: Could not import visualization module. Skipping dashboard generation.")
-    
+
     print("\nAnalysis complete!")
 
 
