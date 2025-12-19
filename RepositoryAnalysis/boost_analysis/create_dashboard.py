@@ -961,8 +961,8 @@ def _collect_library_data(
             SELECT
                 bl.name as dep_library_name,
                 ld.version_id
-            FROM library_dependents ld
-            JOIN boost_library bl ON ld.dependents_library_id = bl.id
+            FROM library_dependency ld
+            JOIN boost_library bl ON ld.dependency_library_id = bl.id
             WHERE ld.main_library_id = ? AND ld.version_id = ?
             ORDER BY bl.name
         """, (lib_id, latest_version_id))
@@ -972,8 +972,8 @@ def _collect_library_data(
         dep_by_version_rows = db.fetchall("""
             SELECT
                 bv.version,
-                COUNT(DISTINCT ld.dependents_library_id) as dep_count
-            FROM library_dependents ld
+                COUNT(DISTINCT ld.dependency_library_id) as dep_count
+            FROM library_dependency ld
             JOIN boost_version bv ON ld.version_id = bv.id
             WHERE ld.main_library_id = ?
             GROUP BY bv.version
@@ -1091,7 +1091,7 @@ def collect_dashboard_data() -> None:
         latest_version_id = latest_version_rows[0]["id"] if latest_version_rows else None
         latest_version_str = latest_version_rows[0]["version"] if latest_version_rows else None
 
-        table_exists = db.table_exists("library_dependents")
+        table_exists = db.table_exists("library_dependency")
 
         libraries_data: Dict[str, Dict[str, Any]] = {}
         for lib_row in libraries:
