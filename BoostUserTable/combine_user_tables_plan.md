@@ -54,6 +54,8 @@ erDiagram
     identities {
         id int PK
         display_name text
+        description text
+        need_review boolean
         created_at timestamptz
         updated_at timestamptz
     }
@@ -74,7 +76,7 @@ erDiagram
         provider varchar
         account_id varchar
         username varchar
-        profile_url text
+        avatar_url text
         verified boolean
         verified_at timestamptz
         created_at timestamptz
