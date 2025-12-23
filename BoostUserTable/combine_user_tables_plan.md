@@ -76,6 +76,7 @@ erDiagram
         provider varchar
         account_id varchar
         username varchar
+        display_name varchar
         avatar_url text
         verified boolean
         verified_at timestamptz
