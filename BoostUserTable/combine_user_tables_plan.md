@@ -65,8 +65,6 @@ erDiagram
         identity_id int FK
         email citext
         is_primary boolean
-        verified boolean
-        verified_at timestamptz
         created_at timestamptz
     }
 
@@ -78,7 +76,7 @@ erDiagram
         username varchar
         display_name varchar
         avatar_url text
-        verified boolean
+        is_verified boolean
         verified_at timestamptz
         created_at timestamptz
     }
