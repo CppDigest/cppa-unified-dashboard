@@ -8,6 +8,8 @@ This report addresses the mechanics of using subscriptions versus API keys with 
 - **API keys can be used in Cursor via BYO (Bring Your Own) keys**, but Cursor still applies token fees on Teams plans
 - **Cost conversion is not 1:1** - web subscriptions use message/session limits, not token-based pricing
 - **Pooled usage is only available on Enterprise** - Teams plans have per-seat usage that cannot be shared
+- **Administrative Control** - Teams admins set limits and alerts, Enterprise adds granular billing and member-level controls.
+- **Tired Deployment** -No, All users on a Teams or Enterprise plan must be on the same tier
 - **Value parity exists at the API level** - $20 on Teams provides the same prompts/tokens as $20 on Enterprise (same API rates + Cursor fee)
 
 ---
@@ -35,6 +37,7 @@ This report addresses the mechanics of using subscriptions versus API keys with 
 Cursor supports two ways to use AI models:
 
 1. **Built-in Cursor-metered usage:**
+
    - Individual, Teams, and Enterprise plans include some AI usage that Cursor measures and bills at model API list prices plus a Cursor token fee. [14][15][20]
 
 2. **Bring-your-own (BYO) API keys:**
@@ -50,22 +53,24 @@ Cursor supports two ways to use AI models:
 #### Why Direct Conversion Doesn't Work
 
 **OpenAI Web Plans:**
+
 - ChatGPT Plus offers access to advanced models with variable message caps that can tighten during high demand; there is no published token allowance. [1]
 - ChatGPT Business and Enterprise publish matrices of model-specific limits (e.g., effectively unlimited GPT-4o messages but daily or weekly caps for higher-cost models like GPT-4.1). [3][4]
 - Limits are in **messages**, not tokens, and can change over time.
 
 **Anthropic Web Plans:**
+
 - Claude Pro has session-based limits that reset roughly every five hours, with approximate ranges of messages and Claude Code prompts per session. [8]
 - Claude Max increases those limits by factors such as 5x or 20x, again with session resets and weekly usage guidance. [9]
 - Claude for Work Team and Enterprise define included weekly usage per seat and allow purchase of extra usage at API rates once those limits are hit. [10][11]
 
 **API Pricing (for comparison):**
 
-| Provider and Model (API) | Input Price (USD / 1M tokens) | Output Price (USD / 1M tokens) | Notes |
-|--------------------------|------------------------------:|-------------------------------:|-------|
-| OpenAI GPT-4o mini       | 0.15                          | 0.60                           | Low-cost model |
-| Other OpenAI GPT-4.x/5.x | Varies, higher than 4o mini   | Varies                         | See API pricing |
-| Anthropic Claude Haiku 4.5 | 1.00                        | 5.00                           | Fast, lower cost |
+| Provider and Model (API)   | Input Price (USD / 1M tokens) | Output Price (USD / 1M tokens) | Notes            |
+| -------------------------- | ----------------------------: | -----------------------------: | ---------------- |
+| OpenAI GPT-4o mini         |                          0.15 |                           0.60 | Low-cost model   |
+| Other OpenAI GPT-4.x/5.x   |   Varies, higher than 4o mini |                         Varies | See API pricing  |
+| Anthropic Claude Haiku 4.5 |                          1.00 |                           5.00 | Fast, lower cost |
 
 Sources: OpenAI API pricing and Anthropic Haiku 4.5 announcement. [5][12]
 
@@ -101,9 +106,12 @@ Sources: OpenAI API pricing and Anthropic Haiku 4.5 announcement. [5][12]
 
 ### 2.2 Administrative Control: Usage Limits and Top-Ups
 
+**Short Answer: Teams admins set spend limits and alerts, but cannot top up usage. Enterprise adds controls.**
+
 #### Teams Plan Admin Controls
 
 **Usage-Limit Notifications (Spend Alerts):**
+
 - Spend alerts send **email notifications** when configured thresholds of on-demand spend are reached at team or member level. [17]
 - Alerts **do not block usage** - they are informational only. [17]
 - Admins can configure alerts for:
@@ -112,6 +120,7 @@ Sources: OpenAI API pricing and Anthropic Haiku 4.5 announcement. [5][12]
   - On-demand usage (included usage doesn't count toward alerts) [17]
 
 **Topping Up a Specific User:**
+
 - Teams plans do **not support direct "top-ups"** of included usage for individual users
 - When a user exhausts their 20 USD included usage, they automatically move to on-demand billing at API rates plus Cursor token fee (0.25 USD per million tokens) [15]
 - Admins can:
@@ -153,11 +162,13 @@ Sources: OpenAI API pricing and Anthropic Haiku 4.5 announcement. [5][12]
 #### Pricing Structure Comparison
 
 **Teams Plan:**
+
 - **Base cost:** 40 USD per active user per month
 - **Included usage:** 20 USD per seat per month of AI usage, priced at public API list prices plus the Cursor token fee (0.25 USD per million tokens for non-Auto agent requests) [15]
 - **Overage pricing:** Same API list prices plus 0.25 USD per million tokens [15]
 
 **Enterprise Plan:**
+
 - **Base cost:** Custom contract-based pricing
 - **Included usage:** Pooled usage (details per contract), but based on underlying model API prices plus Cursor fees [15][18]
 - **Overage pricing:** API prices plus Cursor fee (contracted rates, but public docs indicate same API list prices) [15][18]
@@ -177,31 +188,31 @@ Sources: OpenAI API pricing and Anthropic Haiku 4.5 announcement. [5][12]
 
 ### 3.1 Comprehensive Feature Matrix
 
-| Aspect | Individual (Pro, Pro Plus, Ultra) | Teams | Enterprise |
-|--------|-----------------------------------|-------|------------|
-| **Billing scope** | Single user | Team with centralized billing | Organization-wide |
-| **Base cost** | Varies by tier (Pro ~$20/mo) | 40 USD per active user/month | Custom contract |
-| **Included usage** | Fixed dollars of usage per user (~20 USD equivalent on Pro) | 20 USD usage per seat per month | Pooled usage (details per contract) |
-| **Pooling across users** | No | No | Yes |
-| **Overage pricing** | API prices plus Cursor fee | API prices plus 0.25 USD per M tokens | API prices plus Cursor fee (contracted) |
-| **Spend limits** | User limits and alerts | User and team limits and alerts | Team and member limits and alerts on pooled usage |
-| **BYO API keys** | Supported for some providers | Supported; token fee still applies | Supported; details may be negotiated |
-| **Admin dashboard** | User-level only | Team activity, usage stats, per-user spend | Enhanced with audit logs, billing groups, analytics APIs |
-| **Security and compliance** | Standard | SSO and basic admin controls | SSO, advanced admin, audit logs, SIEM integration |
-| **Usage notifications** | User-level alerts | Team and member-level spend alerts | Enhanced alerts with total spend visibility |
+| Aspect                      | Individual (Pro, Pro Plus, Ultra)                           | Teams                                      | Enterprise                                               |
+| --------------------------- | ----------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------- |
+| **Billing scope**           | Single user                                                 | Team with centralized billing              | Organization-wide                                        |
+| **Base cost**               | Varies by tier (Pro ~$20/mo)                                | 40 USD per active user/month               | Custom contract                                          |
+| **Included usage**          | Fixed dollars of usage per user (~20 USD equivalent on Pro) | 20 USD usage per seat per month            | Pooled usage (details per contract)                      |
+| **Pooling across users**    | No                                                          | No                                         | Yes                                                      |
+| **Overage pricing**         | API prices plus Cursor fee                                  | API prices plus 0.25 USD per M tokens      | API prices plus Cursor fee (contracted)                  |
+| **Spend limits**            | User limits and alerts                                      | User and team limits and alerts            | Team and member limits and alerts on pooled usage        |
+| **BYO API keys**            | Supported for some providers                                | Supported; token fee still applies         | Supported; details may be negotiated                     |
+| **Admin dashboard**         | User-level only                                             | Team activity, usage stats, per-user spend | Enhanced with audit logs, billing groups, analytics APIs |
+| **Security and compliance** | Standard                                                    | SSO and basic admin controls               | SSO, advanced admin, audit logs, SIEM integration        |
+| **Usage notifications**     | User-level alerts                                           | Team and member-level spend alerts         | Enhanced alerts with total spend visibility              |
 
 Sources: Cursor pricing, Team Pricing, Enterprise, Spend Limits, Spend Alerts, API Keys, Models. [14][15][16][17][18][19][20]
 
 ### 3.2 Cost Channel Comparison
 
-| Channel or Plan Type | How You Pay | How Usage is Limited | Cost Predictability per Token |
-|---------------------|-------------|---------------------|------------------------------|
-| **OpenAI or Anthropic API directly** | Per token at published API rates | API rate limits and vendor budget tools | High; directly tied to tokens |
-| **ChatGPT or Claude web subscriptions** | Flat per user per month | Message caps, session windows, fair use | Low; effective rate varies |
-| **Cursor individual plans** | Flat per user plus included usage dollars | Included usage caps; optional user spend limits | Medium; marginal cost is clear |
-| **Cursor Teams (Cursor-metered)** | 40 USD per user plus 20 USD included usage; overage at API rates plus 0.25 USD per M tokens | Per-user included usage; user and team spend limits | High for overage; included chunk is opaque |
-| **Cursor Teams (BYO API keys)** | Vendor API bill plus Cursor token fee (0.25 USD per M tokens) | Vendor caps and Cursor spend limits | High on API side; small markup |
-| **Cursor Enterprise (pooled usage)** | Custom contract; underlying API prices plus Cursor fee | Org-wide pool plus member and team limits | High for metered usage; depends on contract |
+| Channel or Plan Type                    | How You Pay                                                                                 | How Usage is Limited                                | Cost Predictability per Token               |
+| --------------------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------- |
+| **OpenAI or Anthropic API directly**    | Per token at published API rates                                                            | API rate limits and vendor budget tools             | High; directly tied to tokens               |
+| **ChatGPT or Claude web subscriptions** | Flat per user per month                                                                     | Message caps, session windows, fair use             | Low; effective rate varies                  |
+| **Cursor individual plans**             | Flat per user plus included usage dollars                                                   | Included usage caps; optional user spend limits     | Medium; marginal cost is clear              |
+| **Cursor Teams (Cursor-metered)**       | 40 USD per user plus 20 USD included usage; overage at API rates plus 0.25 USD per M tokens | Per-user included usage; user and team spend limits | High for overage; included chunk is opaque  |
+| **Cursor Teams (BYO API keys)**         | Vendor API bill plus Cursor token fee (0.25 USD per M tokens)                               | Vendor caps and Cursor spend limits                 | High on API side; small markup              |
+| **Cursor Enterprise (pooled usage)**    | Custom contract; underlying API prices plus Cursor fee                                      | Org-wide pool plus member and team limits           | High for metered usage; depends on contract |
 
 Sources: OpenAI API pricing, Anthropic docs, Cursor pricing and billing docs. [5][7][13][14][15][16][18][19][20]
 
@@ -211,24 +222,26 @@ Sources: OpenAI API pricing, Anthropic docs, Cursor pricing and billing docs. [5
 
 ### 4.1 Direct Answers to Research Questions
 
-| Question | Answer |
-|---------|--------|
-| **Can an existing direct Claude or ChatGPT subscription be used within Cursor via OAuth or similar?** | No. Web subscriptions and API usage are fully separate for both providers and for Cursor. There is no OAuth or direct integration. |
-| **What is the "conversion rate" of dollars to tokens for web subscriptions vs API keys?** | There is no precise conversion rate. Web subscriptions use message/session limits, not token-based pricing. $1 on an API key does NOT equal $1 of subscription value. |
-| **How does pooled usage work in Enterprise?** | Enterprise provides a shared organizational usage pool. Heavy users can automatically draw from unused allotments of others within the pool, subject to member-level limits. |
-| **Can high-usage users automatically draw from unused allotments of others on Teams?** | No. Teams plans have per-seat usage (20 USD per user) that cannot be shared. Heavy users move to on-demand billing even if others have unused capacity. |
-| **How do usage-limit notifications work on Teams?** | Spend alerts send email notifications when configured thresholds of on-demand spend are reached at team or member level. Alerts do not block usage. |
-| **How does an admin top up a specific user on Teams?** | Teams does not support direct "top-ups" of included usage. Admins can adjust spend limits to allow more on-demand usage, but included usage cannot be transferred. |
-| **Can most employees be on a smaller plan while power users are on higher plans within the same org?** | No. Teams is a flat per-seat rate (40 USD/user). Enterprise terms are contract-specific, but tiered deployment within one account is not standard. |
-| **Does $20 on Teams provide the same prompts/tokens as $20 on Enterprise?** | Yes, at the API pricing level. Both use the same underlying API rates plus Cursor token fees. The difference is pooling (Enterprise) vs. per-seat allocation (Teams). |
+| Question                                                                                               | Answer                                                                                                                                                                       |
+| ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Can an existing direct Claude or ChatGPT subscription be used within Cursor via OAuth or similar?**  | No. Web subscriptions and API usage are fully separate for both providers and for Cursor. There is no OAuth or direct integration.                                           |
+| **What is the "conversion rate" of dollars to tokens for web subscriptions vs API keys?**              | There is no precise conversion rate. Web subscriptions use message/session limits, not token-based pricing. $1 on an API key does NOT equal $1 of subscription value.        |
+| **How does pooled usage work in Enterprise?**                                                          | Enterprise provides a shared organizational usage pool. Heavy users can automatically draw from unused allotments of others within the pool, subject to member-level limits. |
+| **Can high-usage users automatically draw from unused allotments of others on Teams?**                 | No. Teams plans have per-seat usage (20 USD per user) that cannot be shared. Heavy users move to on-demand billing even if others have unused capacity.                      |
+| **How do usage-limit notifications work on Teams?**                                                    | Spend alerts send email notifications when configured thresholds of on-demand spend are reached at team or member level. Alerts do not block usage.                          |
+| **How does an admin top up a specific user on Teams?**                                                 | Teams does not support direct "top-ups" of included usage. Admins can adjust spend limits to allow more on-demand usage, but included usage cannot be transferred.           |
+| **Can most employees be on a smaller plan while power users are on higher plans within the same org?** | No. Teams is a flat per-seat rate (40 USD/user). Enterprise terms are contract-specific, but tiered deployment within one account is not standard.                           |
+| **Does $20 on Teams provide the same prompts/tokens as $20 on Enterprise?**                            | Yes, at the API pricing level. Both use the same underlying API rates plus Cursor token fees. The difference is pooling (Enterprise) vs. per-seat allocation (Teams).        |
 
 ### 4.2 Practical Recommendations
 
 **For Individuals and Small Teams:**
+
 - Use **direct API plus a lightweight client** if you primarily care about predictable token costs and already have strong internal tools. [5][13]
 - Use **Cursor Pro or Teams** if the integrated coding experience and tooling outweigh a small markup and some opacity around included usage. [14][15]
 
 **For Larger Organizations:**
+
 - Choose **Cursor Teams** if:
   - Most users have moderate usage and per-seat included usage (20 USD) is sufficient
   - You are comfortable with heavy users moving into on-demand pricing under spend limits
@@ -239,6 +252,7 @@ Sources: OpenAI API pricing, Anthropic docs, Cursor pricing and billing docs. [5
   - You need advanced analytics APIs and compliance features [16][17][18]
 
 **For Budgeting and Governance:**
+
 - Anchor financial models on **vendor API pricing and Cursor's documented token fee** (0.25 USD per million tokens on Teams), not on web subscriptions. [5][12][14][15]
 - Treat ChatGPT Plus, ChatGPT Business, Claude Pro, Claude Max, and Cursor's included usage as **convenience bundles with inherently approximate effective per-token cost**. [1][7][8][9]
 - For Teams, budget assuming **per-seat usage cannot be pooled** - each user's 20 USD is separate
@@ -269,4 +283,3 @@ Sources: OpenAI API pricing, Anthropic docs, Cursor pricing and billing docs. [5
 [19] API Keys – Cursor Docs: https://cursor.com/docs/settings/api-keys  
 [20] Models – Cursor Docs: https://cursor.com/docs/models  
 [21] Team Pricing Clarification – Cursor Forum: https://forum.cursor.com/t/team-pricing-clarification-per-seat-usage-vs-shared-usage-pool/146379
-
