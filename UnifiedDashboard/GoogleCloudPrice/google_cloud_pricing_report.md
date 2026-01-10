@@ -2,26 +2,24 @@
 
 ## Project Overview
 
-This deployment consists of two batch processing projects that scrape and process data from multiple sources.
+This deployment consists of two batch processing projects: a daily data scraper that monitors GitHub repositories, Slack channels, and mailing lists, and a monthly processor that downloads WG21 papers, converts them to Markdown format, and creates automated Pull Requests.
 
 ### Project Scope
 
-- GitHub Repositories: 172 repositories (1 main Boost repository + 171 submodules)
-- Slack Channels: 209 public channels in cpplang Slack team
-- Daily Messages: ~2,000 messages per day from Slack
-- Mailing List: isocpp mailing list (less than 200 messages per day)
-- API Requests: ~5,000 requests per day for GitHub data (commits, PRs with reviews/comments, issues with comments)
+- GitHub Repositories: 172 repositories (1 main Boost repository + 171 submodules), generating ~5,000 API requests per day for commits, PRs with reviews/comments, and issues with comments
+- Slack Channels: 209 public channels in Cpplang Slack team, generating ~2,000 messages per day
+- Mailing List: Isocpp mailing list (less than 200 messages per day)
 - Data Processing: WG21 paper conversion (PDF/HTML to Markdown) and automated PR creation
 
 ## Architecture
 
 ### Project 1: Daily Data Scraper
 
-- Purpose: Monitor and collect data from multiple sources to maintain a database of C++ community activity
+- Purpose: Monitor and collect data from multiple sources to maintain a database of Boost community activity
 - Schedule: Runs once per day during off-peak hours
 - Workflow: Collects GitHub data (172 repositories), Slack messages (209 channels), mailing list data (converts to Markdown and pushes to GitHub), and monitors WG21 papers for updates
 - Runtime: ~2 hours per day
-- Resources: 1 vCPU / 2 GB RAM
+- Resources: 1 vCPU / 2 GB RAM (2 GB container image with conversion tools)
 
 ### Project 2: Monthly WG21 Paper Processor
 
@@ -29,7 +27,7 @@ This deployment consists of two batch processing projects that scrape and proces
 - Schedule: Triggered by Project 1 when WG21 papers are updated (typically once per month)
 - Workflow: Downloads papers, converts to Markdown (PDF: `docling` -> `pdfplumber` -> OpenAI; HTML: `pandoc`), creates Pull Requests (one per minute rate limit)
 - Runtime: ~2 hours per month
-- Resources: 4 vCPU / 8 GB RAM (6 GB container image with conversion tools)
+- Resources: 4 vCPU / 8 GB RAM (8 GB container image with conversion tools)
 
 ## Price Details by Service
 
@@ -87,7 +85,16 @@ Purpose: Execute batch jobs (Project 1 and Project 2)
   - Excess: 39,600 GiB-seconds
   - Cost: 39,600 × $0.000002/GiB-second ≈ $0.08/month
 
-Total Cloud Run Cost: $0.17/month
+#### Price without free tier
+
+- Total Compute: 244,800 vCPU-seconds/month (216,000 + 28,800)
+  - Cost: 244,800 × $0.000018/vCPU-second ≈ $4.41/month
+- Total Memory: 489,600 GiB-seconds/month (432,000 + 57,600)
+  - Cost: 489,600 × $0.000002/GiB-second ≈ $0.98/month
+
+Total Cloud Run Cost (without free tier): $5.39/month
+
+Total Cloud Run Cost (with free tier): $0.17/month
 
 Reference: [Cloud Run Pricing & Free Tier](https://cloud.google.com/run/pricing)
 
@@ -95,9 +102,11 @@ Reference: [Cloud Run Pricing & Free Tier](https://cloud.google.com/run/pricing)
 
 Purpose: Store container images for Cloud Run jobs
 
-- Image Size: 6 GB (for Project 2)
+- Image Size: 10 GB
 - Pricing: $0.10 per GB/month after first 0.5 GB
-- Calculation: (6 GB - 0.5 GB) × $0.10 = $0.55/month
+- Calculation:
+  - (10 GB - 0.5 GB) × $0.10 = $0.95/month (with free tier)
+  - 10 GB × $0.10 = $1.00/month (without free tier)
 
 Reference: [Artifact Registry Pricing](https://cloud.google.com/artifact-registry/pricing)
 
@@ -112,7 +121,9 @@ Purpose: Data transfer out of Google Cloud to external services
   - Mailing list data retrieval (HTTP requests)
 - Pricing: ~$0.12 per GB (Premium Tier)
 - Free Tier: First 1 GB/month is free
-- Calculation: (2 GB - 1 GB) × $0.12 = $0.12/month
+- Calculation:
+  - (2 GB - 1 GB) × $0.12 = $0.12/month (with free tier)
+  - 2 GB × $0.12 = $0.24/month (without free tier)
 
 Reference: [VPC Network Pricing](https://cloud.google.com/vpc/network-pricing)
 
@@ -123,7 +134,9 @@ Purpose: Schedule daily and monthly jobs
 - Jobs: 1 active job (1 daily)
 - Pricing: $0.10 per job per month
 - Free Tier: First 3 jobs per billing account are free
-- Cost: $0.00 (within free tier)
+- Cost:
+  - $0.00/month (with free tier)
+  - 1 job × $0.10 = $0.10/month (without free tier)
 
 Reference: [Cloud Scheduler Pricing](https://cloud.google.com/scheduler/pricing)
 
@@ -133,14 +146,27 @@ Reference: [Cloud Scheduler Pricing](https://cloud.google.com/scheduler/pricing)
 | --------------------- | ---------------- | ----------------------------------------------------- |
 | **Cloud SQL**         | **$2.59**        | Shared between both projects (62 hrs/month)           |
 | **Cloud Run**         | **$0.17**        | 4,800 vCPU-sec + 39,600 GiB-sec excess over free tier |
-| **Artifact Registry** | **$0.55**        | 6 GB container image storage                          |
+| **Artifact Registry** | **$0.95**        | 10 GB container image storage                         |
 | **Networking**        | **$0.12**        | Egress for API requests and Git operations            |
 | **Cloud Scheduler**   | **$0.00**        | Free tier (first 3 jobs)                              |
-| **TOTAL**             | **~$3.43/month** | **~$41/year**                                         |
+| **TOTAL**             | **~$3.83/month** | **~$46/year**                                         |
 
-## Cost Optimization Recommendations
+## Total Monthly Cost Summary (Without Free Tier)
 
-1. Regional Deployment: Ensure Cloud Run jobs and Cloud SQL are in the same region to avoid cross-region data transfer costs
+| Service               | Monthly Cost     | Notes                                           |
+| --------------------- | ---------------- | ----------------------------------------------- |
+| **Cloud SQL**         | **$2.59**        | Shared between both projects (62 hrs/month)     |
+| **Cloud Run**         | **$5.39**        | 244,800 vCPU-sec + 489,600 GiB-sec (full usage) |
+| **Artifact Registry** | **$1.00**        | 10 GB container image storage (full usage)      |
+| **Networking**        | **$0.24**        | 2 GB egress (full usage)                        |
+| **Cloud Scheduler**   | **$0.10**        | 1 job (full usage)                              |
+| **TOTAL**             | **~$9.32/month** | **~$112/year**                                  |
+
+**Note:** This table shows costs if free tier limits were not available. The actual cost with free tier is ~$3.83/month.
+
+## Cost Optimization Recommendation
+
+    Ensure Cloud Run jobs and Cloud SQL are in the same region to avoid cross-region data transfer costs
 
 ## References
 
