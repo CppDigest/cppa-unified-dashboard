@@ -38,6 +38,7 @@ Purpose: Core database for storing scraped data
 Assumptions:
 
 - Active Time: 62 hours/month (~60h from Project 1 + 2h from Project 2)
+- Current Database size: at most 3GB
 - Instance: `db-f1-micro` (Shared Core)
 - Region: us-central1 (Iowa)
 
