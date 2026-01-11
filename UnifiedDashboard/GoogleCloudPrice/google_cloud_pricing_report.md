@@ -140,6 +140,55 @@ Purpose: Schedule daily and monthly jobs
 
 Reference: [Cloud Scheduler Pricing](https://cloud.google.com/scheduler/pricing)
 
+### 6. Google Cloud Logging
+
+Purpose: Store and analyze log data from applications and services
+
+- Usage: Logs from Cloud Run jobs, Cloud SQL, and API requests
+- Pricing: $0.50 per GB/month for ingested logs (after free tier)
+- Free Tier: First 50 GB/month of ingested logs is free
+- Assumptions:
+  - Estimated log volume: ~5 GB/month (application logs, API request logs, error logs)
+- Calculation:
+  - Within free tier: $0.00/month (5 GB < 50 GB free tier)
+  - Without free tier: 5 GB × $0.50 = $2.50/month
+
+Reference: [Cloud Logging Pricing](https://cloud.google.com/logging/pricing)
+
+### 7. Google Cloud Secret Manager
+
+Purpose: Securely store and manage API keys, passwords, and other sensitive data
+
+- Usage: Store secrets for GitHub API tokens, Slack API tokens, database credentials, and other sensitive configuration
+- Pricing: $0.06 per secret per month + $0.03 per 10,000 secret versions accessed
+- Free Tier: First 6 secrets per month are free
+- Assumptions:
+  - Estimated secrets: 5 secrets (GitHub token, Slack token, database password, mailing list credentials, OpenAI API key)
+  - Secret access: ~1,000 accesses/month (read operations during job execution)
+- Calculation:
+  - Secrets: 5 secrets (within free tier of 6) = $0.00/month
+  - Secret access: 1,000 accesses = 0.1 × 10,000 = $0.00/month (minimal cost)
+  - Total: $0.00/month (with free tier)
+  - Without free tier: 5 secrets × $0.06 = $0.30/month
+
+Reference: [Secret Manager Pricing](https://cloud.google.com/secret-manager/pricing)
+
+### 8. Google Cloud Monitoring
+
+Purpose: Monitor application performance, uptime, and resource metrics
+
+- Usage: Metrics collection from Cloud Run, Cloud SQL, and custom application metrics
+- Pricing: $0.258 per million metric data points ingested
+- Free Tier: First 150 MB/month of metric data is free
+- Assumptions:
+  - Estimated metrics: ~500,000 data points/month (from Cloud Run jobs, Cloud SQL, and custom metrics)
+  - Metric size: ~100 bytes per data point = ~50 MB/month
+- Calculation:
+  - Within free tier: $0.00/month (50 MB < 150 MB free tier)
+  - Without free tier: 500,000 data points × $0.258 / 1,000,000 ≈ $0.13/month
+
+Reference: [Cloud Monitoring Pricing](https://cloud.google.com/monitoring/pricing)
+
 ## Total Monthly Cost Summary
 
 | Service               | Monthly Cost     | Notes                                                 |
@@ -149,18 +198,24 @@ Reference: [Cloud Scheduler Pricing](https://cloud.google.com/scheduler/pricing)
 | **Artifact Registry** | **$0.95**        | 10 GB container image storage                         |
 | **Networking**        | **$0.12**        | Egress for API requests and Git operations            |
 | **Cloud Scheduler**   | **$0.00**        | Free tier (first 3 jobs)                              |
+| **Cloud Logging**     | **$0.00**        | Free tier (first 50 GB/month)                         |
+| **Secret Manager**    | **$0.00**        | Free tier (first 6 secrets/month)                     |
+| **Cloud Monitoring**  | **$0.00**        | Free tier (first 150 MB/month)                        |
 | **TOTAL**             | **~$3.83/month** | **~$46/year**                                         |
 
 ## Total Monthly Cost Summary (Without Free Tier)
 
-| Service               | Monthly Cost     | Notes                                           |
-| --------------------- | ---------------- | ----------------------------------------------- |
-| **Cloud SQL**         | **$2.59**        | Shared between both projects (62 hrs/month)     |
-| **Cloud Run**         | **$5.39**        | 244,800 vCPU-sec + 489,600 GiB-sec (full usage) |
-| **Artifact Registry** | **$1.00**        | 10 GB container image storage (full usage)      |
-| **Networking**        | **$0.24**        | 2 GB egress (full usage)                        |
-| **Cloud Scheduler**   | **$0.10**        | 1 job (full usage)                              |
-| **TOTAL**             | **~$9.32/month** | **~$112/year**                                  |
+| Service               | Monthly Cost      | Notes                                           |
+| --------------------- | ----------------- | ----------------------------------------------- |
+| **Cloud SQL**         | **$2.59**         | Shared between both projects (62 hrs/month)     |
+| **Cloud Run**         | **$5.39**         | 244,800 vCPU-sec + 489,600 GiB-sec (full usage) |
+| **Artifact Registry** | **$1.00**         | 10 GB container image storage (full usage)      |
+| **Networking**        | **$0.24**         | 2 GB egress (full usage)                        |
+| **Cloud Scheduler**   | **$0.10**         | 1 job (full usage)                              |
+| **Cloud Logging**     | **$2.50**         | 5 GB log ingestion (full usage)                 |
+| **Secret Manager**    | **$0.30**         | 5 secrets (full usage)                          |
+| **Cloud Monitoring**  | **$0.13**         | 500,000 metric data points (full usage)         |
+| **TOTAL**             | **~$12.25/month** | **~$147/year**                                  |
 
 **Note:** This table shows costs if free tier limits were not available. The actual cost with free tier is ~$3.83/month.
 
@@ -175,3 +230,6 @@ Reference: [Cloud Scheduler Pricing](https://cloud.google.com/scheduler/pricing)
 - Artifact Registry Pricing: https://cloud.google.com/artifact-registry/pricing
 - VPC Network Pricing: https://cloud.google.com/vpc/network-pricing
 - Cloud Scheduler Pricing: https://cloud.google.com/scheduler/pricing
+- Cloud Logging Pricing: https://cloud.google.com/logging/pricing
+- Secret Manager Pricing: https://cloud.google.com/secret-manager/pricing
+- Cloud Monitoring Pricing: https://cloud.google.com/monitoring/pricing
