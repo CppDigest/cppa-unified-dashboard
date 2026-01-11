@@ -131,7 +131,7 @@ Reference: [VPC Network Pricing](https://cloud.google.com/vpc/network-pricing)
 
 Purpose: Schedule daily and monthly jobs
 
-- Jobs: 1 active job (1 daily)
+- Jobs: 1 active job (schedules Project 1 daily; Project 2 is triggered programmatically by Project 1 when WG21 papers are updated)
 - Pricing: $0.10 per job per month
 - Free Tier: First 3 jobs per billing account are free
 - Cost:
