@@ -50,6 +50,8 @@ Assumptions:
 | **Networking (Private IP)**  | $0.00                | **$0.00**        | Private IP within VPC (no charge) |
 | **TOTAL**                    |                      | **~$2.59/month** |                                   |
 
+**Important Note:** The current Cloud SQL cost of ~$2.59/month is very low because it's only actively used for 62 hours/month by two batch processing projects. If additional applications are added that require continuous database access (24/7), the instance would need to run continuously, which would increase the cost significantly. For example, if the database instance runs 24/7 (730 hours/month), the instance cost alone would be approximately $7.67/month, and with additional apps potentially requiring larger instance sizes or more storage, the total Cloud SQL cost could easily exceed **$30/month**.
+
 Reference: [Cloud SQL Pricing](https://cloud.google.com/sql/pricing)
 
 ### 2. Google Cloud Run
