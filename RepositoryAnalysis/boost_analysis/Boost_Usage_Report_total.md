@@ -1,6 +1,6 @@
 # Boost Usage Analysis Report
 
-Generated: 2025-12-17 21:42:02 UTC
+Generated: 2026-01-12 19:36:06 UTC
 
 ## Data Source and Date Range
 
@@ -11,256 +11,331 @@ The data covers repositories from 2002 to present.
 
 ## Overview
 
-- **Total Repositories (≥10 stars)**: 10,226
-- **Repositories Using System Boost**: 9,631
+- **Total Repositories (≥10 stars)**: 13,626
+- **Repositories Using System Boost**: 12,663
 - **Total Boost Libraries**: 171
-- **Total Boost Headers**: 17,310
-- **Total Usage Records**: 508,633
+- **Total Usage Records**: 700,877
 
-**Note on Repository Counts**: "Repositories Using System Boost" counts distinct repositories that depend on external/system Boost. This may be less than "Total Repositories" because repositories with vendored Boost bundle their own copy of Boost rather than using external Boost, so their Boost includes are filtered out during processing.
+**Note on Repository Counts**: "Repositories Using System Boost" counts distinct repositories that depend on system Boost. This may be less than "Total Repositories" because repositories with vendored Boost bundle their own copy of Boost rather than using system Boost, so their Boost includes are filtered out during processing.
 
 ## Top Boost Libraries by Repository Count
 
 | Library | Repository Count | Usage Count | Earliest Commit | Latest Commit |
 |---------|------------------|-------------|-----------------|---------------|
-| algorithm | 3,227 | 29,331 | 2006-11-16T00:12:37+00:00 | 2025-12-16T18:30:43+00:00 |
-| filesystem | 2,751 | 25,021 | 2005-11-13T01:24:01Z | 2025-12-16T18:30:43+00:00 |
-| smart_ptr | 2,580 | 26,095 | 2003-03-20T17:54:09Z | 2025-12-15T13:58:46+00:00 |
-| thread | 2,393 | 20,859 | 2007-10-16T04:38:04+00:00 | 2025-12-16T18:30:43+00:00 |
-| bind | 2,005 | 11,140 | 2006-02-16T21:14:52Z | 2025-12-12T16:13:24+00:00 |
-| program_options | 1,992 | 9,729 | 2008-06-23T06:31:56Z | 2025-12-16T18:30:43+00:00 |
-| lexical_cast | 1,959 | 10,147 | 2006-07-26T20:48:36+00:00 | 2025-12-16T18:30:43+00:00 |
-| asio | 1,795 | 20,979 | 2008-07-07T23:21:20Z | 2025-12-16T19:13:08+00:00 |
-| config | 1,744 | 13,689 | 2003-01-14T19:56:42Z | 2025-12-16T20:27:52+00:00 |
-| date_time | 1,492 | 6,591 | 2007-09-16T15:20:23+00:00 | 2025-12-16T18:30:43+00:00 |
-| test | 1,320 | 42,530 | 2007-03-01T02:29:00Z | 2025-12-16T16:25:54+00:00 |
-| math | 1,287 | 7,131 | 2009-09-30T06:37:33Z | 2025-12-14T23:19:24+00:00 |
-| foreach | 1,234 | 10,629 | 2008-07-03T20:13:07Z | 2025-12-12T14:53:19+00:00 |
-| optional | 1,219 | 8,752 | 2006-06-21T03:57:14+00:00 | 2025-12-14T23:19:24+00:00 |
-| core | 1,168 | 11,273 | 2005-11-28T20:55:34Z | 2025-12-16T09:05:24+00:00 |
-| format | 1,162 | 6,203 | 2008-04-22T21:24:32Z | 2025-12-16T18:30:43+00:00 |
-| function | 1,101 | 4,303 | 2003-03-20T17:54:09Z | 2025-12-11T11:28:11+00:00 |
-| variant | 1,026 | 3,871 | 2006-08-10T16:05:45Z | 2025-12-09T02:11:24+00:00 |
-| preprocessor | 984 | 8,260 | 2005-11-28T20:55:34Z | 2025-12-12T08:47:48+00:00 |
-| regex | 973 | 3,496 | 2005-11-28T20:55:34Z | 2025-12-16T12:31:16+00:00 |
+| algorithm | 4,268 | 39,305 | 2006-08-15 14:48:06 | 2026-01-09 03:27:49 |
+| filesystem | 3,652 | 32,526 | 2005-11-13 01:24:01 | 2026-01-07 22:28:33 |
+| smart_ptr | 3,615 | 37,200 | 1970-01-01 00:39:43 | 2026-01-09 06:58:51 |
+| thread | 3,249 | 27,772 | 1970-01-01 00:39:43 | 2026-01-07 21:34:57 |
+| bind | 2,732 | 15,382 | 2006-02-16 21:14:52 | 2026-01-08 14:28:33 |
+| lexical_cast | 2,669 | 13,733 | 2005-03-12 22:19:53 | 2026-01-07 17:26:55 |
+| program_options | 2,615 | 13,399 | 2008-06-23 06:31:56 | 2026-01-08 14:45:53 |
+| config | 2,362 | 19,521 | 2003-01-14 19:56:42 | 2026-01-09 02:21:50 |
+| asio | 2,357 | 28,242 | 2008-07-07 23:21:20 | 2026-01-09 03:27:49 |
+| date_time | 2,085 | 9,370 | 2007-09-16 15:20:23 | 2026-01-08 09:47:03 |
+| test | 1,755 | 57,273 | 2006-10-17 20:36:13 | 2026-01-07 10:38:52 |
+| math | 1,750 | 9,191 | 2009-09-30 06:37:33 | 2026-01-09 06:58:51 |
+| foreach | 1,662 | 13,732 | 2008-07-03 20:13:07 | 2026-01-07 01:19:22 |
+| core | 1,653 | 15,930 | 2005-10-17 19:09:06 | 2026-01-07 08:55:23 |
+| optional | 1,589 | 11,952 | 2006-06-21 03:57:14 | 2026-01-08 08:56:42 |
+| function | 1,582 | 6,085 | 2003-03-20 17:54:09 | 2026-01-06 20:20:38 |
+| format | 1,567 | 8,568 | 2008-04-22 21:24:32 | 2026-01-07 14:03:40 |
+| variant | 1,346 | 4,973 | 2006-08-10 16:05:45 | 2026-01-07 17:50:49 |
+| random | 1,311 | 8,372 | 2005-10-25 22:14:24 | 2026-01-08 20:26:03 |
+| preprocessor | 1,307 | 11,967 | 2005-11-28 20:55:34 | 2026-01-07 08:15:40 |
 
 ## Bottom Boost Libraries by Repository Count
 
 | Library | Repository Count | Usage Count | Earliest Commit | Latest Commit |
 |---------|------------------|-------------|-----------------|---------------|
-| lambda2 | 1 | 12 | 2021-06-27T00:42:02+00:00 | 2022-08-15T16:22:35+00:00 |
-| parser | 1 | 59 | 2020-08-30T02:09:50+00:00 | 2025-11-25T18:02:18+00:00 |
-| cobalt | 2 | 10 | 2024-03-22T23:43:14+00:00 | 2024-11-14T10:20:20+00:00 |
-| compat | 2 | 74 | 2023-05-15T18:44:34+00:00 | 2025-11-01T17:45:39+00:00 |
-| contract | 2 | 35 | 2019-08-01T18:41:08+00:00 | 2023-03-31T14:29:50+00:00 |
-| hash2 | 2 | 309 | 2023-12-11T18:17:25+00:00 | 2025-10-02T16:37:43+00:00 |
-| metaparse | 2 | 56 | 2016-10-28T14:49:29+00:00 | 2023-03-31T14:29:50+00:00 |
-| mqtt5 | 2 | 127 | 2025-02-12T14:54:14+00:00 | 2025-12-11T06:22:29+00:00 |
-| parameter_python | 2 | 7 | 2014-12-24T04:14:55Z | 2025-09-10T14:08:38+00:00 |
-| redis | 2 | 11 | 2024-05-15T11:14:21+00:00 | 2025-10-29T14:59:15+00:00 |
-| yap | 2 | 6 | 2019-08-01T18:41:08+00:00 | 2024-01-22T15:34:29+00:00 |
-| charconv | 3 | 116 | 2023-01-13T20:47:55+00:00 | 2025-10-23T09:32:26+00:00 |
-| local_function | 4 | 105 | 2013-05-06T15:43:08+00:00 | 2023-03-31T14:29:50+00:00 |
-| mysql | 4 | 30 | 2022-07-08T21:31:56+00:00 | 2025-03-18T14:33:33+00:00 |
-| scope | 4 | 44 | 2023-02-24T16:30:55+00:00 | 2025-09-01T11:20:45+00:00 |
-| poly_collection | 5 | 5 | 2019-04-19T01:33:11+00:00 | 2024-10-03T10:17:37+00:00 |
-| static_string | 5 | 7 | 2020-11-23T02:26:26Z | 2025-11-23T15:52:47+00:00 |
-| leaf | 6 | 70 | 2021-01-19T01:29:09Z | 2025-01-20T03:50:36+00:00 |
-| graph_parallel | 7 | 298 | 2009-04-11T01:33:02+00:00 | 2023-03-31T14:29:50+00:00 |
-| histogram | 7 | 281 | 2019-08-01T18:41:08+00:00 | 2025-05-02T01:17:14+00:00 |
+| bloom | 1 | 19 | 2025-06-24 21:27:54 | 2025-09-30 18:11:22 |
+| yap | 1 | 5 | 2024-01-22 15:34:29 | 2024-01-22 15:34:29 |
+| interval | 1 | 1 | 2018-08-30 21:59:42 | 2018-08-30 21:59:42 |
+| contract | 2 | 16 | 2018-04-16 15:02:22 | 2023-03-31 14:29:50 |
+| lambda2 | 2 | 13 | 2021-06-27 00:42:02 | 2025-06-30 10:40:50 |
+| local_function | 2 | 91 | 2014-12-24 04:14:55 | 2023-03-31 14:29:50 |
+| mqtt5 | 2 | 127 | 2025-02-12 14:54:14 | 2025-12-11 06:22:29 |
+| parameter_python | 2 | 7 | 2014-12-24 04:14:55 | 2025-09-10 14:08:38 |
+| compat | 3 | 82 | 2023-05-15 18:44:34 | 2025-11-01 17:45:39 |
+| hash2 | 3 | 311 | 2023-12-11 18:17:25 | 2026-01-04 16:31:54 |
+| metaparse | 3 | 56 | 2016-05-13 19:32:57 | 2025-04-02 15:03:03 |
+| odeint | 3 | 12 | 2018-12-11 03:32:50 | 2025-02-03 15:06:14 |
+| charconv | 4 | 117 | 2023-01-13 20:47:55 | 2025-11-17 16:25:36 |
+| parser | 4 | 75 | 2020-08-30 02:09:50 | 2026-01-04 09:49:40 |
+| redis | 4 | 192 | 2024-05-15 11:14:21 | 2026-01-07 08:55:23 |
+| ublas | 4 | 192 | 2012-04-09 13:03:44 | 2025-09-05 20:11:32 |
+| cobalt | 5 | 171 | 2023-10-16 13:42:07 | 2026-01-07 16:25:53 |
+| mysql | 5 | 44 | 2022-07-08 21:31:56 | 2025-10-14 12:34:57 |
+| poly_collection | 5 | 5 | 2019-04-19 01:33:11 | 2024-10-03 10:17:37 |
+| leaf | 6 | 73 | 2021-01-19 01:29:09 | 2026-01-07 22:48:54 |
 
-## Top Boost Headers by Repository Count
+## Never Used Boost Libraries
 
-| Header | Repository Count | Usage Count |
-|--------|------------------|-------------|
-| boost/algorithm/string.hpp | 2,640 | 13,415 |
-| boost/filesystem.hpp | 2,515 | 15,766 |
-| boost/lexical_cast.hpp | 1,954 | 10,110 |
-| boost/shared_ptr.hpp | 1,861 | 13,033 |
-| boost/bind.hpp | 1,841 | 9,236 |
-| boost/program_options.hpp | 1,652 | 6,872 |
-| boost/thread.hpp | 1,636 | 8,390 |
-| boost/asio.hpp | 1,473 | 5,756 |
-| boost/foreach.hpp | 1,234 | 10,625 |
-| boost/test/unit_test.hpp | 1,190 | 36,330 |
-| boost/format.hpp | 1,158 | 6,048 |
-| boost/version.hpp | 1,145 | 2,782 |
-| boost/optional.hpp | 1,139 | 7,338 |
-| boost/thread/mutex.hpp | 1,121 | 3,680 |
-| boost/date_time/posix_time/posix_time.hpp | 1,119 | 3,051 |
-| boost/function.hpp | 1,093 | 4,028 |
-| boost/regex.hpp | 870 | 2,577 |
-| boost/variant.hpp | 870 | 2,313 |
-| boost/filesystem/path.hpp | 865 | 3,656 |
-| boost/algorithm/string/predicate.hpp | 828 | 3,751 |
+This section lists Boost libraries that have **never been used** in any repository (≥10 stars) in the dataset.
+
+| Library | Created Version | Last Updated Version |
+|---------|-----------------|----------------------|
+| compatibility | 1.21.2 | 1.21.2 |
+| operators | 1.29.0 | 1.30.0 |
+| compressed_pair | 1.29.0 | 1.75.0 |
+| value_initialized | 1.29.0 | 1.29.0 |
+| ref | 1.29.0 | 1.29.0 |
+| in_place_factory | 1.29.0 | 1.26.0 |
+| result_of | 1.29.0 | 1.52.0 |
+| functional_factory | 1.29.0 | 1.72.0 |
+| functional_forward | 1.29.0 | 1.62.0 |
+| functional_overloaded_function | 1.29.0 | 1.29.0 |
+| tribool | 1.32.0 | 1.90.0 |
+| numeric_conversion | 1.32.0 | 1.48.0 |
+| minmax | 1.32.0 | 1.53.0 |
+| string_algo | 1.32.0 | 1.53.0 |
+| enable_if | 1.56.0 | 1.56.0 |
+| swap | 1.56.0 | 1.56.0 |
+| string_view | 1.78.0 | 1.78.0 |
+| open_method | 1.90.0 | 1.90.0 |
 
 ## Most Active Libraries (Recent vs Past Activity)
 
-This section compares library activity in the last **5 years** (2020-2025) versus earlier years. Libraries with higher recent activity relative to past activity indicate growing adoption.
+This section compares library activity in the last **5 years** (2021-2025) versus earlier years. Libraries with higher recent activity relative to past activity indicate growing adoption.
 
 **Metrics explained:**
-- **Recent Activity Ratio**: Usage in last 5 years / Usage in earlier years (higher = more active recently)
-- **Recent Activity %**: Percentage of total usage that occurred in the last 5 years
-- **Activity Score**: Combined metric (ratio × percentage) indicating overall recent activity trend
+- **Recent Usage**: Total usage in the last 5 years
+- **Past Usage**: Total usage before the last 5 years
+- **Total Usage**: Total usage across all years
+- **Activity Score**: A composite metric (weighted combination of three components) that quantifies the library's adoption trend:
+  - **Weighted Derivative Score (40%)**: Measures recent changes in usage ratio, with higher weight given to more recent time periods
+  - **Trend Score (30%)**: Linear regression slope indicating overall growth or decline pattern over time
+  - **Momentum Score (30%)**: Exponentially weighted velocity that emphasizes recent year-over-year changes more than historical changes
+  Positive scores indicate growing adoption, while negative scores suggest declining usage. The score is normalized by total usage volume to provide relative growth rates.
 
 ### Top 20 Most Active Libraries (Highest Recent Activity)
 
-| Library | Recent Usage | Past Usage | Total Usage | Recent Activity Ratio | Recent Activity % | Activity Score |
-|---------|--------------|------------|-------------|----------------------|-------------------|----------------|
-| sort | 415 | 7 | 422 | 51.88 | 98.3% | 5101.451 |
-| asio | 14,523 | 6,456 | 20,979 | 2.25 | 69.2% | 155.703 |
-| compute | 2,277 | 137 | 2,414 | 16.50 | 94.3% | 1556.359 |
-| nowide | 1,631 | 15 | 1,646 | 101.94 | 99.1% | 10100.854 |
-| pfr | 243 | 2 | 245 | 81.00 | 99.2% | 8033.878 |
-| outcome | 238 | 1 | 239 | 119.00 | 99.6% | 11850.209 |
-| container_hash | 1,344 | 124 | 1,468 | 10.75 | 91.6% | 984.379 |
-| uuid | 2,157 | 921 | 3,078 | 2.34 | 70.1% | 163.946 |
-| process | 1,138 | 110 | 1,248 | 10.25 | 91.2% | 934.861 |
-| algorithm | 17,986 | 11,345 | 29,331 | 1.59 | 61.3% | 97.207 |
-| graph | 3,809 | 4,032 | 7,841 | 0.94 | 48.6% | 45.880 |
-| format | 3,887 | 2,316 | 6,203 | 1.68 | 62.7% | 105.124 |
-| log | 4,114 | 2,454 | 6,568 | 1.68 | 62.6% | 104.965 |
-| fiber | 448 | 76 | 524 | 5.82 | 85.5% | 497.432 |
-| lexical_cast | 4,892 | 5,255 | 10,147 | 0.93 | 48.2% | 44.872 |
-| system | 1,085 | 673 | 1,758 | 1.61 | 61.7% | 99.353 |
-| json | 566 | 0 | 566 | 566.00 | 100.0% | 56600.000 |
-| serialization | 13,826 | 6,960 | 20,786 | 1.99 | 66.5% | 132.115 |
-| type_index | 140 | 52 | 192 | 2.64 | 72.9% | 192.610 |
-| dynamic_bitset | 705 | 459 | 1,164 | 1.53 | 60.6% | 92.826 |
+| Library | Recent Usage | Past Usage | Total Usage | Activity Score |
+|---------|--------------|------------|-------------|----------------|
+| bloom | 19 | 0 | 19 | 7.917 |
+| compute | 2,157 | 1,439 | 3,596 | 5.358 |
+| outcome | 214 | 64 | 278 | 3.928 |
+| format | 2,440 | 6,128 | 8,568 | 0.961 |
+| beast | 1,489 | 2,129 | 3,618 | 0.542 |
+| array | 3,122 | 2,890 | 6,012 | 0.434 |
+| context | 65 | 108 | 173 | 0.352 |
+| heap | 166 | 182 | 348 | 0.276 |
+| fiber | 375 | 369 | 744 | 0.145 |
+| units | 1,923 | 2,050 | 3,973 | 0.113 |
+| tti | 7 | 37 | 44 | 0.063 |
+| container_hash | 940 | 1,316 | 2,256 | 0.027 |
+| container | 1,597 | 3,237 | 4,834 | -0.058 |
+| lexical_cast | 2,362 | 11,371 | 13,733 | -0.065 |
+| nowide | 1,532 | 425 | 1,957 | -0.098 |
+| interval | 0 | 1 | 1 | -0.122 |
+| variant2 | 35 | 124 | 159 | -0.169 |
+| pool | 164 | 507 | 671 | -0.192 |
+| align | 63 | 143 | 206 | -0.239 |
+| asio | 6,634 | 21,608 | 28,242 | -0.254 |
 
 ### Bottom 20 Least Active Libraries (Lowest Recent Activity)
 
-| Library | Recent Usage | Past Usage | Total Usage | Recent Activity Ratio | Recent Activity % | Activity Score |
-|---------|--------------|------------|-------------|----------------------|-------------------|----------------|
-| chrono | 480 | 758 | 1,238 | 0.63 | 38.8% | 24.520 |
-| wave | 44 | 401 | 445 | 0.11 | 9.9% | 1.082 |
-| ptr_container | 202 | 514 | 716 | 0.39 | 28.2% | 11.066 |
-| vmd | 37 | 35 | 72 | 1.03 | 51.4% | 52.816 |
-| function_types | 70 | 267 | 337 | 0.26 | 20.8% | 5.425 |
-| foreach | 2,659 | 7,970 | 10,629 | 0.33 | 25.0% | 8.345 |
-| type_erasure | 52 | 375 | 427 | 0.14 | 12.2% | 1.684 |
-| typeof | 45 | 289 | 334 | 0.16 | 13.5% | 2.091 |
-| gil | 218 | 417 | 635 | 0.52 | 34.3% | 17.905 |
-| leaf | 70 | 0 | 70 | 70.00 | 100.0% | 7000.000 |
-| hof | 59 | 2 | 61 | 19.67 | 96.7% | 1902.186 |
-| python | 6,129 | 6,690 | 12,819 | 0.92 | 47.8% | 43.796 |
-| coroutine | 61 | 105 | 166 | 0.58 | 36.7% | 21.147 |
-| assign | 1,306 | 3,374 | 4,680 | 0.39 | 27.9% | 10.799 |
-| statechart | 123 | 258 | 381 | 0.47 | 32.3% | 15.332 |
-| flyweight | 36 | 117 | 153 | 0.31 | 23.5% | 7.178 |
-| xpressive | 50 | 190 | 240 | 0.26 | 20.8% | 5.454 |
-| spirit | 1,891 | 6,722 | 8,613 | 0.28 | 22.0% | 6.175 |
-| graph_parallel | 103 | 195 | 298 | 0.53 | 34.6% | 18.164 |
-| proto | 47 | 565 | 612 | 0.08 | 7.7% | 0.638 |
+| Library | Recent Usage | Past Usage | Total Usage | Activity Score |
+|---------|--------------|------------|-------------|----------------|
+| python | 3,023 | 13,648 | 16,671 | -1.574 |
+| spirit | 899 | 11,923 | 12,822 | -1.516 |
+| interprocess | 999 | 7,211 | 8,210 | -1.403 |
+| smart_ptr | 4,771 | 32,429 | 37,200 | -1.397 |
+| test | 9,217 | 48,056 | 57,273 | -1.384 |
+| type_traits | 2,085 | 11,705 | 13,790 | -1.370 |
+| random | 1,167 | 7,205 | 8,372 | -1.348 |
+| multi_index | 1,212 | 6,281 | 7,493 | -1.327 |
+| date_time | 1,196 | 8,174 | 9,370 | -1.294 |
+| mpi | 71 | 1,479 | 1,550 | -1.287 |
+| gil | 85 | 1,396 | 1,481 | -1.280 |
+| function | 757 | 5,328 | 6,085 | -1.274 |
+| thread | 4,002 | 23,770 | 27,772 | -1.259 |
+| config | 3,286 | 16,235 | 19,521 | -1.259 |
+| iostreams | 1,099 | 6,901 | 8,000 | -1.252 |
+| math | 1,963 | 7,228 | 9,191 | -1.246 |
+| foreach | 1,438 | 12,294 | 13,732 | -1.240 |
+| exception | 182 | 1,489 | 1,671 | -1.236 |
+| move | 61 | 1,074 | 1,135 | -1.214 |
+| throw_exception | 178 | 1,834 | 2,012 | -1.213 |
 
 ## Repository Counts by Year
 
-[📊 View Interactive Dashboard](boost_usage_by_year.png)
-
 This table shows repository counts (≥10 stars) grouped by year.
-- **Pushed repository count**: year is derived from each repository's latest commit timestamp in the dataset.
-- **New created repository count**: year is derived from `repository.created_at`.
 
-| Year | Pushed repository count | New created repository count |
-|------|-------------------------|-----------------------------|
-| 2025 | 1,569 | 373 |
-| 2024 | 1,146 | 800 |
-| 2023 | 1,084 | 883 |
-| 2022 | 1,236 | 769 |
-| 2021 | 679 | 629 |
-| 2020 | 600 | 692 |
-| 2019 | 473 | 410 |
-| 2018 | 476 | 388 |
-| 2017 | 642 | 752 |
-| 2016 | 600 | 868 |
-| 2015 | 580 | 1,108 |
-| 2014 | 406 | 1,004 |
-| 2013 | 196 | 670 |
-| 2012 | 132 | 409 |
-| 2011 | 76 | 254 |
-| 2010 | 44 | 144 |
-| 2009 | 25 | 54 |
-| 2008 | 6 | 19 |
-| 2007 | 3 | 0 |
-| 2005 | 1 | 0 |
-| 2003 | 1 | 0 |
-| 2002 | 1 | 0 |
+| Year | Repository count |
+|------|-------------------|
+| 2025 | 470 |
+| 2024 | 823 |
+| 2023 | 885 |
+| 2022 | 818 |
+| 2021 | 740 |
+| 2020 | 842 |
+| 2019 | 737 |
+| 2018 | 733 |
+| 2017 | 1,128 |
+| 2016 | 1,249 |
+| 2015 | 1,506 |
+| 2014 | 1,280 |
+| 2013 | 945 |
+| 2012 | 539 |
+| 2011 | 507 |
+| 2010 | 285 |
+| 2009 | 103 |
+| 2008 | 36 |
+
+## Repository Count Analysis (from repo_count.csv)
+
+This section provides insights into the proportion of C++ repositories that meet the 10+ stars threshold and the proportion of those that use Boost.
+
+**Metrics explained:**
+- **over_10:cpp_repo_count**: Percentage of C++ repositories with 10+ stars relative to total C++ repositories
+- **boost_over_10:over_10**: Percentage of repositories with 10+ stars that use Boost
+
+| Year | Total C++ Repos | Repos ≥10 Stars | Boost Repos ≥10 Stars | over_10:cpp_repo_count (%) | boost_over_10:over_10 (%) |
+|------|-----------------|-----------------|----------------------|---------------------------|--------------------------|
+| 2025 | 1,132,850 | 4,450 | 470 | 0.39% | 10.56% |
+| 2024 | 963,633 | 7,043 | 823 | 0.73% | 11.69% |
+| 2023 | 851,810 | 8,822 | 885 | 1.04% | 10.03% |
+| 2022 | 680,941 | 9,962 | 818 | 1.46% | 8.21% |
+| 2021 | 527,467 | 10,998 | 740 | 2.09% | 6.73% |
+| 2020 | 484,245 | 12,912 | 842 | 2.67% | 6.52% |
+| 2019 | 411,654 | 12,144 | 737 | 2.95% | 6.07% |
+| 2018 | 375,070 | 11,912 | 733 | 3.18% | 6.15% |
+| 2017 | 280,129 | 11,127 | 1,128 | 3.97% | 10.14% |
+| 2016 | 214,691 | 9,675 | 1,249 | 4.51% | 12.91% |
+| 2015 | 169,687 | 8,950 | 1,506 | 5.27% | 16.83% |
+| 2014 | 102,277 | 6,709 | 1,280 | 6.56% | 19.08% |
+| 2013 | 64,475 | 5,201 | 945 | 8.07% | 18.17% |
+| 2012 | 32,984 | 3,520 | 539 | 10.67% | 15.31% |
+| 2011 | 15,161 | 2,071 | 507 | 13.66% | 24.48% |
+| 2010 | 5,734 | 995 | 285 | 17.35% | 28.64% |
+
 ## Version Coverage Statistics
 
-- **Confirmed repositories (version detected)**: 1,263
-- **No confirmed repositories (version not detected)**: 8,963
-- **Version Coverage**: 12.4%
+- **Confirmed repositories (version detected)**: 1,103
+- **No confirmed repositories (version not detected)**: 12,523
+- **Version Coverage**: 8.1%
 
 **Note**: Version detection relies on explicit version declarations in build files (CMake, Conan, vcpkg) or `boost/version.hpp`. Repositories using system Boost installed via package managers may not have explicit version declarations.
 
 
 ## Boost Version Distribution
 
-| Version | Confirmed repository count | No confirmed repository count |
-|---------|----------------------------|------------------------------|
-| 1.89.0 | 11 | 63 |
-| 1.88.0 | 16 | 121 |
-| 1.87.0 | 12 | 193 |
-| 1.86.0 | 17 | 212 |
-| 1.85.0 | 16 | 250 |
-| 1.84.0 | 20 | 257 |
-| 1.83.0 | 20 | 264 |
-| 1.82.0 | 13 | 297 |
-| 1.81.0 | 17 | 263 |
-| 1.80.0 | 18 | 258 |
-| 1.79.0 | 33 | 225 |
-| 1.78.0 | 11 | 206 |
-| 1.77.0 | 13 | 181 |
-| 1.76.0 | 8 | 187 |
-| 1.75.0 | 21 | 186 |
-| 1.74.0 | 32 | 194 |
-| 1.73.0 | 16 | 207 |
-| 1.72.0 | 19 | 194 |
-| 1.71.0 | 32 | 112 |
-| 1.70.0 | 42 | 120 |
-| 1.69.0 | 29 | 113 |
-| 1.68.0 | 18 | 112 |
-| 1.67.0 | 29 | 99 |
-| 1.66.0 | 39 | 104 |
-| 1.65.1 | 11 | 155 |
-| 1.65.0 | 21 | 25 |
-| 1.64.0 | 7 | 218 |
-| 1.63.0 | 11 | 241 |
-| 1.62.0 | 15 | 155 |
-| 1.61.0 | 13 | 273 |
-| 1.60.0 | 26 | 331 |
-| 1.59.0 | 18 | 351 |
-| 1.58.0 | 64 | 305 |
-| 1.57.0 | 17 | 386 |
-| 1.56.0 | 41 | 230 |
-| 1.55.0 | 77 | 619 |
-| 1.54.0 | 81 | 224 |
-| 1.53.0 | 46 | 222 |
-| 1.52.0 | 8 | 104 |
-| 1.51.0 | 4 | 73 |
-| 1.50.0 | 25 | 49 |
-| (No confirmed total) |  | 8,958 |
+| Version | Created at | Confirmed repository count | No confirmed repository count |
+|---------|----------------------------|------------------------------|------------------------------|
+| 1.90.0 | 2025-12-10 | 0 | 6 |
+| 1.89.0 | 2025-08-14 | 5 | 92 |
+| 1.88.0 | 2025-04-10 | 7 | 160 |
+| 1.87.0 | 2024-12-12 | 5 | 227 |
+| 1.86.0 | 2024-08-14 | 12 | 224 |
+| 1.85.0 | 2024-04-15 | 6 | 270 |
+| 1.84.0 | 2023-12-13 | 7 | 295 |
+| 1.83.0 | 2023-08-11 | 15 | 280 |
+| 1.82.0 | 2023-04-14 | 6 | 316 |
+| 1.81.0 | 2022-12-14 | 8 | 266 |
+| 1.80.0 | 2022-08-10 | 10 | 283 |
+| 1.79.0 | 2022-04-13 | 19 | 267 |
+| 1.78.0 | 2021-12-08 | 5 | 247 |
+| 1.77.0 | 2021-08-11 | 6 | 234 |
+| 1.76.0 | 2021-04-16 | 3 | 219 |
+| 1.75.0 | 2020-12-11 | 13 | 252 |
+| 1.74.0 | 2020-08-14 | 18 | 258 |
+| 1.73.0 | 2020-04-28 | 14 | 275 |
+| 1.72.0 | 2019-12-11 | 12 | 275 |
+| 1.71.0 | 2019-08-19 | 32 | 212 |
+| 1.70.0 | 2019-04-12 | 31 | 233 |
+| 1.69.0 | 2018-12-12 | 25 | 236 |
+| 1.68.0 | 2018-08-09 | 17 | 229 |
+| 1.67.0 | 2018-04-14 | 28 | 215 |
+| 1.66.0 | 2017-12-18 | 32 | 217 |
+| 1.65.1 | 2017-09-07 | 10 | 277 |
+| 1.65.0 | 2017-08-21 | 19 | 53 |
+| 1.64.0 | 2017-04-19 | 6 | 328 |
+| 1.63.0 | 2016-12-26 | 9 | 350 |
+| 1.62.0 | 2016-09-28 | 13 | 252 |
+| 1.61.0 | 2016-05-13 | 13 | 402 |
+| 1.60.0 | 2015-12-17 | 24 | 484 |
+| 1.59.0 | 2015-08-13 | 21 | 478 |
+| 1.58.0 | 2015-04-17 | 55 | 430 |
+| 1.57.0 | 2014-11-03 | 16 | 535 |
+| 1.56.0 | 2014-08-07 | 44 | 308 |
+| 1.55.0 | 2013-11-11 | 82 | 794 |
+| 1.54.0 | 2013-07-01 | 78 | 307 |
+| 1.53.0 | 2013-02-04 | 50 | 319 |
+| 1.52.0 | 2012-11-05 | 9 | 186 |
+| 1.51.0 | 2012-08-20 | 6 | 112 |
+| 1.50.0 | 2012-06-28 | 25 | 63 |
+| 1.49.0 | 2012-02-24 | 22 | 164 |
+| 1.48.0 | 2011-11-15 | 25 | 130 |
+| 1.47.0 | 2011-07-11 | 17 | 165 |
+| 1.46.1 | 2011-03-12 | 6 | 133 |
+| 1.46.0 | 2011-02-21 | 31 | 26 |
+| 1.45.0 | 2010-11-19 | 25 | 97 |
+| 1.44.0 | 2010-08-13 | 9 | 97 |
+| 1.43.0 | 2010-05-06 | 5 | 55 |
+| 1.42.0 | 2010-02-02 | 16 | 51 |
+| 1.41.0 | 2009-11-17 | 10 | 29 |
+| 1.40.0 | 2009-08-27 | 36 | 21 |
+| 1.39.0 | 2009-05-02 | 16 | 25 |
+| 1.38.0 | 2009-02-08 | 9 | 22 |
+| 1.37.0 | 2008-11-03 | 5 | 19 |
+| 1.36.0 | 2008-08-14 | 28 | 10 |
+| 1.35.0 | 2008-03-29 | 8 | 12 |
+| 1.34.1 | 2007-07-24 | 2 | 1 |
+| 1.34.0 | 2007-05-12 | 5 | 0 |
+| 1.33.1 | 2006-12-05 | 4 | 0 |
+| 1.33.0 | 2005-08-11 | 3 | 0 |
+| 1.32.0 | 2004-11-19 | 0 | 0 |
+| 1.31.0 | 2004-01-26 | 0 | 0 |
+| 1.30.2 | 2003-08-19 | 0 | 0 |
+| 1.30.1 | 2003-08-04 | 0 | 0 |
+| 1.30.0 | 2003-03-19 | 5 | 0 |
+| 1.29.0 | 2002-10-10 | 0 | 0 |
+| 1.28.0 | 2002-05-15 | 0 | 0 |
+| 1.27.0 | 2002-02-05 | 0 | 0 |
+| 1.26.0 | 2001-11-30 | 0 | 0 |
+| 1.25.1 | 2001-11-05 | 0 | 0 |
+| 1.25.0 | 2001-10-01 | 0 | 0 |
+| 1.24.0 | 2001-08-19 | 0 | 0 |
+| 1.23.0 | 2001-07-06 | 0 | 0 |
+| 1.22.0 | 2001-05-25 | 0 | 0 |
+| 1.21.2 | 2001-04-24 | 0 | 0 |
+| 1.21.1 | 2001-03-14 | 0 | 0 |
+| 1.21.0 | 2001-03-09 | 0 | 0 |
+| 1.20.2 | 2001-02-10 | 0 | 0 |
+| 1.20.1 | 2001-01-10 | 0 | 0 |
+| 1.20.0 | 2001-01-06 | 0 | 0 |
+| 1.19.0 | 2000-12-10 | 0 | 0 |
+| 1.18.3 | 2000-11-18 | 0 | 0 |
+| 1.18.2 | 2000-11-03 | 0 | 0 |
+| 1.18.0 | 2000-09-28 | 0 | 0 |
+| 1.17.0 | 2000-08-03 | 0 | 0 |
+| 1.16.1 | 2000-07-05 | 0 | 0 |
 
 ## Repository Counts by Year and Version
 
-This table shows the number of repositories using Boost, grouped by both the Boost version and the year of their latest commit.
+This table shows the number of repositories using Boost, grouped by both the Boost version and the year of their creation.
 
 **Note**: This section only includes Boost versions for which version information was successfully detected in the repository data. Versions are shown starting from Boost 1.53.0 and later, as earlier versions may not have explicit version declarations in build files or may use different version detection methods. The absence of earlier versions in this table does not indicate they were not used, but rather that version information was not reliably detected for those repositories.
 
 | Year | 1.89.0 | 1.88.0 | 1.87.0 | 1.86.0 | 1.85.0 | 1.84.0 | 1.83.0 | 1.82.0 | 1.81.0 | 1.80.0 | 1.79.0 | 1.78.0 | 1.77.0 | 1.76.0 | 1.75.0 | 1.74.0 | 1.73.0 | 1.72.0 | 1.71.0 | 1.70.0 | 1.69.0 | 1.68.0 | 1.67.0 | 1.66.0 | 1.65.1 | 1.65.0 | 1.64.0 | 1.63.0 | 1.62.0 | 1.61.0 | 1.60.0 | 1.59.0 | 1.58.0 | 1.57.0 | 1.56.0 | 1.55.0 | 1.54.0 | 1.53.0 |
 |------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
-| 2025 | 8 | 15 | 8 | 12 | 11 | 10 | 11 | 7 | 6 | 8 | 7 | 2 | 4 | 3 | 3 | 7 | 3 | 2 | 7 | 15 | 1 | 5 | 6 | 15 | | 2 | | 1 | 3 | 2 | 1 | | 5 | 2 | 3 | 6 | 6 | 2 |
-| 2024 | | | 1 | 4 | 4 | 9 | 5 | 3 | 3 | 2 | 14 | 1 | 2 | 2 | 4 | 7 | 3 | 3 | 2 | 8 | 2 | 1 | 1 | 4 | 2 | 1 | 1 | | 1 | | 1 | | 7 | 2 | 1 | 4 | 3 | 3 |
-| 2023 | | | | | | | 1 | 2 | 3 | 6 | 3 | 2 | 1 | | 3 | 4 | | 1 | 4 | 3 | 3 | | 3 | 5 | 1 | 4 | 1 | 1 | | 2 | 6 | | 7 | 1 | 1 | 4 | 6 | 3 |
-| 2022 | | | | | | | | | 2 | 1 | 9 | 5 | 4 | 3 | 9 | 5 | 6 | 8 | 15 | 6 | 11 | 2 | 3 | 4 | 3 | 4 | 1 | | 2 | 2 | 3 | 3 | 12 | 1 | 8 | 14 | 14 | 7 |
-| 2021 | | | | | | | | | | | | | 2 | | 2 | 5 | 2 | 1 | 1 | 2 | 3 | 3 | 4 | 2 | 1 | 2 | 1 | 1 | 1 | 1 | 2 | 1 | 6 | 1 | 7 | 6 | 6 | 1 |
-| 2020 | | | | | | | | | | | | | | | | 2 | 2 | 1 | 1 | 2 | 4 | | 5 | 3 | 1 | 1 | 1 | 2 | 2 | 2 | 3 | 2 | 4 | 2 | 2 | 4 | 2 | 8 |
-| 2019 | | | | | | | | | | | | | | | | | | 2 | 1 | 5 | 5 | 1 | 2 | 3 | 1 | 6 | 1 | | 2 | 1 | 1 | 1 | 7 | 2 | 2 | 5 | 5 | |
-| 2018 | | | | | | | | | | | | | | | | | | | | | | 4 | 2 | 2 | 1 | 1 | | 2 | 3 | 1 | 1 | 3 | 2 | 1 | 1 | 6 | 8 | 2 |
-| 2017 | | | | | | | | | | | | | | | | | | | | | | | | | | | 1 | 3 | | 1 | 5 | 1 | 6 | 1 | 6 | 9 | 10 | |
-| 2016 | | | | | | | | | | | | | | | | | | | | | | | | | | | | 1 | 1 | 1 | 1 | 6 | 5 | 3 | 3 | 9 | 8 | 7 |
-| 2015 | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | 1 | 1 | 2 | 1 | | 5 | 9 | 8 |
-| 2014 | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | 1 | 4 | 4 | 4 |
+| 2025 | 1 | | 2 | | | | | | | 1 | | | 1 | | | 1 | | | | 1 | | | | 1 | | | | | | | | | | | | 1 | 1 | |
+| 2024 | | | | 3 | | | 4 | 1 | 2 | 1 | 3 | | 2 | 1 | | 1 | 1 | 2 | 4 | 2 | | 1 | | 3 | | 1 | | | | | | | 2 | | | 2 | | |
+| 2023 | 1 | 1 | 1 | 2 | | 1 | 2 | 2 | 1 | 2 | | | | | 1 | 2 | | | | 3 | | | 1 | 3 | | | | | | | | | 2 | | | 2 | 1 | 1 |
+| 2022 | 1 | | | 2 | | 1 | 1 | 1 | 1 | 1 | 1 | 2 | | | | 1 | | | 5 | 1 | 1 | 2 | 1 | | | 1 | | | | | | | | | 1 | 1 | 1 | |
+| 2021 | | | | | | 1 | 2 | 1 | 1 | 2 | 2 | | | | 2 | 2 | | | 3 | 2 | | | | 1 | | 1 | | 2 | | | | 1 | 1 | | 1 | | 1 | |
+| 2020 | | | | | | 1 | 1 | | 2 | | 1 | | | | 1 | 2 | 2 | 2 | 1 | 1 | 3 | | 2 | | | | | 1 | | | | 2 | 5 | | 2 | 1 | | 1 |
+| 2019 | 1 | | | 2 | | | | | | 1 | 4 | | 1 | | | | 1 | 1 | 4 | 5 | | 2 | 2 | 1 | 1 | 2 | 1 | | | 1 | 1 | | 3 | | 3 | 3 | 1 | 1 |
+| 2018 | 1 | 3 | 1 | | 1 | 2 | 2 | | 1 | | | | | | 2 | 1 | 1 | | | 2 | 2 | 2 | 7 | 5 | | 1 | | 1 | 1 | | 3 | | 3 | 1 | 2 | 6 | 1 | 2 |
+| 2017 | | | | | 2 | | | 1 | | 1 | | | | | 1 | 1 | 2 | 2 | 4 | 2 | 3 | 2 | 3 | 5 | 2 | 5 | 2 | 1 | 3 | 5 | 6 | | 6 | 1 | 10 | 9 | 7 | 5 |
+| 2016 | | | | 2 | 1 | | 1 | | | | 1 | 1 | | | 1 | 1 | 2 | | 4 | 3 | 5 | 1 | 2 | 4 | 1 | 3 | | 3 | 1 | 3 | 5 | 9 | 11 | 6 | 7 | 13 | 11 | 1 |
+| 2015 | | | 1 | | 1 | | | | | | 1 | | | | 2 | 1 | 1 | 1 | 6 | 2 | 2 | 4 | 6 | 2 | 3 | 2 | 1 | | 5 | 2 | 3 | 5 | 9 | 4 | 7 | 23 | 28 | 22 |
+| 2014 | | 1 | | 1 | 1 | 1 | 1 | | | | 1 | | | 1 | 2 | 1 | 3 | 3 | | 2 | 3 | 3 | 3 | 2 | 2 | | 1 | | 2 | | 3 | 1 | 2 | 2 | 8 | 9 | 11 | 10 |
+| 2013 | | | | | | | | | | 1 | 2 | 1 | | | 1 | 3 | | | 1 | 1 | 3 | | 1 | 4 | 1 | 2 | 1 | | | 1 | 2 | 2 | 6 | 2 | 1 | 6 | 8 | 4 |
+| 2012 | | | | | | | 1 | | | | | 1 | 1 | 1 | | | 1 | | | | 1 | | | 1 | | | | 1 | | | 1 | | 2 | | | 2 | 2 | 1 |
+| 2011 | | 2 | | | | | | | | | 2 | | | | | 1 | | | | 2 | 2 | | | | | | | | | | | | 3 | | 1 | 3 | 3 | 2 |
+| 2010 | | | | | | | | | | | | | 1 | | | | | 1 | | 1 | | | | | | 1 | | | | 1 | | | | | 1 | 1 | 1 | |
+| 2009 | | | | | | | | | | | 1 | | | | | | | | | 1 | | | | | | | | | 1 | | | 1 | | | | | 1 | |
 
 
 ## Data Processing Procedure
@@ -320,7 +395,7 @@ Usage records are excluded if:
 
 - The file path contains `/boost` AND the repository has `contains_vendored_boost = true`
 
-This ensures that vendored Boost headers within repository directories are not counted as external Boost usage.
+This ensures that vendored Boost headers within repository directories are not counted as system Boost usage.
 
 ### 5. Database Construction
 
