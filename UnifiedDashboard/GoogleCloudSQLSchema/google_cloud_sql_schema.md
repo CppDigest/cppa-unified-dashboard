@@ -50,10 +50,13 @@ erDiagram
     Email ||--o{ Commit : "author"
     Email ||--o{ Issue : "creator"
     Email ||--o{ IssueComment : "author"
+    Email ||--o{ IssueAssignee : "assigned"
 
     Repository ||--o{ Commit : "contains"
     Repository ||--o{ Issue : "contains"
     Repository ||--o{ IssueComment : "contains"
+    Issue ||--o{ IssueAssignee : "has"
+    Issue ||--o{ IssueLabel : "has"
 
     Email {
         int id PK
@@ -70,8 +73,12 @@ erDiagram
         string repo_url
         string repo_type
         boolean is_active
+        int stars
+        int forks
+        string language
+        string license
+        datetime pushed_at
         datetime created_at
-        datetime updated_at
     }
 
     Commit {
@@ -111,6 +118,20 @@ erDiagram
         int email_id FK
         int repo_id FK
     }
+
+    IssueAssignee {
+        int id PK
+        int issue_id FK
+        int email_id FK
+        datetime created_at
+    }
+
+    IssueLabel {
+        int id PK
+        int issue_id FK
+        string label_name
+        datetime created_at
+    }
 ```
 
 ### Part 2b: GitHub Schema - Pull Requests
@@ -120,10 +141,13 @@ erDiagram
     Email ||--o{ PullRequest : "creator"
     Email ||--o{ PullRequestReview : "author"
     Email ||--o{ PullRequestComment : "author"
+    Email ||--o{ PullRequestAssignee : "assigned"
 
     Repository ||--o{ PullRequest : "contains"
     Repository ||--o{ PullRequestReview : "contains"
     Repository ||--o{ PullRequestComment : "contains"
+    PullRequest ||--o{ PullRequestAssignee : "has"
+    PullRequest ||--o{ PullRequestLabel : "has"
 
     Email {
         int id PK
@@ -140,8 +164,12 @@ erDiagram
         string repo_url
         string repo_type
         boolean is_active
+        int stars
+        int forks
+        string language
+        string license
+        datetime pushed_at
         datetime created_at
-        datetime updated_at
     }
 
     PullRequest {
@@ -180,6 +208,20 @@ erDiagram
         datetime updated_at
         int email_id FK
         int repo_id FK
+    }
+
+    PullRequestAssignee {
+        int id PK
+        int pr_id FK
+        int email_id FK
+        datetime created_at
+    }
+
+    PullRequestLabel {
+        int id PK
+        int pr_id FK
+        string label_name
+        datetime created_at
     }
 ```
 
@@ -325,6 +367,11 @@ Stores Git repository information from GitHub. Tracks repositories being monitor
 - `repo_url`: Full repository URL
 - `repo_type`: Type/category of repository
 - `is_active`: Whether the repository is actively being monitored
+- `stars`: Number of stars the repository has received
+- `forks`: Number of forks of the repository
+- `language`: Primary programming language of the repository
+- `license`: License type of the repository (e.g., "MIT", "Apache-2.0", "GPL-3.0")
+- `pushed_at`: Timestamp of the last push to the repository
 
 #### `github_commit`
 
@@ -360,6 +407,28 @@ Stores comments made on GitHub issues.
 - `issue_comment_id`: Unique GitHub comment ID
 - `body`: Comment content
 
+#### `github_issue_assignee`
+
+Junction table establishing the many-to-many relationship between GitHub issues and their assignees. One issue can have multiple assignees, and one email (person) can be assigned to multiple issues.
+
+**Key Fields:**
+
+- `issue_id`: Foreign key linking to the Issue table
+- `email_id`: Foreign key linking to the Email table (identifies the assignee)
+
+**Note:** A composite unique constraint should be applied on (`issue_id`, `email_id`) to prevent duplicate assignee-issue combinations.
+
+#### `github_issue_label`
+
+Junction table establishing the many-to-many relationship between GitHub issues and labels. One issue can have multiple labels, and one label name can be applied to multiple issues.
+
+**Key Fields:**
+
+- `issue_id`: Foreign key linking to the Issue table
+- `label_name`: Name of the label (e.g., "bug", "enhancement", "documentation")
+
+**Note:** A composite unique constraint should be applied on (`issue_id`, `label_name`) to prevent duplicate label-issue combinations.
+
 #### `github_pull_request`
 
 Stores GitHub pull request information including merge and close timestamps.
@@ -391,6 +460,28 @@ Stores comments on pull requests (non-review comments).
 - `pr_number`: Associated pull request number
 - `pr_comment_id`: Unique GitHub comment ID
 - `body`: Comment content
+
+#### `github_pull_request_assignee`
+
+Junction table establishing the many-to-many relationship between GitHub pull requests and their assignees. One pull request can have multiple assignees, and one email (person) can be assigned to multiple pull requests. Note that the creator of a PR (stored in `github_pull_request.email_id`) is separate from assignees.
+
+**Key Fields:**
+
+- `pr_id`: Foreign key linking to the PullRequest table
+- `email_id`: Foreign key linking to the Email table (identifies the assignee)
+
+**Note:** A composite unique constraint should be applied on (`pr_id`, `email_id`) to prevent duplicate assignee-PR combinations.
+
+#### `github_pull_request_label`
+
+Junction table establishing the many-to-many relationship between GitHub pull requests and labels. One pull request can have multiple labels, and one label name can be applied to multiple pull requests.
+
+**Key Fields:**
+
+- `pr_id`: Foreign key linking to the PullRequest table
+- `label_name`: Name of the label (e.g., "bug", "enhancement", "documentation")
+
+**Note:** A composite unique constraint should be applied on (`pr_id`, `label_name`) to prevent duplicate label-PR combinations.
 
 ### Slack Tables
 
@@ -466,6 +557,10 @@ Junction table establishing the many-to-many relationship between WG21 papers an
 - **Email -> Profile**: One-to-many (one email can have profiles on multiple platforms)
 - **Email -> All Activity Tables**: One-to-many (one email can have many commits, issues, PRs, messages, etc.)
 - **Email <-> WG21Paper**: Many-to-many (through WG21PaperAuthor - one email can author multiple papers, one paper can have multiple authors)
+- **Email <-> Issue**: Many-to-many (through IssueAssignee - one email can be assigned to multiple issues, one issue can have multiple assignees)
+- **Email <-> PullRequest**: Many-to-many (through PullRequestAssignee - one email can be assigned to multiple PRs, one PR can have multiple assignees. Note: PR creator is separate from assignees)
+- **Issue <-> Label**: Many-to-many (through IssueLabel - one issue can have multiple labels, one label name can be applied to multiple issues)
+- **PullRequest <-> Label**: Many-to-many (through PullRequestLabel - one PR can have multiple labels, one label name can be applied to multiple PRs)
 - **Repository -> All GitHub Activity Tables**: One-to-many (one repo contains many commits, issues, PRs, etc.)
 - **SlackTeam -> SlackChannel**: One-to-many (one team has many channels)
 - **SlackChannel -> SlackChannelMember**: One-to-many (one channel has many members)
@@ -479,3 +574,7 @@ Junction table establishing the many-to-many relationship between WG21 papers an
 - Email addresses serve as the central linking mechanism between identities and their activities across platforms
 - WG21 papers use a many-to-many relationship with authors through the `wg21_paper_author` junction table, allowing papers to have multiple authors and authors to write multiple papers
 - The `wg21_paper_author` table requires a composite unique constraint on (`paper_id`, `email_id`) to prevent duplicate author-paper combinations
+- The `github_issue_assignee` table requires a composite unique constraint on (`issue_id`, `email_id`) to prevent duplicate assignee-issue combinations
+- The `github_pull_request_assignee` table requires a composite unique constraint on (`pr_id`, `email_id`) to prevent duplicate assignee-PR combinations
+- The `github_issue_label` table requires a composite unique constraint on (`issue_id`, `label_name`) to prevent duplicate label-issue combinations
+- The `github_pull_request_label` table requires a composite unique constraint on (`pr_id`, `label_name`) to prevent duplicate label-PR combinations
