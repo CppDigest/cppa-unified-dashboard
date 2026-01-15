@@ -1,6 +1,40 @@
 # Database Schema Documentation
 
-This document describes the database schema for the BoostDataCollector project.
+This document describes the database schema for the Boost Dashboard.
+
+## Dashboard Data Requirements
+
+- Track Boost library repositories, commits, issues, and pull requests with their key metrics and activities.
+
+- Monitor Boost libraries, headers, versions, dependencies, and usage tracking across repositories.
+
+- Track library dependency changes (addition/removal history) and processed repositories (processing status, Boost inclusion tracking).
+
+- Monitor Slack activity (cpplang channel activity, team/channel information, message counts) and mailing lists (message counts, thread tracking, mailing list types).
+
+- Resolve contributor profiles across platforms (email addresses, GitHub/Slack profiles) and track WG21 papers (authors and publications).
+
+- Track website statistics (daily visit counts, visits by country, search word frequency and counts).
+
+## Executive Summary
+
+This database schema supports the Boost Dashboard. It tracks and analyzes Boost library development, community engagement, and ecosystem health. The schema has seven main parts:
+
+**Part 1: Core Identity Schema** - Creates a unified identity system. It links contributors across GitHub, Slack, and mailing lists using email addresses and profiles. This allows tracking contributors across all platforms.
+
+**Part 2: GitHub Schema** - Captures GitHub activity data. It includes commits, issues, pull requests, labels, and assignees for Boost library repositories. It tracks metrics like lines added or removed, issue states, PR reviews, and repository information such as stars, forks, language, and license.
+
+**Part 3: Boost Library Schema** - Manages Boost library information. It stores library details, header files, version history, and dependencies between libraries. It also tracks how Boost libraries are used in external repositories. This enables tracking of library changes, version releases, and adoption patterns.
+
+**Part 4: Slack Schema** - Tracks communication in Slack workspaces. It includes teams, channels, channel members, and messages. It supports thread tracking for conversations.
+
+**Part 5: WG21 Papers Schema** - Records C++ Standards Committee papers and their authors. It links papers to contributor identities.
+
+**Part 6: Mailing List Schema** - Captures mailing list messages with thread tracking. This enables analysis of community discussions and communication patterns.
+
+**Part 7: Web Search Schema** - Stores website analytics. It includes daily visit counts, visits by country, and search word frequency statistics.
+
+The schema uses email addresses as the central linking mechanism. This allows contributors to be tracked across all platforms. Data integrity is maintained through foreign key relationships and unique constraints. Most tables include timestamps (`created_at`, `updated_at`) to track when data changes.
 
 ## Entity Relationship Diagrams
 
@@ -52,9 +86,9 @@ erDiagram
     Email ||--o{ IssueComment : "author"
     Email ||--o{ IssueAssignee : "assigned"
 
-    Repository ||--o{ Commit : "contains"
-    Repository ||--o{ Issue : "contains"
-    Repository ||--o{ IssueComment : "contains"
+    GitHubRepository ||--o{ Commit : "contains"
+    GitHubRepository ||--o{ Issue : "contains"
+    GitHubRepository ||--o{ IssueComment : "contains"
     Issue ||--o{ IssueAssignee : "has"
     Issue ||--o{ IssueLabel : "has"
 
@@ -66,19 +100,20 @@ erDiagram
         datetime created_at
     }
 
-    Repository {
+    GitHubRepository {
         int id PK
         string owner
         string repo_name
         string repo_url
         string repo_type
-        boolean is_active
         int stars
         int forks
         string language
         string license
+        text description
         datetime pushed_at
         datetime created_at
+        datetime updated_at
     }
 
     Commit {
@@ -143,9 +178,9 @@ erDiagram
     Email ||--o{ PullRequestComment : "author"
     Email ||--o{ PullRequestAssignee : "assigned"
 
-    Repository ||--o{ PullRequest : "contains"
-    Repository ||--o{ PullRequestReview : "contains"
-    Repository ||--o{ PullRequestComment : "contains"
+    GitHubRepository ||--o{ PullRequest : "contains"
+    GitHubRepository ||--o{ PullRequestReview : "contains"
+    GitHubRepository ||--o{ PullRequestComment : "contains"
     PullRequest ||--o{ PullRequestAssignee : "has"
     PullRequest ||--o{ PullRequestLabel : "has"
 
@@ -157,19 +192,20 @@ erDiagram
         datetime created_at
     }
 
-    Repository {
+    GitHubRepository {
         int id PK
         string owner
         string repo_name
         string repo_url
         string repo_type
-        boolean is_active
         int stars
         int forks
         string language
         string license
+        text description
         datetime pushed_at
         datetime created_at
+        datetime updated_at
     }
 
     PullRequest {
@@ -225,7 +261,143 @@ erDiagram
     }
 ```
 
-### Part 3: Slack Schema with Email
+### Part 3a: Boost Library Schema
+
+```mermaid
+erDiagram
+    direction LR
+    GitHubRepository ||--o| BoostLibrary : "repo"
+    BoostLibrary ||--o{ BoostHeader : "has"
+    BoostLibrary ||--o{ BoostDependency : "main_library"
+    BoostLibrary ||--o{ BoostDependency : "dependency_library"
+    BoostVersion ||--o{ BoostDependency : "version"
+    BoostVersion ||--o{ BoostLibrary : "created_version"
+    BoostVersion ||--o{ BoostLibrary : "last_updated_version"
+    BoostVersion ||--o{ BoostLibrary : "removed_version"
+    BoostVersion ||--o{ IncludeBoostRepository : "version"
+    BoostVersion ||--o{ IncludeBoostRepository : "candidate_version"
+    GitHubRepository ||--o| IncludeBoostRepository : "repo"
+    IncludeBoostRepository ||--o{ BoostUsage : "repo"
+    BoostHeader ||--o{ BoostUsage : "header"
+
+    GitHubRepository {
+        int id PK
+        string owner
+        string repo_name
+        string repo_url
+        string repo_type
+        int stars
+        int forks
+        string language
+        string license
+        text description
+        datetime pushed_at
+        datetime created_at
+        datetime updated_at
+    }
+
+    BoostLibrary {
+        int id PK
+        string name
+        int repo_id FK
+        int created_version_id FK
+        int last_updated_version_id FK
+        int removed_version_id FK
+        string cpp_version
+        text description
+        string repo_type
+        datetime created_at
+        datetime updated_at
+    }
+
+    BoostHeader {
+        int id PK
+        int library_id FK
+        string header_name
+        string full_header_name
+        datetime last_commit_date
+        datetime created_at
+        datetime updated_at
+    }
+
+    BoostVersion {
+        int id PK
+        string version
+        datetime created_at
+        datetime updated_at
+        text updated_libraries
+        text included_libraries
+    }
+
+    BoostDependency {
+        int id PK
+        int main_library_id FK
+        int version_id FK
+        int dependency_library_id FK
+        datetime created_at
+    }
+
+    IncludeBoostRepository {
+        int id PK
+        int repo_id FK
+        boolean boost_change_safe
+        int boost_version_id FK
+        int boost_candidate_version_id FK
+        string repo_type
+        datetime created_at
+        datetime updated_at
+    }
+
+    BoostUsage {
+        int id PK
+        int repo_id FK
+        text file_path
+        int boost_header_id FK
+        datetime last_commit_date
+        date excepted_at
+        datetime created_at
+    }
+```
+
+### Part 3b: Boost Library Schema - Other
+
+```mermaid
+erDiagram
+    direction LR
+    BoostLibrary ||--o{ DependencyChangeLog : "library"
+    BoostLibrary ||--o{ DependencyChangeLog : "dep_library"
+
+    BoostLibrary {
+        int id PK
+        string name
+        int repo_id FK
+        int created_version_id FK
+        int last_updated_version_id FK
+        int removed_version_id FK
+        string cpp_version
+        text description
+        string repo_type
+        datetime created_at
+        datetime updated_at
+    }
+
+    DependencyChangeLog {
+        int id PK
+        int library_id FK
+        int dep_library_id FK
+        boolean is_add
+        date created_at
+    }
+
+    ProcessedRepository {
+        int id PK
+        text repo_name
+        datetime processed_at
+        boolean includes_boost
+    }
+```
+
+### Part 4: Slack Schema
 
 ```mermaid
 erDiagram
@@ -259,6 +431,7 @@ erDiagram
         string channel_id UK
         string channel_name
         string channel_type
+        text description
         int team_id FK
         int channel_creator_id FK
         datetime created_at
@@ -284,7 +457,7 @@ erDiagram
     }
 ```
 
-### Part 4: WG21 Papers Schema
+### Part 5: WG21 Papers Schema
 
 ```mermaid
 erDiagram
@@ -317,6 +490,60 @@ erDiagram
     }
 
 
+```
+
+### Part 6: Mailing List Schema
+
+```mermaid
+erDiagram
+    direction LR
+    Email ||--o{ MailingListMessage : "sender"
+
+    Email {
+        int id PK
+        string email UK
+        int identity_id FK
+        boolean is_primary
+        datetime created_at
+    }
+
+    MailingListMessage {
+        int id PK
+        string msg_id UK
+        string parent_id
+        string thread_id
+        string subject
+        text content
+        int sender_id FK
+        datetime sent_at
+        string list_name
+        datetime created_at
+    }
+```
+
+### Part 7: Web Search Schema
+
+```mermaid
+erDiagram
+    Website {
+        int id PK
+        date stat_date UK
+        int website_visit_count
+    }
+
+    WebsiteVisitCount {
+        int id PK
+        date stat_date
+        string country
+        int count
+    }
+
+    WebsiteWordCount {
+        int id PK
+        date stat_date
+        string word
+        int count
+    }
 ```
 
 ## Table Descriptions
@@ -358,7 +585,7 @@ Stores user profiles from external providers (GitHub, Slack, etc.) linked to ema
 
 #### `github_repo`
 
-Stores Git repository information from GitHub. Tracks repositories being monitored for activity.
+Stores Boost library information from GitHub. Tracks Boost libraries being monitored for activity.
 
 **Key Fields:**
 
@@ -366,11 +593,11 @@ Stores Git repository information from GitHub. Tracks repositories being monitor
 - `repo_name`: Repository name
 - `repo_url`: Full repository URL
 - `repo_type`: Type/category of repository
-- `is_active`: Whether the repository is actively being monitored
 - `stars`: Number of stars the repository has received
 - `forks`: Number of forks of the repository
 - `language`: Primary programming language of the repository
 - `license`: License type of the repository (e.g., "MIT", "Apache-2.0", "GPL-3.0")
+- `description`: Repository description/topic
 - `pushed_at`: Timestamp of the last push to the repository
 
 #### `github_commit`
@@ -483,6 +710,105 @@ Junction table establishing the many-to-many relationship between GitHub pull re
 
 **Note:** A composite unique constraint should be applied on (`pr_id`, `label_name`) to prevent duplicate label-PR combinations.
 
+#### `dependency_change_log`
+
+Stores dependency change history between Boost libraries. Tracks when one Boost library depends on another Boost library, including when dependencies are added or removed.
+
+**Key Fields:**
+
+- `library_id`: Foreign key linking to the BoostLibrary table (the Boost library that has the dependency)
+- `dep_library_id`: Foreign key linking to the BoostLibrary table (the Boost library being depended upon)
+- `is_add`: Boolean flag indicating whether this dependency was added (true) or removed (false)
+- `created_at`: Date when this dependency relationship was recorded
+
+**Note:** This table tracks the history of dependency changes. A composite unique constraint should be applied on (`library_id`, `dep_library_id`, `created_at`) to prevent duplicate dependency records, or consider using a separate table for current dependencies and this table for dependency history.
+
+#### `processed_repository`
+
+Stores processing status of repositories. Used for tracking which repositories have been processed and whether they include Boost.
+
+**Key Fields:**
+
+- `repo_name`: Repository name (text)
+- `processed_at`: Timestamp when the repository was processed
+- `includes_boost`: Boolean flag indicating if the repository includes Boost
+
+**Note:** This table is used only for recording processing status and does not have any foreign key relationships.
+
+### Boost Library Tables
+
+#### `boost_library`
+
+Stores Boost library information. Each Boost library is linked to a GitHub repository and tracks version information.
+
+**Key Fields:**
+
+- `name`: Boost library name
+- `repo_id`: Foreign key linking to the GitHubRepository table
+- `created_version_id`: Foreign key linking to the BoostVersion table (version when the library was first created)
+- `last_updated_version_id`: Foreign key linking to the BoostVersion table (last version when the library was updated)
+- `removed_version_id`: Foreign key linking to the BoostVersion table (version when the library was removed, if applicable)
+- `cpp_version`: C++ version requirement for the library
+- `description`: Library description
+- `repo_type`: Type of repository (should be 'boost-library')
+
+#### `boost_header`
+
+Stores header file information for Boost libraries. Each header belongs to a Boost library.
+
+**Key Fields:**
+
+- `library_id`: Foreign key linking to the BoostLibrary table
+- `header_name`: Short header name (e.g., "algorithm")
+- `full_header_name`: Full header path (e.g., "boost/algorithm/string.hpp")
+- `last_commit_date`: Timestamp of the last commit that modified this header
+
+#### `boost_version`
+
+Stores Boost release version information. Tracks which libraries were updated or included in each version.
+
+**Key Fields:**
+
+- `version`: Boost version string (e.g., "1.84.0")
+- `updated_libraries`: Text field listing libraries updated in this version
+- `included_libraries`: Text field listing libraries included in this version
+
+#### `boost_dependency`
+
+Stores dependency relationships between Boost libraries for specific versions. Tracks which libraries depend on other libraries in each Boost version.
+
+**Key Fields:**
+
+- `main_library_id`: Foreign key linking to the BoostLibrary table (the library that has the dependency)
+- `version_id`: Foreign key linking to the BoostVersion table
+- `dependency_library_id`: Foreign key linking to the BoostLibrary table (the library being depended upon)
+
+**Note:** A composite unique constraint should be applied on (`main_library_id`, `version_id`, `dependency_library_id`) to prevent duplicate dependency records.
+
+#### `include_boost_repository`
+
+Stores information about repositories that include/use Boost libraries. Links external repositories to Boost versions they use.
+
+**Key Fields:**
+
+- `repo_id`: Foreign key linking to the GitHubRepository table
+- `boost_change_safe`: Boolean flag indicating if the repository is safe from Boost changes
+- `boost_version_id`: Foreign key linking to the BoostVersion table (current Boost version used)
+- `boost_candidate_version_id`: Foreign key linking to the BoostVersion table (candidate Boost version)
+- `repo_type`: Type of repository (should be 'include boost repository')
+
+#### `boost_usage`
+
+Stores usage information of Boost headers in external repositories. Tracks which Boost headers are used in which files.
+
+**Key Fields:**
+
+- `repo_id`: Foreign key linking to the IncludeBoostRepository table
+- `file_path`: Path to the file using the Boost header
+- `boost_header_id`: Foreign key linking to the BoostHeader table
+- `last_commit_date`: Timestamp of the last commit that modified this usage
+- `excepted_at`: Date when this usage was excepted/excluded from tracking
+
 ### Slack Tables
 
 #### `slack_team`
@@ -503,6 +829,7 @@ Stores Slack channel information including channel type and creator.
 - `channel_id`: Unique Slack channel ID
 - `channel_name`: Name of the channel
 - `channel_type`: Type of channel (public, private, etc.)
+- `description`: Channel description/topic
 - `channel_creator_id`: Email ID of the channel creator
 
 #### `slack_channel_member`
@@ -551,17 +878,86 @@ Junction table establishing the many-to-many relationship between WG21 papers an
 
 **Note:** A composite unique constraint should be applied on (`paper_id`, `email_id`) to prevent duplicate author-paper combinations.
 
+### Mailing List Tables
+
+#### `mailing_list_message`
+
+Stores messages from mailing lists (e.g., Boost mailing lists). Tracks email threads, parent-child relationships, and message metadata.
+
+**Key Fields:**
+
+- `msg_id`: Unique message identifier (unique constraint)
+- `parent_id`: Message ID of the parent message (string, stores the `msg_id` of the parent message for threaded conversations)
+- `thread_id`: Thread identifier to group related messages together
+- `subject`: Message subject line
+- `content`: Message body/content
+- `sender_id`: Foreign key linking to the Email table (identifies the sender)
+- `sent_at`: Timestamp when the message was sent
+- `list_name`: Name of the mailing list (e.g., "boost@lists.boost.org")
+
+**Note:** The `parent_id` field stores the `msg_id` of the parent message as a string reference to track message threads. A unique constraint should be applied on `msg_id` to prevent duplicate messages.
+
+### Web Search Tables
+
+#### `website`
+
+Stores overall website visit statistics aggregated by date.
+
+**Key Fields:**
+
+- `stat_date`: Statistics date (unique constraint) - represents a single day
+- `website_visit_count`: Total number of website visits on this date
+
+**Note:** A unique constraint should be applied on `stat_date` to ensure one record per day.
+
+#### `website_visit_count`
+
+Stores website visit statistics broken down by country and date.
+
+**Key Fields:**
+
+- `stat_date`: Statistics date - represents a single day
+- `country`: Country code or name
+- `count`: Number of visits from this country on this date
+
+**Note:** A composite unique constraint should be applied on (`stat_date`, `country`) to prevent duplicate records.
+
+#### `website_word_count`
+
+Stores search word frequency statistics by date.
+
+**Key Fields:**
+
+- `stat_date`: Statistics date - represents a single day
+- `word`: Search word or keyword
+- `count`: Number of times this word was searched on this date
+
+**Note:** A composite unique constraint should be applied on (`stat_date`, `word`) to prevent duplicate records.
+
 ## Relationships Summary
 
 - **Identity -> Email**: One-to-many (one identity can have multiple emails)
 - **Email -> Profile**: One-to-many (one email can have profiles on multiple platforms)
 - **Email -> All Activity Tables**: One-to-many (one email can have many commits, issues, PRs, messages, etc.)
+- **Email -> MailingListMessage**: One-to-many (one email can send multiple mailing list messages)
 - **Email <-> WG21Paper**: Many-to-many (through WG21PaperAuthor - one email can author multiple papers, one paper can have multiple authors)
 - **Email <-> Issue**: Many-to-many (through IssueAssignee - one email can be assigned to multiple issues, one issue can have multiple assignees)
 - **Email <-> PullRequest**: Many-to-many (through PullRequestAssignee - one email can be assigned to multiple PRs, one PR can have multiple assignees. Note: PR creator is separate from assignees)
 - **Issue <-> Label**: Many-to-many (through IssueLabel - one issue can have multiple labels, one label name can be applied to multiple issues)
 - **PullRequest <-> Label**: Many-to-many (through PullRequestLabel - one PR can have multiple labels, one label name can be applied to multiple PRs)
-- **Repository -> All GitHub Activity Tables**: One-to-many (one repo contains many commits, issues, PRs, etc.)
+- **GitHubRepository -> All GitHub Activity Tables**: One-to-many (one repository contains many commits, issues, PRs, etc.)
+- **BoostLibrary <-> BoostLibrary**: Many-to-many (through DependencyChangeLog - one Boost library can depend on multiple Boost libraries, one Boost library can be depended upon by multiple Boost libraries)
+- **GitHubRepository -> BoostLibrary**: One-to-one (one repository can be one Boost library)
+- **BoostLibrary -> BoostHeader**: One-to-many (one Boost library has many headers)
+- **BoostVersion -> BoostLibrary**: One-to-many (created_version_id - one version can be the creation version for multiple libraries)
+- **BoostVersion -> BoostLibrary**: One-to-many (last_updated_version_id - one version can be the last update version for multiple libraries)
+- **BoostVersion -> BoostLibrary**: One-to-many (removed_version_id - one version can be the removal version for multiple libraries)
+- **BoostLibrary <-> BoostLibrary**: Many-to-many (through BoostDependency - one library can depend on multiple libraries, one library can be depended upon by multiple libraries, per version)
+- **BoostVersion -> BoostDependency**: One-to-many (one Boost version has many dependency relationships)
+- **BoostVersion -> IncludeBoostRepository**: One-to-many (one Boost version can be used by multiple repositories)
+- **GitHubRepository -> IncludeBoostRepository**: One-to-one (one repository can be one include Boost repository)
+- **IncludeBoostRepository -> BoostUsage**: One-to-many (one include Boost repository has many Boost header usages)
+- **BoostHeader -> BoostUsage**: One-to-many (one Boost header can be used in multiple files/repositories)
 - **SlackTeam -> SlackChannel**: One-to-many (one team has many channels)
 - **SlackChannel -> SlackChannelMember**: One-to-many (one channel has many members)
 - **SlackChannel -> SlackMessage**: One-to-many (one channel contains many messages)
@@ -578,3 +974,7 @@ Junction table establishing the many-to-many relationship between WG21 papers an
 - The `github_pull_request_assignee` table requires a composite unique constraint on (`pr_id`, `email_id`) to prevent duplicate assignee-PR combinations
 - The `github_issue_label` table requires a composite unique constraint on (`issue_id`, `label_name`) to prevent duplicate label-issue combinations
 - The `github_pull_request_label` table requires a composite unique constraint on (`pr_id`, `label_name`) to prevent duplicate label-PR combinations
+- The `boost_dependency` table requires a composite unique constraint on (`main_library_id`, `version_id`, `dependency_library_id`) to prevent duplicate dependency records
+- The `boost_library` table should have `repo_type` set to 'boost-library'
+- The `include_boost_repository` table should have `repo_type` set to 'include boost repository'
+- The `processed_repository` table is used only for tracking processing status and has no foreign key relationships
