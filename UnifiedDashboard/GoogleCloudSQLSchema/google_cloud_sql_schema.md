@@ -18,7 +18,7 @@ This document describes the database schema for the Boost Dashboard.
 
 ## Executive Summary
 
-This database schema supports the Boost Dashboard. It tracks and analyzes Boost library development, community engagement, and ecosystem health. The schema has seven main parts:
+This database schema supports the Boost Dashboard. It tracks and analyzes Boost library development, community engagement, and ecosystem health. The schema has eight main parts:
 
 **Part 1: Core Identity Schema** - Creates a unified identity system. It links contributors across GitHub, Slack, and mailing lists using email addresses and profiles. This allows tracking contributors across all platforms.
 
@@ -33,6 +33,8 @@ This database schema supports the Boost Dashboard. It tracks and analyzes Boost 
 **Part 6: Mailing List Schema** - Captures mailing list messages with thread tracking. This enables analysis of community discussions and communication patterns.
 
 **Part 7: Web Search Schema** - Stores website analytics. It includes daily visit counts, visits by country, and search word frequency statistics.
+
+**Part 8: Pinecone Fail List Schema** - Tracks failed Pinecone operations. It records items that failed to be processed or indexed in the Pinecone vector database, categorized by type (mailing list, WG21 paper, Slack, etc.).
 
 The schema uses email addresses as the central linking mechanism. This allows contributors to be tracked across all platforms. Data integrity is maintained through foreign key relationships and unique constraints. Most tables include timestamps (`created_at`, `updated_at`) to track when data changes.
 
@@ -546,6 +548,18 @@ erDiagram
     }
 ```
 
+### Part 8: Pinecone Fail List Schema
+
+```mermaid
+erDiagram
+    PineconeFailList {
+        int id PK
+        string failed_id
+        string type
+        datetime created_at
+    }
+```
+
 ## Table Descriptions
 
 ### Core Identity Tables
@@ -933,6 +947,19 @@ Stores search word frequency statistics by date.
 - `count`: Number of times this word was searched on this date
 
 **Note:** A composite unique constraint should be applied on (`stat_date`, `word`) to prevent duplicate records.
+
+### Pinecone Fail List Tables
+
+#### `pinecone_fail_list`
+
+Stores records of failed Pinecone operations. Tracks items that failed to be processed or indexed in Pinecone vector database.
+
+**Key Fields:**
+
+- `failed_id`: Unique identifier of the failed item (unique constraint) - the ID of the item that failed (e.g., message ID, paper ID, Slack message ID)
+- `type`: Type of the failed item (e.g., "mailing list", "wg21 paper", "slack", etc.)
+
+**Note:** A unique constraint should be applied on `failed_id` to prevent duplicate failure records. The `type` field categorizes the source of the failed item for easier tracking and debugging.
 
 ## Relationships Summary
 
