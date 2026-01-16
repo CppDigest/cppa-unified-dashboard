@@ -307,7 +307,6 @@ erDiagram
         int removed_version_id FK
         string cpp_version
         text description
-        string repo_type
         datetime created_at
         datetime updated_at
     }
@@ -345,7 +344,6 @@ erDiagram
         boolean boost_change_safe
         int boost_version_id FK
         int boost_candidate_version_id FK
-        string repo_type
         datetime created_at
         datetime updated_at
     }
@@ -378,7 +376,6 @@ erDiagram
         int removed_version_id FK
         string cpp_version
         text description
-        string repo_type
         datetime created_at
         datetime updated_at
     }
