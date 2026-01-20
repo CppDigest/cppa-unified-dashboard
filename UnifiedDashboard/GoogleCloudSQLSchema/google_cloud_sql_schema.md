@@ -40,6 +40,8 @@ The schema uses email addresses as the central linking mechanism. This allows co
 
 ## Entity Relationship Diagrams
 
+**Legend:** PK = Primary Key, FK = Foreign Key, UK = Unique Key, IX = Index
+
 ### Part 1: Core Identity Schema (Identity, Email, Profile)
 
 ```mermaid
@@ -47,228 +49,313 @@ erDiagram
     direction LR
     Identity {
         int id PK
-        string display_name
+        string display_name "IX"
         text description
-        boolean need_review
         datetime created_at
         datetime updated_at
     }
 
     Email {
         int id PK
-        string email UK
         int identity_id FK
+        string email "IX"
         boolean is_primary
         datetime created_at
+        datetime updated_at
     }
 
-    Profile {
+    BaseProfile {
         int id PK
         int email_id FK
-        string provider
-        string account_id
-        string username
-        string display_name
-        string avatar_url
-        boolean is_verified
-        datetime verified_at
         datetime created_at
+        datetime updated_at
+    }
+
+    GitHubProfile {
+        bigint account_id "IX"
+        string username "IX"
+        string display_name "IX"
+        string avatar_url
+    }
+
+    SlackProfile {
+        string slack_user_id "IX"
+        string username "IX"
+        string display_name "IX"
+        string avatar_url
+    }
+
+    MailingListProfile {
+        string display_name "IX"
+    }
+
+    WG21PaperAuthorProfile {
+        string display_name "IX"
+    }
+
+    TmpIdentity {
+        int id PK
+        string display_name "IX"
+        text description
+        datetime created_at
+        datetime updated_at
+    }
+
+    EmailToMerge {
+        int id PK
+        int email_id FK
+        int target_identity_id FK
+        datetime created_at
+        datetime updated_at
     }
 
     Identity ||--o{ Email : "has"
-    Email ||--o{ Profile : "has"
+    Email ||--o{ BaseProfile : "has"
+    BaseProfile ||--o| GitHubProfile : "extends"
+    BaseProfile ||--o| SlackProfile : "extends"
+    BaseProfile ||--o| MailingListProfile : "extends"
+    BaseProfile ||--o| WG21PaperAuthorProfile : "extends"
+    Email ||--o{ EmailToMerge : "has"
+    TmpIdentity ||--o{ EmailToMerge : "target"
 ```
 
-### Part 2a: GitHub Schema - Commits and Issues
+**Note:** The `email` field in the Email table is not unique. Multiple records with the same email address may exist, differentiated by `created_at` and `updated_at` timestamps to track historical changes.
+
+**Note:** GitHubProfile, SlackProfile, MailingListProfile, and WG21PaperAuthorProfile extend BaseProfile (one-to-one).
+
+### Part 2a: GitHub Schema - Repository
 
 ```mermaid
 erDiagram
-    Email ||--o{ Commit : "author"
-    Email ||--o{ Issue : "creator"
-    Email ||--o{ IssueComment : "author"
-    Email ||--o{ IssueAssignee : "assigned"
+    direction LR
+    GitHubProfile ||--o{ GitHubRepository : "owns"
+    GitHubRepository ||--o{ RepoLanguage : "has"
+    GitHubRepository ||--o{ RepoLicense : "has"
+    Language ||--o{ RepoLanguage : "used_in"
+    License ||--o{ RepoLicense : "used_in"
 
-    GitHubRepository ||--o{ Commit : "contains"
-    GitHubRepository ||--o{ Issue : "contains"
-    GitHubRepository ||--o{ IssueComment : "contains"
-    Issue ||--o{ IssueAssignee : "has"
-    Issue ||--o{ IssueLabel : "has"
-
-    Email {
-        int id PK
-        string email UK
-        int identity_id FK
-        boolean is_primary
-        datetime created_at
+    GitHubProfile {
+        bigint account_id "IX"
+        string username "IX"
+        string display_name "IX"
+        string avatar_url
     }
 
     GitHubRepository {
         int id PK
-        string owner
-        string repo_name
-        string repo_url
-        string repo_type
+        int owner_id FK
+        string repo_name "IX"
+        string repo_type "IX"
         int stars
         int forks
-        string language
-        string license
         text description
-        datetime pushed_at
+        datetime repo_pushed_at "IX"
+        datetime repo_created_at "IX"
+        datetime repo_updated_at "IX"
         datetime created_at
         datetime updated_at
     }
 
-    Commit {
-        bigint id PK
-        int email_id FK
-        datetime commit_date
+    Language {
+        int id PK
+        string name UK "IX"
+        datetime created_at
+    }
+
+    License {
+        int id PK
+        string name UK "IX"
+        string spdx_id "IX"
+        string url
+        datetime created_at
+    }
+
+    RepoLanguage {
+        int id PK
         int repo_id FK
+        int language_id FK
+        int line_count
+        datetime created_at
+        datetime updated_at
+    }
+
+    RepoLicense {
+        int id PK
+        int repo_id FK
+        int license_id FK
+        datetime created_at
+    }
+```
+
+**Note:** Composite unique constraints should be applied on: (`owner_id`, `repo_name`) in GitHubRepository, (`repo_id`, `language_id`) in RepoLanguage, (`repo_id`, `license_id`) in RepoLicense.
+
+### Part 2b: GitHub Schema - Commits and Issues
+
+```mermaid
+erDiagram
+    direction LR
+    GitHubRepository ||--o{ GitCommit : "contains"
+    GitHubRepository ||--o{ Issue : "contains"
+    Issue ||--o{ IssueComment : "has"
+    Issue ||--o{ IssueAssignee : "has"
+    Issue ||--o{ IssueLabel : "has"
+
+    GitHubRepository {
+        int id PK
+        int owner_id FK
+        string repo_name "IX"
+        string repo_type "IX"
+        int stars
+        int forks
+        text description
+        datetime repo_pushed_at "IX"
+        datetime repo_created_at "IX"
+        datetime repo_updated_at "IX"
+        datetime created_at
+        datetime updated_at
+    }
+
+    GitCommit {
+        bigint id PK
+        int repo_id FK
+        bigint account_id "IX"
+        string commit_hash UK "IX"
         text comment
-        string commit_hash
         int changed_files
         int added_lines
         int deleted_lines
+        datetime commit_at "IX"
     }
 
     Issue {
         int id PK
-        int issue_number
-        bigint issue_id UK
+        int repo_id FK
+        bigint account_id "IX"
+        int issue_number "IX"
+        bigint issue_id UK "IX"
         text title
         text body
-        datetime created_at
-        datetime updated_at
-        datetime closed_at
-        int email_id FK
-        int repo_id FK
-        string state
+        string state "IX"
         string state_reason
+        datetime issue_created_at "IX"
+        datetime issue_updated_at "IX"
+        datetime issue_closed_at "IX"
     }
 
     IssueComment {
         int id PK
-        int issue_number
-        bigint issue_comment_id UK
+        int issue_id FK
+        bigint account_id "IX"
+        bigint issue_comment_id UK "IX"
         text body
-        datetime created_at
-        datetime updated_at
-        int email_id FK
-        int repo_id FK
+        datetime issue_comment_created_at
+        datetime issue_comment_updated_at
     }
 
     IssueAssignee {
         int id PK
         int issue_id FK
-        int email_id FK
+        bigint account_id "IX"
         datetime created_at
     }
 
     IssueLabel {
         int id PK
         int issue_id FK
-        string label_name
+        string label_name "IX"
         datetime created_at
     }
 ```
 
-### Part 2b: GitHub Schema - Pull Requests
+**Note:** `account_id` fields reference `account_id` in GitHubProfile (not a FK).
+
+**Note:** Composite unique constraints should be applied on: (`repo_id`, `commit_hash`) in GitCommit, (`repo_id`, `issue_number`) in Issue, (`issue_id`, `account_id`) in IssueAssignee, (`issue_id`, `label_name`) in IssueLabel.
+
+### Part 2c: GitHub Schema - Pull Requests
 
 ```mermaid
 erDiagram
-    Email ||--o{ PullRequest : "creator"
-    Email ||--o{ PullRequestReview : "author"
-    Email ||--o{ PullRequestComment : "author"
-    Email ||--o{ PullRequestAssignee : "assigned"
-
+    direction LR
     GitHubRepository ||--o{ PullRequest : "contains"
-    GitHubRepository ||--o{ PullRequestReview : "contains"
-    GitHubRepository ||--o{ PullRequestComment : "contains"
+    PullRequest ||--o{ PullRequestReview : "has"
+    PullRequest ||--o{ PullRequestComment : "has"
     PullRequest ||--o{ PullRequestAssignee : "has"
     PullRequest ||--o{ PullRequestLabel : "has"
 
-    Email {
-        int id PK
-        string email UK
-        int identity_id FK
-        boolean is_primary
-        datetime created_at
-    }
-
     GitHubRepository {
         int id PK
-        string owner
-        string repo_name
-        string repo_url
-        string repo_type
+        int owner_id FK
+        string repo_name "IX"
+        string repo_type "IX"
         int stars
         int forks
-        string language
-        string license
         text description
-        datetime pushed_at
+        datetime repo_pushed_at "IX"
+        datetime repo_created_at "IX"
+        datetime repo_updated_at "IX"
         datetime created_at
         datetime updated_at
     }
 
     PullRequest {
         int id PK
-        int pr_number
-        bigint pr_id UK
+        int repo_id FK
+        bigint account_id "IX"
+        int pr_number "IX"
+        bigint pr_id UK "IX"
         text title
         text body
-        datetime created_at
-        datetime updated_at
-        datetime merged_at
-        datetime closed_at
-        int email_id FK
-        int repo_id FK
-        string state
+        string state "IX"
+        datetime pr_created_at "IX"
+        datetime pr_updated_at "IX"
+        datetime pr_merged_at "IX"
+        datetime pr_closed_at "IX"
     }
 
     PullRequestReview {
         int id PK
-        int pr_number
-        bigint pr_review_id UK
+        int pr_id FK
+        bigint account_id "IX"
+        bigint pr_review_id UK "IX"
         text body
-        datetime created_at
-        datetime updated_at
-        int email_id FK
-        int repo_id FK
         bigint in_reply_to_id
+        datetime pr_review_created_at "IX"
+        datetime pr_review_updated_at "IX"
     }
 
     PullRequestComment {
         int id PK
-        int pr_number
-        bigint pr_comment_id UK
+        int pr_id FK
+        bigint account_id "IX"
+        bigint pr_comment_id UK "IX"
         text body
-        datetime created_at
-        datetime updated_at
-        int email_id FK
-        int repo_id FK
+        datetime pr_comment_created_at "IX"
+        datetime pr_comment_updated_at "IX"
     }
 
     PullRequestAssignee {
         int id PK
         int pr_id FK
-        int email_id FK
+        bigint account_id "IX"
         datetime created_at
     }
 
     PullRequestLabel {
         int id PK
         int pr_id FK
-        string label_name
+        string label_name "IX"
         datetime created_at
     }
 ```
+
+**Note:** Composite unique constraints should be applied on: (`repo_id`, `pr_number`) in PullRequest, (`pr_id`, `account_id`) in PullRequestAssignee, (`pr_id`, `label_name`) in PullRequestLabel.
 
 ### Part 3a: Boost Library Schema
 
 ```mermaid
 erDiagram
     direction LR
-    GitHubRepository ||--o| BoostLibrary : "repo"
+    GitHubRepository ||--o| BoostLibrary : "extends"
     BoostLibrary ||--o{ BoostHeader : "has"
     BoostLibrary ||--o{ BoostDependency : "main_library"
     BoostLibrary ||--o{ BoostDependency : "dependency_library"
@@ -278,56 +365,51 @@ erDiagram
     BoostVersion ||--o{ BoostLibrary : "removed_version"
     BoostVersion ||--o{ IncludeBoostRepository : "version"
     BoostVersion ||--o{ IncludeBoostRepository : "candidate_version"
-    GitHubRepository ||--o| IncludeBoostRepository : "repo"
+    GitHubRepository ||--o| IncludeBoostRepository : "extends"
     IncludeBoostRepository ||--o{ BoostUsage : "repo"
     BoostHeader ||--o{ BoostUsage : "header"
 
     GitHubRepository {
         int id PK
-        string owner
-        string repo_name
-        string repo_url
-        string repo_type
+        int owner_id FK
+        string repo_name "IX"
+        string repo_type "IX"
         int stars
         int forks
-        string language
-        string license
         text description
-        datetime pushed_at
+        datetime repo_pushed_at "IX"
+        datetime repo_created_at "IX"
+        datetime repo_updated_at "IX"
         datetime created_at
         datetime updated_at
     }
 
     BoostLibrary {
-        int id PK
-        string name
-        int repo_id FK
         int created_version_id FK
         int last_updated_version_id FK
         int removed_version_id FK
+        string name "IX"
         string cpp_version
         text description
-        datetime created_at
-        datetime updated_at
     }
 
     BoostHeader {
         int id PK
         int library_id FK
-        string header_name
-        string full_header_name
-        datetime last_commit_date
+        string header_name "IX"
+        string full_header_name "IX"
+        datetime last_commit_date "IX"
         datetime created_at
         datetime updated_at
     }
 
     BoostVersion {
         int id PK
-        string version
-        datetime created_at
-        datetime updated_at
+        string version UK "IX"
         text updated_libraries
         text included_libraries
+        datetime created_at
+        datetime updated_at
     }
 
     BoostDependency {
@@ -339,25 +421,26 @@ erDiagram
     }
 
     IncludeBoostRepository {
-        int id PK
-        int repo_id FK
-        boolean boost_change_safe
         int boost_version_id FK
         int boost_candidate_version_id FK
-        datetime created_at
-        datetime updated_at
+        boolean boost_change_safe
     }
 
     BoostUsage {
         int id PK
         int repo_id FK
-        text file_path
         int boost_header_id FK
-        datetime last_commit_date
+        text file_path
+        datetime last_commit_date "IX"
         date excepted_at
         datetime created_at
+        datetime updated_at
     }
 ```
+
+**Note:** BoostLibrary and IncludeBoostRepository extend GitHubRepository (one-to-one).
+
+**Note:** Composite unique constraint should be applied on: (`main_library_id`, `version_id`, `dependency_library_id`) in BoostDependency.
 
 ### Part 3b: Boost Library Schema - Other
 
@@ -368,16 +451,12 @@ erDiagram
     BoostLibrary ||--o{ DependencyChangeLog : "dep_library"
 
     BoostLibrary {
-        int id PK
-        string name
-        int repo_id FK
         int created_version_id FK
         int last_updated_version_id FK
         int removed_version_id FK
+        string name "IX"
         string cpp_version
         text description
-        datetime created_at
-        datetime updated_at
     }
 
     DependencyChangeLog {
@@ -385,41 +464,31 @@ erDiagram
         int library_id FK
         int dep_library_id FK
         boolean is_add
-        date created_at
+        date created_at "IX"
     }
 
     ProcessedRepository {
         int id PK
-        text repo_name
-        datetime processed_at
+        text repo_name "IX"
         boolean includes_boost
+        datetime processed_at "IX"
     }
 ```
+
+**Note:** Composite unique constraint should be applied on: (`library_id`, `dep_library_id`, `created_at`) in DependencyChangeLog.
 
 ### Part 4: Slack Schema
 
 ```mermaid
 erDiagram
     direction LR
-    Email ||--o{ SlackChannel : "creator"
-    Email ||--o{ SlackChannelMember : "member"
-    Email ||--o{ SlackMessage : "author"
-
     SlackTeam ||--o{ SlackChannel : "has"
     SlackChannel ||--o{ SlackChannelMember : "has"
     SlackChannel ||--o{ SlackMessage : "contains"
 
-    Email {
-        int id PK
-        string email UK
-        int identity_id FK
-        boolean is_primary
-        datetime created_at
-    }
-
     SlackTeam {
         int id PK
-        string team_id UK
+        string team_id UK "IX"
         string team_name
         datetime created_at
         datetime updated_at
@@ -427,69 +496,70 @@ erDiagram
 
     SlackChannel {
         int id PK
-        string channel_id UK
-        string channel_name
+        int team_id FK
+        string channel_id UK "IX"
+        string channel_name "IX"
         string channel_type
         text description
-        int team_id FK
-        int channel_creator_id FK
+        string creator_user_id
         datetime created_at
+        datetime updated_at
     }
 
     SlackChannelMember {
         int id PK
         int channel_id FK
-        int user_id FK
+        string user_id "IX"
         boolean is_joined
         datetime created_at
     }
 
     SlackMessage {
         bigint id PK
-        string ts
         int channel_id FK
-        int user_id FK
+        string ts UK "IX"
+        string user_id "IX"
         text message
-        string thread_ts
-        datetime created_at
-        datetime updated_at
+        string thread_ts "IX"
+        datetime slack_message_created_at "IX"
+        datetime slack_message_updated_at "IX"
     }
 ```
+
+**Note:** `user_id` fields reference `slack_user_id` in SlackProfile (not a FK).
+
+**Note:** Composite unique constraint should be applied on: (`channel_id`, `ts`) in SlackMessage, (`channel_id`, `user_id`, `created_at`) in SlackChannelMember.
 
 ### Part 5: WG21 Papers Schema
 
 ```mermaid
 erDiagram
-    Email ||--o{ WG21PaperAuthor : "author"
+    WG21PaperAuthorProfile ||--o{ WG21PaperAuthor : "author"
     WG21Paper ||--o{ WG21PaperAuthor : "has"
 
-    Email {
-        int id PK
-        string email UK
-        int identity_id FK
-        boolean is_primary
-        datetime created_at
+    WG21PaperAuthorProfile {
+        string display_name
     }
 
     WG21PaperAuthor {
         int id PK
         int paper_id FK
-        int email_id FK
+        int profile_id FK
         datetime created_at
     }
 
     WG21Paper {
         int id PK
-        string paper_id UK
+        string paper_id UK "IX"
         string url
-        string title
-        date publication_date
+        string title "IX"
+        date publication_date "IX"
         datetime created_at
         datetime updated_at
     }
-
-
 ```
+
+**Note:** Composite unique constraint should be applied on: (`paper_id`, `profile_id`) in WG21PaperAuthor.
 
 ### Part 6: Mailing List Schema
 
@@ -500,22 +570,23 @@ erDiagram
 
     Email {
         int id PK
-        string email UK
         int identity_id FK
+        string email UK "IX"
         boolean is_primary
         datetime created_at
+        datetime updated_at
     }
 
     MailingListMessage {
         int id PK
-        string msg_id UK
-        string parent_id
-        string thread_id
+        int sender_id FK
+        string msg_id UK "IX"
+        string parent_id "IX"
+        string thread_id "IX"
         string subject
         text content
-        int sender_id FK
-        datetime sent_at
-        string list_name
+        string list_name "IX"
+        datetime sent_at "IX"
         datetime created_at
     }
 ```
@@ -526,24 +597,26 @@ erDiagram
 erDiagram
     Website {
         int id PK
-        date stat_date UK
+        date stat_date UK "IX"
         int website_visit_count
     }
 
     WebsiteVisitCount {
         int id PK
-        date stat_date
-        string country
+        date stat_date "IX"
+        string country "IX"
         int count
     }
 
     WebsiteWordCount {
         int id PK
-        date stat_date
-        string word
+        date stat_date "IX"
+        string word "IX"
         int count
     }
 ```
+
+**Note:** Composite unique constraints should be applied on: (`stat_date`, `country`) in WebsiteVisitCount, (`stat_date`, `word`) in WebsiteWordCount.
 
 ### Part 8: Pinecone Fail List Schema
 
@@ -551,8 +624,8 @@ erDiagram
 erDiagram
     PineconeFailList {
         int id PK
-        string failed_id
-        string type
+        string failed_id UK "IX"
+        string type "IX"
         datetime created_at
     }
 ```
@@ -568,7 +641,6 @@ Represents a contributor identity that groups multiple email addresses belonging
 **Key Fields:**
 
 - `display_name`: Human-readable name for the identity
-- `need_review`: Flag indicating if the identity needs manual review
 - `description`: Additional notes about the identity
 
 #### `email`
@@ -581,35 +653,126 @@ Stores email addresses linked to identities. Acts as the central linking table c
 - `identity_id`: Links to the parent identity
 - `is_primary`: Indicates if this is the primary email for the identity
 
-#### `profile`
+#### `base_profile`
 
-Stores user profiles from external providers (GitHub, Slack, etc.) linked to email addresses. Contains provider-specific account information.
+Base profile table that links email addresses to platform-specific profiles. Acts as the parent table for extended profile types (GitHub, Slack, Mailing List).
 
 **Key Fields:**
 
-- `provider`: Source platform (e.g., "github", "slack")
-- `account_id`: Provider-specific account identifier
-- `username`: Username on the provider platform
-- `is_verified`: Whether the profile has been verified
+- `email_id`: Foreign key linking to the Email table
+
+#### `github_profile`
+
+Extended profile table for GitHub accounts. Stores GitHub-specific user information. Inherits `id`, `email_id`, `created_at`, `updated_at` from the BaseProfile table. Also serves as the repository owner reference.
+
+**Key Fields:**
+
+- `account_id`: GitHub account ID (numeric)
+- `username`: GitHub username
+- `display_name`: Display name on GitHub
+- `avatar_url`: URL to the GitHub avatar image
+
+#### `slack_profile`
+
+Extended profile table for Slack accounts. Stores Slack-specific user information. Inherits `id`, `email_id`, `created_at`, `updated_at` from the BaseProfile table.
+
+**Key Fields:**
+
+- `slack_user_id`: Slack user ID
+- `username`: Slack username
+- `display_name`: Display name on Slack
+- `avatar_url`: URL to the Slack avatar image
+
+#### `mailing_list_profile`
+
+Extended profile table for mailing list contributors. Stores mailing list-specific user information. Inherits `id`, `email_id`, `created_at`, `updated_at` from the BaseProfile table.
+
+**Key Fields:**
+
+- `display_name`: Display name used in mailing list messages
+
+#### `wg21_paper_author_profile`
+
+Extended profile table for WG21 paper authors. Stores WG21-specific author information. Inherits `id`, `email_id`, `created_at`, `updated_at` from the BaseProfile table.
+
+**Key Fields:**
+
+- `display_name`: Display name used in WG21 paper authorship
+
+#### `tmp_identity`
+
+Temporary table for storing proposed identity records during the human review process. These identities are candidates for merging into the main Identity table after approval.
+
+**Key Fields:**
+
+- `display_name`: Human-readable name for the proposed identity
+- `description`: Additional notes about the proposed identity
+
+#### `email_to_merge`
+
+Temporary table for human review of identity merging. Stores proposed email-to-identity associations that require manual verification before merging.
+
+**Key Fields:**
+
+- `email_id`: Foreign key linking to the Email table (the email to be merged)
+- `target_identity_id`: Foreign key linking to the TmpIdentity table (the target temporary identity to merge into)
 
 ### GitHub Tables
 
 #### `github_repo`
 
-Stores Boost library information from GitHub. Tracks Boost libraries being monitored for activity.
+Stores GitHub repository information. Each repository belongs to one owner (GitHubProfile). Tracks Boost libraries being monitored for activity.
 
 **Key Fields:**
 
-- `owner`: Repository owner (username or organization)
+- `owner_id`: Foreign key linking to the GitHubProfile table (the repository owner)
 - `repo_name`: Repository name
-- `repo_url`: Full repository URL
 - `repo_type`: Type/category of repository
 - `stars`: Number of stars the repository has received
 - `forks`: Number of forks of the repository
-- `language`: Primary programming language of the repository
-- `license`: License type of the repository (e.g., "MIT", "Apache-2.0", "GPL-3.0")
 - `description`: Repository description/topic
-- `pushed_at`: Timestamp of the last push to the repository
+- `repo_pushed_at`: Timestamp of the last push to the repository (from GitHub)
+- `repo_created_at`: Timestamp when the repository was created on GitHub
+- `repo_updated_at`: Timestamp when the repository was last updated on GitHub
+- `created_at`: Timestamp when this record was added to the database
+- `updated_at`: Timestamp when this record was last updated in the database
+
+#### `language`
+
+Stores programming language information. Used for tracking which languages are used in repositories.
+
+**Key Fields:**
+
+- `name`: Language name (unique constraint)
+
+#### `license`
+
+Stores software license information. Used for tracking which licenses are used in repositories.
+
+**Key Fields:**
+
+- `name`: License name (unique constraint)
+- `spdx_id`: SPDX license identifier (e.g., "MIT", "Apache-2.0", "GPL-3.0")
+- `url`: URL to the license text
+
+#### `repo_language`
+
+Junction table establishing the many-to-many relationship between repositories and programming languages. One repository can use multiple languages, and one language can be used in multiple repositories.
+
+**Key Fields:**
+
+- `repo_id`: Foreign key linking to the GitHubRepository table
+- `language_id`: Foreign key linking to the Language table
+- `line_count`: Number of lines of code in this language for the repository
+
+#### `repo_license`
+
+Junction table establishing the many-to-many relationship between repositories and licenses. One repository can have multiple licenses, and one license can be used in multiple repositories.
+
+**Key Fields:**
+
+- `repo_id`: Foreign key linking to the GitHubRepository table
+- `license_id`: Foreign key linking to the License table
 
 #### `github_commit`
 
@@ -618,7 +781,7 @@ Stores Git commit information including commit metadata and statistics.
 **Key Fields:**
 
 - `commit_hash`: Unique commit hash (unique per repository)
-- `commit_date`: When the commit was made
+- `commit_at`: When the commit was made
 - `comment`: Commit message
 - `changed_files`: Number of files changed
 - `added_lines`: Lines added in the commit
@@ -641,7 +804,7 @@ Stores comments made on GitHub issues.
 
 **Key Fields:**
 
-- `issue_number`: Associated issue number
+- `issue_id`: Foreign key linking to the Issue table
 - `issue_comment_id`: Unique GitHub comment ID
 - `body`: Comment content
 
@@ -654,8 +817,6 @@ Junction table establishing the many-to-many relationship between GitHub issues 
 - `issue_id`: Foreign key linking to the Issue table
 - `email_id`: Foreign key linking to the Email table (identifies the assignee)
 
-**Note:** A composite unique constraint should be applied on (`issue_id`, `email_id`) to prevent duplicate assignee-issue combinations.
-
 #### `github_issue_label`
 
 Junction table establishing the many-to-many relationship between GitHub issues and labels. One issue can have multiple labels, and one label name can be applied to multiple issues.
@@ -664,8 +825,6 @@ Junction table establishing the many-to-many relationship between GitHub issues 
 
 - `issue_id`: Foreign key linking to the Issue table
 - `label_name`: Name of the label (e.g., "bug", "enhancement", "documentation")
-
-**Note:** A composite unique constraint should be applied on (`issue_id`, `label_name`) to prevent duplicate label-issue combinations.
 
 #### `github_pull_request`
 
@@ -685,7 +844,7 @@ Stores review comments and approvals on pull requests.
 
 **Key Fields:**
 
-- `pr_number`: Associated pull request number
+- `pr_id`: Foreign key linking to the PullRequest table
 - `pr_review_id`: Unique GitHub review ID
 - `in_reply_to_id`: ID of the review being replied to (for threaded reviews)
 
@@ -695,7 +854,7 @@ Stores comments on pull requests (non-review comments).
 
 **Key Fields:**
 
-- `pr_number`: Associated pull request number
+- `pr_id`: Foreign key linking to the PullRequest table
 - `pr_comment_id`: Unique GitHub comment ID
 - `body`: Comment content
 
@@ -708,8 +867,6 @@ Junction table establishing the many-to-many relationship between GitHub pull re
 - `pr_id`: Foreign key linking to the PullRequest table
 - `email_id`: Foreign key linking to the Email table (identifies the assignee)
 
-**Note:** A composite unique constraint should be applied on (`pr_id`, `email_id`) to prevent duplicate assignee-PR combinations.
-
 #### `github_pull_request_label`
 
 Junction table establishing the many-to-many relationship between GitHub pull requests and labels. One pull request can have multiple labels, and one label name can be applied to multiple pull requests.
@@ -718,8 +875,6 @@ Junction table establishing the many-to-many relationship between GitHub pull re
 
 - `pr_id`: Foreign key linking to the PullRequest table
 - `label_name`: Name of the label (e.g., "bug", "enhancement", "documentation")
-
-**Note:** A composite unique constraint should be applied on (`pr_id`, `label_name`) to prevent duplicate label-PR combinations.
 
 #### `dependency_change_log`
 
@@ -732,7 +887,7 @@ Stores dependency change history between Boost libraries. Tracks when one Boost 
 - `is_add`: Boolean flag indicating whether this dependency was added (true) or removed (false)
 - `created_at`: Date when this dependency relationship was recorded
 
-**Note:** This table tracks the history of dependency changes. A composite unique constraint should be applied on (`library_id`, `dep_library_id`, `created_at`) to prevent duplicate dependency records, or consider using a separate table for current dependencies and this table for dependency history.
+**Note:** This table tracks the history of dependency changes.
 
 #### `processed_repository`
 
@@ -794,8 +949,6 @@ Stores dependency relationships between Boost libraries for specific versions. T
 - `version_id`: Foreign key linking to the BoostVersion table
 - `dependency_library_id`: Foreign key linking to the BoostLibrary table (the library being depended upon)
 
-**Note:** A composite unique constraint should be applied on (`main_library_id`, `version_id`, `dependency_library_id`) to prevent duplicate dependency records.
-
 #### `include_boost_repository`
 
 Stores information about repositories that include/use Boost libraries. Links external repositories to Boost versions they use.
@@ -841,7 +994,7 @@ Stores Slack channel information including channel type and creator.
 - `channel_name`: Name of the channel
 - `channel_type`: Type of channel (public, private, etc.)
 - `description`: Channel description/topic
-- `channel_creator_id`: Email ID of the channel creator
+- `creator_user_id`: Slack user ID of the channel creator (matches `slack_user_id` in SlackProfile)
 
 #### `slack_channel_member`
 
@@ -850,7 +1003,7 @@ Junction table linking channels to their members.
 **Key Fields:**
 
 - `channel_id`: Associated channel
-- `user_id`: Email ID of the member
+- `user_id`: Slack user ID of the member (matches `slack_user_id` in SlackProfile)
 - `is_joined`: Whether the user is currently a member
 
 #### `slack_message`
@@ -860,6 +1013,7 @@ Stores Slack messages including thread information.
 **Key Fields:**
 
 - `ts`: Slack timestamp identifier
+- `user_id`: Slack user ID of the message author (matches `slack_user_id` in SlackProfile)
 - `message`: Message content
 - `thread_ts`: Timestamp of parent message (if this is a thread reply)
 - `created_at`: When the message was sent
@@ -885,9 +1039,7 @@ Junction table establishing the many-to-many relationship between WG21 papers an
 **Key Fields:**
 
 - `paper_id`: Foreign key linking to the WG21Paper table
-- `email_id`: Foreign key linking to the Email table (identifies the author)
-
-**Note:** A composite unique constraint should be applied on (`paper_id`, `email_id`) to prevent duplicate author-paper combinations.
+- `profile_id`: Foreign key linking to the WG21PaperAuthorProfile table (identifies the author)
 
 ### Mailing List Tables
 
@@ -931,8 +1083,6 @@ Stores website visit statistics broken down by country and date.
 - `country`: Country code or name
 - `count`: Number of visits from this country on this date
 
-**Note:** A composite unique constraint should be applied on (`stat_date`, `country`) to prevent duplicate records.
-
 #### `website_word_count`
 
 Stores search word frequency statistics by date.
@@ -942,8 +1092,6 @@ Stores search word frequency statistics by date.
 - `stat_date`: Statistics date - represents a single day
 - `word`: Search word or keyword
 - `count`: Number of times this word was searched on this date
-
-**Note:** A composite unique constraint should be applied on (`stat_date`, `word`) to prevent duplicate records.
 
 ### Pinecone Fail List Tables
 
@@ -961,14 +1109,23 @@ Stores records of failed Pinecone operations. Tracks items that failed to be pro
 ## Relationships Summary
 
 - **Identity -> Email**: One-to-many (one identity can have multiple emails)
-- **Email -> Profile**: One-to-many (one email can have profiles on multiple platforms)
-- **Email -> All Activity Tables**: One-to-many (one email can have many commits, issues, PRs, messages, etc.)
+- **Email -> BaseProfile**: One-to-many (one email can have multiple profiles)
+- **BaseProfile -> GitHubProfile**: One-to-one (one base profile can have one GitHub profile extension)
+- **BaseProfile -> SlackProfile**: One-to-one (one base profile can have one Slack profile extension)
+- **BaseProfile -> MailingListProfile**: One-to-one (one base profile can have one mailing list profile extension)
+- **BaseProfile -> WG21PaperAuthorProfile**: One-to-one (one base profile can have one WG21 paper author profile extension)
+- **Email -> All Activity Tables**: One-to-many (one email can have many commits, issues, PRs, mailing list messages, etc.)
+- **SlackProfile (via user_id) -> SlackChannelMember**: One-to-many (one Slack user can be a member of multiple channels)
+- **SlackProfile (via user_id) -> SlackMessage**: One-to-many (one Slack user can send multiple messages)
 - **Email -> MailingListMessage**: One-to-many (one email can send multiple mailing list messages)
-- **Email <-> WG21Paper**: Many-to-many (through WG21PaperAuthor - one email can author multiple papers, one paper can have multiple authors)
+- **WG21PaperAuthorProfile <-> WG21Paper**: Many-to-many (through WG21PaperAuthor - one profile can author multiple papers, one paper can have multiple authors)
 - **Email <-> Issue**: Many-to-many (through IssueAssignee - one email can be assigned to multiple issues, one issue can have multiple assignees)
 - **Email <-> PullRequest**: Many-to-many (through PullRequestAssignee - one email can be assigned to multiple PRs, one PR can have multiple assignees. Note: PR creator is separate from assignees)
 - **Issue <-> Label**: Many-to-many (through IssueLabel - one issue can have multiple labels, one label name can be applied to multiple issues)
 - **PullRequest <-> Label**: Many-to-many (through PullRequestLabel - one PR can have multiple labels, one label name can be applied to multiple PRs)
+- **GitHubProfile -> GitHubRepository**: One-to-many (one GitHub profile/owner can have multiple repositories)
+- **GitHubRepository <-> Language**: Many-to-many (through RepoLanguage - one repository can use multiple languages, one language can be used in multiple repositories)
+- **GitHubRepository <-> License**: Many-to-many (through RepoLicense - one repository can have multiple licenses, one license can be used in multiple repositories)
 - **GitHubRepository -> All GitHub Activity Tables**: One-to-many (one repository contains many commits, issues, PRs, etc.)
 - **BoostLibrary <-> BoostLibrary**: Many-to-many (through DependencyChangeLog - one Boost library can depend on multiple Boost libraries, one Boost library can be depended upon by multiple Boost libraries)
 - **GitHubRepository -> BoostLibrary**: One-to-one (one repository can be one Boost library)
@@ -988,17 +1145,11 @@ Stores records of failed Pinecone operations. Tracks items that failed to be pro
 
 ## Notes
 
-- All tables use integer primary keys with auto-increment except `Commit` and `SlackMessage` which use `BigInteger`
+- All tables use integer primary keys with auto-increment except `GitCommit` and `SlackMessage` which use `BigInteger`
 - Foreign keys use `ondelete='SET NULL'` to preserve data integrity when referenced records are deleted
 - Most tables include `created_at` and `updated_at` timestamps for audit purposes
 - Email addresses serve as the central linking mechanism between identities and their activities across platforms
-- WG21 papers use a many-to-many relationship with authors through the `wg21_paper_author` junction table, allowing papers to have multiple authors and authors to write multiple papers
-- The `wg21_paper_author` table requires a composite unique constraint on (`paper_id`, `email_id`) to prevent duplicate author-paper combinations
-- The `github_issue_assignee` table requires a composite unique constraint on (`issue_id`, `email_id`) to prevent duplicate assignee-issue combinations
-- The `github_pull_request_assignee` table requires a composite unique constraint on (`pr_id`, `email_id`) to prevent duplicate assignee-PR combinations
-- The `github_issue_label` table requires a composite unique constraint on (`issue_id`, `label_name`) to prevent duplicate label-issue combinations
-- The `github_pull_request_label` table requires a composite unique constraint on (`pr_id`, `label_name`) to prevent duplicate label-PR combinations
-- The `boost_dependency` table requires a composite unique constraint on (`main_library_id`, `version_id`, `dependency_library_id`) to prevent duplicate dependency records
 - The `boost_library` table should have `repo_type` set to 'boost-library'
 - The `include_boost_repository` table should have `repo_type` set to 'include boost repository'
 - The `processed_repository` table is used only for tracking processing status and has no foreign key relationships
+- All composite unique constraints are documented in the diagram notes above each ERD section
