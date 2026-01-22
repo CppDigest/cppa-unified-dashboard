@@ -21,8 +21,8 @@ Beast2's GitHub Actions CI pipeline can be dramatically accelerated through dedi
 - **High-tier (SaaS runners)**: ~$2,500-3,500/month, 1.8-2.2 min median
 
 **Recommendations:**
-- **For day-to-day CI workflow**: Option 3 (Hybrid Starter) - ~$200-400/month, 4-5 min median
-- **For rapid AI bot iteration**: Option 2 (GCP-Centric ARC) part-time - ~$1,600-2,000/month, 2.5-3 min median
+- **For day-to-day CI workflow**: Hybrid approach with 5-10 self-hosted Linux runners on GCP/AWS, GitHub-hosted for Windows/macOS - ~$200-400/month, 4-5 min median
+- **For rapid AI bot iteration**: GCP-Centric ARC (GKE with Actions Runner Controller, autoscaling Linux/Windows runners, macOS from Cirrus/MacStadium) part-time - ~$1,600-2,000/month, 2.5-3 min median
 
 **Runtime reduction**: Current 5-8 min median → With optimization 3-5 min → With self-hosted/third-party 1.8-2.5 min median, ≤3 min max
 
@@ -170,6 +170,8 @@ For public repositories, GitHub Actions minutes are unlimited and free [1][2], b
 | **Cirrus** | $150/mo/runner [25] | M4 Mac [25], unlimited min [25] | All [25] | ~17s [12] |
 
 **Comparison**: Open-source (ARC/Terraform) offers full control, lower long-term cost, requires DevOps expertise. Commercial offers plug-and-play, minimal maintenance, higher per-minute costs [13].
+
+**Disadvantages of Third-Party Runners**: Code runs on provider infrastructure (security concern for sensitive code), higher per-minute costs than self-hosted, vendor lock-in, and less control over hardware/configuration [7][13].
 
 **Best Fit**: **GCP**: ARC on GKE [9]. **AWS**: RunsOn [18] (deploys in your account). **Multi-platform**: ARC + macOS provider (Cirrus [25], MacStadium).
 
