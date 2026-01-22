@@ -26,7 +26,7 @@ Beast2's GitHub Actions CI pipeline can be dramatically accelerated through dedi
 
 | Option | Cost (monthly) | Median Time | Queue Behavior | Setup Complexity |
 |--------|---------------|-------------|----------------|------------------|
-| GitHub-hosted (Team) | $20-100 | 5-8 min | Occasional delays | Minimal |
+| GitHub-hosted (Team) | $0 (non-profit) | 5-8 min | Occasional delays | Minimal |
 | Self-hosted (ARC/GCP) | $1,600-2,000 | 2.5-3 min | <60s | Medium-high |
 | Third-party (Ubicloud) | $50-200 | 2-3 min | <30s | Low |
 | Third-party (RunsOn/AWS) | €300/yr + AWS | 2-3 min | <30s | Medium |
@@ -46,99 +46,49 @@ For public repositories, GitHub Actions minutes are unlimited and free [1][2], b
 | **Team(Pro)** | 3,000 | 60  | 5 | 1000 | 10 GB (up to 10T) | 2 GB(1 GB) |
 | **Enterprise Cloud** | 50,000 | 500 | 50 | 1000 | 10 GB (up to 10T) | 50 GB |
 
-**Current Team plan** ($4/user/month [4]): 60 concurrent jobs [3] sufficient for ~50-job matrices, but peak usage can still cause delays. **Enterprise** (~$21/user/month [4]): 500 concurrent jobs [3], justified only if multiple repos need large matrices simultaneously or macOS concurrency >5 is required.
+**Current Team plan** ($4/user/month [4]): 60 concurrent jobs [3] sufficient for ~50-job matrices, but peak usage can still cause delays.  
+**Enterprise** (~$21/user/month [4]): 500 concurrent jobs [3], justified only if multiple repos need large matrices simultaneously or macOS concurrency >5 is required.
 
-### 1.2 Current Team Plan Benefits and Enterprise Considerations
+### 1.2 Current Team Plan Assessment
 
-**Current Team Plan Benefits (Already in Use):**
-- **60 concurrent jobs** [3]: Provides 3× more concurrency than Free plan, helps reduce queue delays
-- **Repository-level runner assignment**: Can dedicate self-hosted runners to specific repos (Beast2, Http.Io, Buffers, Capy) [7]
-- **Larger runners available**: Access to GitHub's larger hosted runners (4x, 8x, 16x cores) at per-minute cost [1]
-- **Better policy controls**: Organization-level settings for Actions, security, and compliance
+**Current Team Plan (Already in Use):**
+- **60 concurrent jobs** [3]: Sufficient for ~50-job matrices, but peak usage can still cause delays
+- **Repository-level runner assignment** [7]: Can dedicate self-hosted runners to specific repos
+- **Limitations**: 5 macOS concurrent jobs [3] may be insufficient; no enterprise features
 
-**Limitations**: 60 concurrent jobs may still cause delays with 50+ job matrices; 5 macOS concurrent jobs limit [3] may be insufficient; no enterprise features (advanced security, audit logs).
-
-**Enterprise Plan Benefits (If Considering Upgrade):**
-- **500 concurrent jobs** [3]: Massive headroom for multiple repos running simultaneously
+**Enterprise Plan (If Considering Upgrade):**
+- **500 concurrent jobs** [3]: Massive headroom for multiple repos
 - **50 macOS concurrent jobs** [3]: vs 5 on Team (critical if macOS builds are significant)
-- **Enterprise runner groups**: Centralized management of self-hosted runners across multiple orgs [7]
-- **Advanced security**: SAML SSO, IP allow lists, required workflows, audit logs
 - **Cost**: ~$21/user/month [4] vs Team's $4/user/month [4]
 
-**Recommendation**: Current Team plan is sufficient for Beast2's ~50-job matrix. Enterprise justified only if multiple repos need large matrices simultaneously, macOS concurrency >5 is required, or enterprise security/compliance features are needed.
+**Recommendation**: Current Team plan is sufficient for Beast2's ~50-job matrix. Enterprise justified only if multiple repos need large matrices simultaneously or macOS concurrency >5 is required.
 
 ### 1.3 Self-Hosted Runners
 
-**Setup and Configuration:**
-- Install GitHub runner agent on VMs (cloud or on-prem) [7]
-- Register at repository, organization, or enterprise level [7]
-- Tag runners by capability (OS, CPU, labels) for job targeting [7]
-- Can use automation (IaC tools, ARC, Terraform) for scalable deployment [9][11]
+**Benefits**: No queue on GitHub side [7], hardware control (faster CPUs, NVMe storage) [7], zero GitHub per-minute fees [1], repository-level assignment [7].  
+**Cost**: Only infrastructure (e.g., AWS c7i.xlarge ~$0.179/hour [14][15]).  
+**Impact**: With 50+ dedicated runners, all jobs start immediately (<30s startup), eliminating worst-case 2-hour waits.  
+**Custom time ranges**: Script runner lifecycle via cloud APIs (ARC supports min/max replicas for autoscaling).
 
-**Performance Benefits vs GitHub-Hosted:**
-- **No queue on GitHub side**: Jobs dispatch immediately to available runners [7]
-- **Hardware control**: Choose high-performance instances (more cores, faster CPUs, NVMe storage) [7]
-- **Consistent performance**: No multi-tenant contention or shared pool delays [6]
-- **Custom images**: Pre-install dependencies, toolchains, and build environments [7]
+### 1.4 Parallel Execution
 
-**Cost Implications:**
-- **GitHub charges**: Zero per-minute fees for self-hosted runners [1] (only pay for infrastructure)
-- **Infrastructure costs**: Cloud VMs (AWS/GCP/Azure) or hardware purchase
-- **Example**: AWS c7i.xlarge (4 vCPU) ~$0.179/hour [14][15] = ~$0.003/min per job
-
-**Impact on Queue Wait Times:**
-- **Target**: Eliminate worst-case 2-hour waits entirely
-- **Achievement**: With 50+ dedicated runners, all jobs start immediately (<30s startup)
-- **Fallback**: Can configure workflows to use self-hosted if available, else GitHub-hosted
-
-**Custom Daily Time Ranges:**
-- GitHub doesn't provide native UI for time-based scheduling
-- **Solution**: Script runner lifecycle via cloud APIs (Lambda, Cloud Functions, cron)
-- **Example**: Scale up runners at 8AM PT, scale down at 8PM PT
-- **Tools**: ARC supports autoscaling with min/max replicas; Terraform modules can use scheduled scaling
-- **Consideration**: Keep minimal runners always-on for off-hour triggers, or accept delayed CI during off-hours
-
-### 1.3 Parallel Execution
-
-**Concurrency by plan**: Free 20, Team 60 (current), Enterprise 500, Self-hosted effectively unlimited [3]. **Runtime impact**: Sequential 50 jobs × 3 min = 150 minutes → Parallel ~3 minutes (longest job). With Team plan's 60 concurrent [3], all 50 jobs can start immediately.
+**Concurrency by plan**: Free 20, Team 60 (current), Enterprise 500, Self-hosted effectively unlimited [3].  
+**Runtime impact**: Sequential 50 jobs × 3 min = 150 minutes → Parallel ~3 minutes (longest job). With Team plan's 60 concurrent [3], all 50 jobs can start immediately.
 
 ---
 
 ## 2. CI Speed Optimization Report
 
-### 2.1 Current CI Statistics and Baseline
+### 2.1 Current Baseline
 
-**Beast2 CI Performance (Past Week):**
-- **Workflow runs**: ~8 runs in the week
-- **Fastest successful workflows**: ~1.0 minutes (GHA: skip self-hosted runner select for now #764)
-- **Longest runs**: ~2h 28m 20s (Tidy up .gitignore #763)
-- **Median workflow time**: ~15-30 minutes
-
-**Capy CI Performance (Past Week):**
-- **Workflow runs**: ~104 runs
-- **Median workflow time**: ~10-20 minutes
-- **Longest runs**: ~2h 28m 16s (Allocator fix #384)
-- **Trend**: Fewer heavy jobs, but still experiences queuing at peak times
+**Beast2**: ~8 runs/week, median 15-30 min, longest ~2h 28m.  
+**Capy**: ~104 runs/week, median 10-20 min, longest ~2h 28m. Both experience queuing at peak times.
 
 ### 2.2 Performance Optimization
 
-**Current CI Pipeline Bottlenecks:**
-- **Sequential execution**: 50+ jobs × 2-3 min = 100-150 minutes if run sequentially
-- **Queue wait times**: Worst-case 2 hours, typical 1-2 minutes during peak
-- **Total CI cycle time**: Hours (queue + execution)
-- **Inconsistent job completion**: Some jobs 8 minutes while others finish in 2 minutes, workflow time = slowest job
-
-**Performance Targets:**
-- **Current state**: 2-5 minute total CI time is still considered long for rapid AI bot iteration
-- **Target**: Sub-2 minute median, max times under 3 minutes
-- **Focus**: Optimize max time (eliminate 8-minute stragglers), not just average
-- **Strategy**: Ensure all jobs finish in similar time window (~2-3 min)
-
-**Parallelization Strategies:**
-- **Run all 50+ jobs simultaneously**: Requires 50+ concurrent runners (Team plan provides 60 [3], sufficient for current needs)
-- **Reduce total CI time**: From hours (sequential) to sub-2 minutes (parallel)
-- **Consistent resource allocation**: Assign more CPU to heavy jobs (Debug builds → 8-core runners)
-- **Eliminate stragglers**: Target slow jobs specifically (split tests, use larger runners, optimize build steps)
+**Bottlenecks**: Sequential execution (50+ jobs × 2-3 min = 100-150 min), queue waits (worst-case 2 hours), inconsistent job completion (some 8 min, others 2 min).  
+**Targets**: Sub-2 minute median, max ≤3 minutes.  
+**Strategy**: Run all 50+ jobs simultaneously (Team plan's 60 concurrent [3] is sufficient), optimize max time (eliminate 8-minute stragglers), ensure consistent resource allocation.
 
 ### 2.3 Caching Strategy
 
@@ -167,278 +117,69 @@ For public repositories, GitHub Actions minutes are unlimited and free [1][2], b
 
 **Expected Results**: Current hours → With parallel: sub-2 min → With dedicated runners: <30s startup → With caching: cold 5-10 min → warm 1-3 min → Combined: median 1.8-2.2 min, max ≤3 min.
 
-### 2.4 Cost Analysis with 3 Pricing Tiers
+### 2.4 Cost Analysis
 
-**High-Performance Option (Maximum Speed):**
-- **Infrastructure**: High-end cloud instances (32-64 vCPUs) or premium SaaS runners
-- **Examples**: AWS c6a.48xlarge (96 vCPU), Namespace high-perf runners, Cirrus dedicated Macs
-- **Expected runtime reduction**: Median ~1.8-2.2 minutes, max ≤3 minutes
-- **Queue elimination**: Near-zero (<30s), pre-warmed runners
-- **Parallel job capacity**: 50+ concurrent jobs, all start immediately
-- **Monthly cost**: ~$2,500-3,500 (compute + macOS + SaaS fees)
-- **Best for**: Maximum performance priority, budget available
+**High-Performance**: High-end cloud instances or premium SaaS runners. Examples: AWS c6a.48xlarge, Namespace, Cirrus. Median ~1.8-2.2 min, max ≤3 min, near-zero queues. **Cost**: ~$2,500-3,500/month.
 
-**Mid-Tier Option (Balanced Performance and Cost):**
-- **Infrastructure**: Moderate cloud instances (8-16 vCPUs) or balanced SaaS providers
-- **Examples**: GCP N2/C2 instances via ARC, BuildJet runners, Blacksmith
-- **Expected runtime reduction**: Median ~2.5-3 minutes, max ~3-4 minutes
-- **Queue wait time reduction**: <60 seconds with autoscaling
-- **Parallel job capacity**: 20-30 concurrent jobs, scale up to 50+ on demand
-- **Monthly cost**: ~$1,600-2,000 (GKE + compute + macOS provider)
-- **Best for**: Balance of performance and cost, GCP infrastructure preference
+**Mid-Tier**: Moderate cloud instances via ARC or balanced SaaS. Examples: GCP N2/C2 via ARC, BuildJet. Median ~2.5-3 min, max ~3-4 min, <60s queues. **Cost**: ~$1,600-2,000/month.
 
-**Low-Tier Option (Cost-Effective):**
-- **Infrastructure**: Minimal self-hosted runners + caching (Team plan already in use)
-- **Examples**: 5-10 self-hosted Linux runners on GCP, GitHub-hosted for Windows/macOS
-- **Expected runtime reduction**: Median ~4-5 minutes, max ~8-10 minutes
-- **Queue wait time reduction**: Improved for Linux (no queue), still exposed to GitHub macOS/Windows queues
-- **Parallel job capacity**: 5-10 Linux concurrent, limited by GitHub-hosted for others
-- **Monthly cost**: ~$200-400 (minimal compute, Team plan costs already paid)
-- **Best for**: Budget-conscious, Linux-focused optimization, first step before larger investment
+**Low-Tier**: Minimal self-hosted runners + caching. Examples: 5-10 Linux runners on GCP, GitHub-hosted for Windows/macOS. Median ~4-5 min, max ~8-10 min. **Cost**: ~$200-400/month (Team plan already paid).
 
-### 2.5 High-Performance Hardware Specifications
+### 2.5 Hardware Specifications and Scope
 
-**CPU Specifications:**
-- **Cores/Threads**: 4-8 vCPUs per job (8-core runners for heavy jobs, 4-core for typical)
-- **Clock Speed**: 3.5-4.5 GHz boost (AMD EPYC 7xx4, Intel Xeon Scalable, AMD Ryzen 7950X) [12]
-- **Single-thread Performance**: PassMark scores 3500-4650 (vs GitHub's ~2300) [12]
-- **Architecture**: x64 primary, ARM64 (Graviton) for cost optimization if toolchain supports [12]
-- **Instance Examples**: See Section 3.1 for specific cloud provider instance types and pricing
+**Hardware Specs**: 4-8 vCPUs per job (8-core for heavy jobs), 8-16 GB RAM per job, NVMe SSD (10,000+ IOPS), PassMark 3500-4650 (vs GitHub's ~2300) [12]. See Section 3.1 for cloud instance types.
 
-**Memory Requirements:**
-- **Per Job**: 4-8 GB RAM minimum, 8-16 GB recommended for C++ builds
-- **Per Runner**: 32-64 GB for 8-core runners handling multiple jobs
-- **Total**: 200-400 GB aggregate for 50 concurrent jobs
-
-**Storage Options:**
-- **Type**: NVMe SSD preferred, standard SSD acceptable
-- **Capacity**: 100-250 GB per runner for build workspace + caches
-- **I/O Performance**: High IOPS (10,000+) for fast compilation and cache access
-- **Caching**: Local NVMe for ccache, persistent volumes for dependency caches
-
-**Network Capabilities:**
-- **Bandwidth**: Gigabit+ for dependency downloads and artifact uploads
-- **Latency**: Low latency to GitHub API and artifact storage
-- **Cloud Integration**: High-speed links to S3/GCS for cache storage
-
-### 2.6 Scope and Multi-Repository Support
-
-**Dedicated Runners for Team Repositories:**
-- **Target Repos**: Beast2, Http.Io, Buffers, Capy (select repositories only)
-- **Isolation**: Repository-level runner assignment prevents resource contention
-- **Shared Pool Option**: Can use org-level runners with labels for multi-repo support
-- **Capacity Planning**: Size for peak load across all repos (e.g., 2 repos × 50 jobs = 100 concurrent capacity)
-
-**Cloud-Based Slop-Driven Development Support:**
-- **Compatibility**: Same runners can execute both GitHub Actions workflows and other CI/CD tasks
-- **Multi-Repository Support**: Runners can be shared across repos via labels or org-level assignment
-- **Resource Sharing**: Can allocate runners dynamically based on demand (ARC autoscaling)
-- **Isolation**: Ephemeral runners ensure clean environments for each job
-- **Bot-Driven + Manual Workflows**: Runners support both automated (AI bot) and manual (developer) triggers
+**Scope**: Target repos: Beast2, Http.Io, Buffers, Capy. Repository-level assignment prevents contention. Runners support both GitHub Actions and other CI/CD tasks via labels/org-level assignment.
 
 ---
 
 ## 3. Cloud vs. Hardware Infrastructure Report
 
-### 3.1 Cloud Services Options (AWS, GCP, Azure)
+### 3.1 Cloud Services (AWS, GCP, Azure)
 
-**AWS EC2 Instances:**
-- **Compute-Optimized**: C7i (Intel), C7g (Graviton3 ARM), C6a (AMD) [14][15]
-- **Pricing**: c7i.xlarge (4 vCPU) ~$0.179/hour [14][15], c6a.32xlarge (128 vCPU) ~$3.89/hour [14]
-- **Spot Instances**: 70-90% cost reduction [14], suitable for ephemeral runners
-- **macOS Support**: Mac EC2 instances available (mac1.metal, mac2.metal) at ~$1.08/hour with 24-hour minimum [14]
-- **Integration**: Self-hosted runners via EC2 [7], or RunsOn for automated management [18]
-- **Best For**: AWS credits available, need macOS in cloud, maximum instance variety
+| Provider | Instance Types | Pricing (4 vCPU) | Key Features |
+|----------|---------------|------------------|--------------|
+| **AWS** | C7i, C7g, C6a [14][15] | ~$0.179/hour [14][15] | Spot 70-90% savings [14], macOS support ($1.08/hour, 24h min) [14] |
+| **GCP** | N2, C2, T2A [16] | ~$0.194/hour [16] | Preemptible 80% discount [16], GKE + ARC [9] |
+| **Azure** | Dv5, Fsv5 [17] | ~$0.192/hour [17] | Spot VMs, strong Windows support [17] |
 
-**Google Cloud Platform (GCP) Compute Engine:**
-- **Instance Families**: N2 (balanced), C2 (compute-optimized), Tau T2A (ARM) [16]
-- **Pricing**: n2-standard-8 (8 vCPU) ~$0.388/hour($280/mon) [16], c2-standard-8 ~$0.418/hour(~$300/mon) [16]
-- **Preemptible VMs**: Up to 80% discount [16], ideal for ephemeral runners
-- **Sustained Use Discounts**: Automatic discounts for continuous usage [16]
-- **macOS Support**: No native offering (use MacStadium or Mac Mini)
-- **Integration**: GKE with ARC [9], or GCE VMs as self-hosted runners [7]
-- **Best For**: Existing GCP infrastructure, credits available, Kubernetes expertise
+**Integration**: All support self-hosted runners [7], autoscaling, 30-60s cold start. **Recommendation**: Stay on GCP if credits/expertise exist; consider AWS if macOS needed.
 
-**Azure Virtual Machines:**
-- **Instance Series**: Dv5 (general purpose), Dsv5 (with premium storage), Fsv5 (compute-optimized), Fsv2 (older generation) [17]
-- **Pricing**: D4s v5 (4 vCPU) ~$0.192/hour [17], F4s v2 (4 vCPU) ~$0.169/hour [17]
-- **Spot VMs**: Low-priority VMs with significant discounts [17]
-- **Windows Support**: Strong Windows integration, included licensing [17]
-- **Integration**: Self-hosted runners on Azure VMs [7], or Azure Pipelines (separate CI system)
-- **Best For**: Windows-heavy workloads, Microsoft ecosystem preference
+### 3.2 Runner Service Alternatives (Open-Source and Third-Party)
 
-**Pricing Comparison (4 vCPU instances, approximate):**
-- **AWS c7i.xlarge**: ~$0.179/hour
-- **GCP n2-standard-4**: ~$0.194/hour
-- **Azure D4s v5**: ~$0.192/hour
-- **Note**: Spot/preemptible pricing can reduce costs by 70-90%
+**Open-Source Solutions:**
 
-**Queue Elimination and Parallel Execution:**
-- **All providers**: Can provision 50+ instances concurrently (may need quota increases)
-- **Startup Time**: 30-60 seconds cold start, <5 seconds with warm pool
-- **Autoscaling**: All support auto-scaling groups/clusters for on-demand capacity
+**ARC (Actions Runner Controller)** [9]: Kubernetes-based, autoscaling, Linux/Windows, zero licensing, works on GKE/EKS/AKS, 5-30s queue time [12]. **Best for**: GCP infrastructure, GKE deployment.
 
-**Integration with GitHub Actions:**
-- **All providers**: Install runner agent on VMs, register with GitHub
-- **Automation**: Terraform modules, ARC, or custom scripts for lifecycle management
-- **Best Practice**: Ephemeral runners (one job per VM) for security and consistency
+**Terraform Modules** [11]: Infrastructure-as-code, spot/preemptible 70-90% savings, 30-60s cold start. **Best for**: AWS/GCP native, fine-grained control.
 
-**Migration Considerations:**
-- **From GCP to AWS/Azure**: Runner setup is identical (same agent), only infrastructure changes
-- **Cost-Benefit**: Compare spot/preemptible pricing, existing credits, and instance performance
-- **Recommendation**: Stay on GCP if credits/expertise exist; consider AWS if macOS needed or better spot availability
+**Best Practices**: Ephemeral runners, spot/preemptible instances, persistent volumes for caches, scale to zero off-hours.
 
-### 3.2 Runner Service Alternatives
+**Commercial Third-Party Solutions:**
 
-**Open-Source Self-Hosted Solutions:**
+| Provider | Pricing | Key Strengths | OS | Queue Time |
+|----------|---------|---------------|----|-----------| 
+| **RunsOn** | €300/yr + AWS [18] | Your VPC, 90% savings [13][18] | All + GPU [18] | ~24s [12] |
+| **Ubicloud** | $0.0008/min [19] | 90% cheaper [13][19] | Linux [19] | <30s |
+| **BuildJet** | $0.004/min [20] | 50% vs GitHub [13][20] | Linux [20] | <30s |
+| **Namespace** | From $100/mo [22] | Fastest x64 (~4650) [12][22], M-series [22] | All [22] | ~13s [12] |
+| **Cirrus** | $150/mo/runner [25] | M4 Mac [25], unlimited min [25] | All [25] | ~17s [12] |
 
-**Actions Runner Controller (ARC):**
-- **Implementation**: Kubernetes controller managing GitHub runners as ephemeral pods [9]
-- **Protocol**: Uses official GitHub runner agent, full Actions compatibility [9]
-- **OS Support**: Linux (primary), Windows (with Windows node pools), macOS (requires separate Mac hosts) [9][11]
-- **Scaling**: Autoscales based on queued jobs via webhooks, can scale to zero when idle [9]
-- **Cost Structure**: Zero licensing fees [9], only pay for Kubernetes infrastructure (GKE, EKS, AKS)
-- **Cloud Integration**: Works on any Kubernetes (GCP GKE, AWS EKS, Azure AKS, on-prem) [9]
-- **Queue Management**: Launches new pods within 5-30 seconds of job queuing [12]
-- **Caching**: Supports persistent volumes (PVC) for ccache, dependency caches [9]
-- **Security**: Ephemeral runners (one job per pod) ensure clean environments, isolation [9]
-- **Best for Beast2**: GCP infrastructure, GKE deployment, Linux/Windows runners, autoscaling needs
+**Comparison**: Open-source (ARC/Terraform) offers full control, lower long-term cost, requires DevOps expertise. Commercial offers plug-and-play, minimal maintenance, higher per-minute costs [13].
 
-**Terraform AWS/GCP Modules:**
-- **Implementation**: Infrastructure-as-code for auto-scaling runner fleets
-- **Protocol**: Official runner agent, full compatibility
-- **OS Support**: Linux, Windows (via EC2/GCE), macOS (requires Mac hardware or cloud Mac service)
-- **Scaling**: Lambda/Cloud Functions trigger new VMs on job queue events, terminate after completion
-- **Cost Structure**: Zero licensing, pay cloud provider directly (can use spot/preemptible for 70-90% savings)
-- **Cloud Integration**: Native AWS (EC2, ECS Fargate) and GCP (GCE, Cloud Run) support
-- **Queue Management**: ~30-60 second cold start, <5s with warm pool
-- **Caching**: Can mount persistent disks or use cloud storage (S3, GCS) for caches
-- **Security**: Ephemeral VMs per job, code stays in your VPC
-- **Best for Beast2**: AWS or GCP native deployments, fine-grained control, cost optimization with spot instances
-
-**act (Local Runner - Not for Production):**
-- **Implementation**: Local Docker-based workflow execution [10]
-- **Use Case**: Developer-side workflow testing, debugging only [10]
-- **Limitation**: Doesn't connect to GitHub, can't be used for automated CI [10]
-
-**Best Practices for Open-Source Deployments:**
-- Use ephemeral runners for security (one job per VM/pod)
-- Implement warm base images with pre-installed dependencies
-- Leverage spot/preemptible instances for 70-90% cost savings
-- Use persistent volumes or cloud storage for caches (S3, GCS)
-- Scale aggressively during work hours, scale to zero off-hours
-- Monitor runner health and implement auto-recovery
-
-**Commercial Third-Party Solutions - Overview:**
-
-| Provider | Model | Pricing | Key Strengths | OS Support |
-|----------|-------|---------|---------------|------------|
-| **RunsOn** | Self-hosted in your AWS | €300/yr + AWS compute [18] | Security (your VPC), 90% cost reduction [13][18], unlimited concurrency [18] | Linux, Windows, macOS, GPU [18] |
-| **Ubicloud** | Managed on Hetzner | $0.0008/min (2-core) [19] | Ultra-low cost, 90% cheaper [13][19], open-source platform [19] | Linux (x64, arm64) [19] |
-| **BuildJet** | Managed bare-metal | $0.004/min (2-core) [20] | Gaming-grade CPUs, 50% cost vs GitHub [13][20], fast performance [12] | Linux (AMD, ARM) [20] |
-| **Blacksmith** | Managed on Hetzner | $0.004/min, 3k free min [21] | 2× faster, half cost [13][21], 64GB disk, 25GB cache [21] | Linux (x64, arm64 beta) [21] |
-| **Namespace** | High-perf ephemeral | From $100/mo [22] | Fastest x64 CPUs (EPYC ~4650) [12][22], macOS M-series [22], large caches [22] | Linux, Windows, macOS [22] |
-| **Depot** | Container builders | $20/mo + $0.004/min [23] | Docker optimization, integrated caching, M2 Mac support [23] | Linux, Windows, macOS [23] |
-| **Cirrus Runners** | Dedicated fixed-price | $150/mo per runner [24][25] | Pre-warmed VMs [25], M4 Mac [25], unlimited minutes per runner [25] | Linux, Windows, macOS [24][25] |
-| **Warpbuild** | BYOC or managed | 50-90% cheaper [26] | High performance, unlimited concurrency, fast caching [26] | Linux, Windows, macOS [26] |
-
-**Cost Comparison:**
-- **90% cost reduction providers**: RunsOn (with AWS spot) [13][18], Ubicloud (Hetzner-based) [13][19]
-- **50% cost reduction**: BuildJet [13][20], Blacksmith [13][21] (vs GitHub's $0.008/min Linux [1])
-- **Per-minute pricing**: Most charge $0.004-0.008/min for Linux, 2× for Windows, 10× for macOS [1][13]
-
-**Performance Comparison (runs-on.com benchmarks):**
-- **Fastest x64**: Namespace (EPYC ~4650) [12][22], Cirrus (Ryzen 7950X3D ~4000) [12][24], Blacksmith (~4538) [12][21]
-- **Best arm64 price/performance**: RunsOn (Graviton4) [12][18], Ubicloud [12][19]
-- **Queue times**: Most maintain <30 seconds (Namespace ~13s [12], Cirrus ~17s [12], RunsOn ~24s [12])
-
-**Security Trade-Offs:**
-- **Third-party SaaS** (BuildJet [20], Ubicloud [19], Namespace [22]): Code runs on their infrastructure, ephemeral VMs per job [13]
-- **Self-hosted solutions** (RunsOn [18], ARC [9]): Code stays in your VPC/Kubernetes [18][9], full control
-- **Best Practice**: For public repos, SaaS is acceptable; for private/sensitive code, self-hosted preferred [7]
-
-**Platform-Specific Considerations:**
-- **RunsOn**: AWS-only [18], deploys in your account [18], can use AWS credits [18], yearly license from €300 [18]
-- **Ubicloud**: Hetzner-based [19], 90% cheaper [13][19], good for cost optimization, Linux only [19]
-- **ARC**: Kubernetes-based [9], works with any cloud (GCP, AWS, Azure) [9], zero licensing [9]
-
-**Feature Support:**
-- **macOS**: Namespace (M-series) [22], Depot (M2) [23], Cirrus (M4) [25], RunsOn (AWS Mac instances with 24h minimum) [18]
-- **Windows**: RunsOn [18], Namespace [22], Depot [23], some open-source solutions
-- **GPU**: RunsOn offers GPU support [18]
-- **Instance Types**: Some support up to 896 vCPUs (RunsOn) [18], unlimited concurrency policies [18]
-
-**Comparison: Open-Source vs Commercial Third-Party**
-
-| Aspect | Open-Source (ARC/Terraform) | Commercial (BuildJet, Ubicloud, etc.) |
-|--------|----------------------------|----------------------------------------|
-| **Setup Complexity** | Medium-high (K8s knowledge, IaC) | Low (plug-and-play, GitHub App) |
-| **Maintenance Overhead** | Medium (monitor cluster, updates) | Low (vendor-managed) |
-| **Feature Completeness** | Full control, customizable | Pre-configured, optimized |
-| **Community Support** | Active (ARC widely used) | Vendor support + community |
-| **Customization** | Full (choose hardware, config) | Limited (provider's offerings) |
-| **TCO** | Infrastructure only (lower long-term) | Infrastructure + service fees |
-| **Best For** | Long-term, high-scale, GCP/AWS expertise | Quick wins, minimal ops, cost-sensitive |
-
-**When to Use Open-Source vs Commercial:**
-- **Open-source (ARC/Terraform)**: Full control, code stays in your VPC/Kubernetes, use existing cloud credits, requires DevOps expertise
-- **Commercial third-party**: Zero setup, plug-and-play, code runs on their infrastructure, minimal maintenance
-
-**Integration Complexity:**
-- **Commercial SaaS**: ~30 minutes (install GitHub App, add runner labels, configure billing) [13]
-- **Open-source (ARC)**: Few hours (deploy on K8s, configure autoscaling, test) [9]
-- **Open-source (Terraform)**: 1-2 hours (setup cloud credentials, deploy stack, configure)
-
-**Best Fit for Beast2:**
-- **If staying on GCP**: ARC on GKE is ideal - leverages existing infrastructure, autoscaling, zero licensing
-- **If open to AWS**: RunsOn (hybrid open-source/commercial) deploys in your AWS, uses spot instances
-- **Multi-platform needs**: ARC handles Linux/Windows, supplement with macOS provider (Cirrus, MacStadium)
+**Best Fit**: **GCP**: ARC on GKE [9]. **AWS**: RunsOn [18] (deploys in your account). **Multi-platform**: ARC + macOS provider (Cirrus [25], MacStadium).
 
 ### 3.3 Own Hardware vs Cloud
 
-**Initial Investment:**
+**Own Hardware**: ~$25,000-35,000 upfront (servers + Mac Mini M2 ~$1,000), ~$5,000 ops over 3 years = $30,000 TCO. 
 - **Servers**: 4 servers × 32 cores (64 threads) × 128-256 GB RAM = $20,000-30,000
 - **Mac Hardware**: Mac Mini M2 (~$1,000) or Mac Studio M2 Ultra (~$4,000) for macOS builds
 - **Windows Licensing**: ~$100-200 per server if needed
-- **Total Upfront**: ~$25,000-35,000
+- **Total Upfront**: ~$25,000-35,000**Limitations**: Fixed capacity, idle costs, maintenance overhead, hardware becomes outdated.
 
-**Ongoing Costs:**
-- **Power**: ~$440/year for 64-core server (500W × 24/7)
-- **Cooling**: Additional power costs
-- **Rack Space**: Colocation fees (~$100-200/month) or office space
-- **Maintenance**: Hardware failures, OS updates, runner software updates
-- **Depreciation**: 3-5 year typical hardware lifecycle
+**Cloud (3-Year TCO)**: Mid-tier $64,800, Low-tier $10,800. **Advantages**: Pay-per-use, scale instantly, no idle costs, latest hardware.
 
-**Scalability and Flexibility:**
-- **Fixed Capacity**: Hardware provides fixed cores/performance, cannot scale beyond purchase
-- **Cloud Advantage**: Pay-per-use, scale up/down instantly, no idle costs
-- **Bursty Workloads**: CI is often idle (nights, weekends), hardware sits unused
-
-**Performance Characteristics:**
-- **Queue Times**: Near-zero with dedicated hardware (no cloud provisioning delay)
-- **Parallel Execution**: Limited by purchased capacity (e.g., 128 cores = 128 concurrent jobs max)
-- **Latest Hardware**: Cloud providers roll out new CPUs regularly; owned hardware becomes outdated
-
-**Suitability for Automated Bot-Driven CI:**
-- **Pros**: Consistent performance, no cloud provisioning delays, predictable costs (after purchase)
-- **Cons**: Cannot scale beyond capacity, idle costs during low usage, maintenance overhead
-
-**Mac Builds Requirement:**
-- **M-Series CPUs**: Required for macOS builds (Apple licensing)
-- **Options**: Mac Mini M2 (8 cores, ~$1,000) or Mac Studio M2 Ultra (24 cores, ~$4,000)
-- **Cloud Alternative**: AWS Mac instances ($1.08/hour, 24h minimum) [14] or MacStadium (~$200-300/month)
-- **Break-Even**: Mac Mini pays for itself in ~2-3 months vs AWS Mac instances [14]
-
-**Cost Comparison (3-Year TCO):**
-- **Own Hardware**: $25,000 upfront + $5,000 ops (3 years) = $30,000
-- **Cloud (Mid-Tier)**: $1,800/month × 36 months = $64,800
-- **Cloud (Low-Tier)**: $300/month × 36 months = $10,800
-- **Break-Even**: Only if running 24/7 at high utilization (unlikely for CI)
-
-**Recommendation**: **Prefer cloud or SaaS** due to flexibility, scalability, and lower total cost for bursty CI workloads. Own hardware only makes sense if:
-- Combined with other compute workloads (24/7 utilization)
-- Regulatory/compliance requires on-prem
-- Existing hardware available (repurpose)
+**Recommendation**: **Prefer cloud/SaaS** for bursty CI workloads. Own hardware only if: 24/7 utilization, regulatory requirements, or existing hardware available.
 
 ---
 
@@ -493,13 +234,9 @@ For public repositories, GitHub Actions minutes are unlimited and free [1][2], b
 
 ### 4.4 Final Recommendation
 
-For Beast2's use case (rapid AI bot iteration, 50+ job matrix, sub-2 min median target), **recommend Option 2 (GCP-Centric ARC)** [9]:
-- **Performance**: Achieves 2.5-3 min median, meets sub-3 min max target
-- **Cost**: ~$1,600-2,000/month is reasonable for productivity gains
-- **Control**: Full control over infrastructure [9], leverages existing GCP expertise
-- **Scalability**: Autoscaling handles growth [9], can scale to zero when idle [9]
+**For day-to-day CI workflow**: **Option 3 (Hybrid Starter)** - ~$200-400/month, 4-5 min median, sufficient for regular development workflows.
 
-**Alternative**: If budget allows and maximum performance is critical, **Option 1 (High-Performance SaaS)** provides fastest CI times (1.8-2.2 min median [12]) with minimal operational overhead [13].
+**For rapid AI bot iteration**: **Option 2 (GCP-Centric ARC) part-time** - ~$1,600-2,000/month, 2.5-3 min median, can be scaled up during bot iteration periods and scaled down otherwise. Full control over infrastructure [9], leverages existing GCP expertise, autoscaling handles growth [9].
 
 ---
 
