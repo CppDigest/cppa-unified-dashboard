@@ -20,6 +20,10 @@ Beast2's GitHub Actions CI pipeline can be dramatically accelerated through dedi
 - **Mid-tier (ARC on GCP)**: ~$1,600-2,000/month, 2.5-3 min median
 - **High-tier (SaaS runners)**: ~$2,500-3,500/month, 1.8-2.2 min median
 
+**Recommendations:**
+- **For day-to-day CI workflow**: Option 3 (Hybrid Starter) - ~$200-400/month, 4-5 min median
+- **For rapid AI bot iteration**: Option 2 (GCP-Centric ARC) part-time - ~$1,600-2,000/month, 2.5-3 min median
+
 **Runtime reduction**: Current 5-8 min median → With optimization 3-5 min → With self-hosted/third-party 1.8-2.5 min median, ≤3 min max
 
 **Runner options comparison:**
@@ -278,7 +282,7 @@ For public repositories, GitHub Actions minutes are unlimited and free [1][2], b
 
 [18] RunsOn website: https://runs-on.com
 
-[19] Ubicloud documentation: https://ubicloud.com/docs
+[19] Ubicloud documentation: https://www.ubicloud.com/docs/about/pricing
 
 [20] BuildJet website: https://buildjet.com
 
