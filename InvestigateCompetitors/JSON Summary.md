@@ -4,7 +4,7 @@
 
 Scope: DOM-style JSON parsing, serialization, and manipulation for C++11+ production code, comparing Boost.JSON with five major competitors.
 
-The primary trade-offs are performance, API ergonomics, ecosystem maturity, and standards support, with particular attention to C++11. Quantitative data below is approximate as of late 2024 and based on project documentation and public benchmarks such as nativejson-benchmark and vendor benchmarks [2][6][8][11].
+The primary trade-offs are performance, API ergonomics, ecosystem maturity, and standards support, with particular attention to C++11. 
 
 Libraries covered:
 
